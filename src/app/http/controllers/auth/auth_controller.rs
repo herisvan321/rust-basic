@@ -4,8 +4,8 @@
  * --------------------------------------------------------- */
 
 use crate::app::view;
-use crate::app::http::requests::Request;
-use crate::app::http::responses::ResponseHelper;
+use crate::config::requests::Request;
+use crate::config::responses::ResponseHelper;
 use axum::response::IntoResponse;
 use bcrypt::{hash, verify, DEFAULT_COST};
 use serde::Deserialize;

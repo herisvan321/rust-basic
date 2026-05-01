@@ -1,6 +1,6 @@
 use crate::app::view;
-use crate::app::http::requests::Request;
-use crate::app::http::responses::ResponseHelper;
+use crate::config::requests::Request;
+use crate::config::responses::ResponseHelper;
 use axum::response::IntoResponse;
 use minijinja::context;
 
@@ -13,7 +13,7 @@ pub async fn index(req: Request) -> impl IntoResponse {
 
 /// Contoh penggunaan Request & Response ala Laravel
 pub async fn test_request(req: Request) -> impl IntoResponse {
-    let name = req.input("name").unwrap_or_else(|| "Tamu".to_string());
+    let name = req.input_as_str("name").unwrap_or("Tamu");
     
     ResponseHelper::json(serde_json::json!({
         "message": format!("Halo, {}! Ini adalah data dari Request ala Laravel.", name),

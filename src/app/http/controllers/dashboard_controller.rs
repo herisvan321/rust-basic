@@ -4,7 +4,7 @@
  * --------------------------------------------------------- */
 
 use crate::app::view;
-use crate::app::http::requests::Request;
+use crate::config::requests::Request;
 use axum::response::IntoResponse;
 use minijinja::context;
 use sqlx::sqlite::SqlitePool;

@@ -9,7 +9,7 @@ use axum::{
 };
 use minijinja::{Environment, path_loader, context};
 use std::sync::LazyLock;
-use crate::app::http::requests::Request as AppRequest;
+use crate::config::requests::Request as AppRequest;
 use serde_json::{json, Value};
 
 pub mod http;

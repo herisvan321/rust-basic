@@ -1,13 +1,9 @@
-/* ---------------------------------------------------------
- * 📑 LABEL: LARAVEL STYLE RESPONSE (app/http/responses/mod.rs)
- * File ini menyediakan helper untuk mengembalikan response.
- * --------------------------------------------------------- */
-
 use axum::{
     response::{Html, IntoResponse, Json, Redirect, Response},
 };
 use serde::Serialize;
 use serde_json;
+use crate::database::session_manager::RustBasicSessionStore;
 
 pub struct ResponseHelper;
 
@@ -66,7 +62,7 @@ impl ResponseHelper {
     pub fn redirect_with_success(
         url: &str, 
         message: &str, 
-        session: axum_session::Session<crate::database::session_manager::LaravelSessionStore>
+        session: axum_session::Session<RustBasicSessionStore>
     ) -> Response {
         session.set("flash_success", message);
         Redirect::to(url).into_response()
@@ -76,7 +72,7 @@ impl ResponseHelper {
     pub fn redirect_with_error(
         url: &str, 
         message: &str, 
-        session: axum_session::Session<crate::database::session_manager::LaravelSessionStore>
+        session: axum_session::Session<RustBasicSessionStore>
     ) -> Response {
         session.set("flash_error", message);
         Redirect::to(url).into_response()

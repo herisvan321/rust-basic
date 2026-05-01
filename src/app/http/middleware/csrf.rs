@@ -10,11 +10,11 @@ use axum::{
     response::Response,
 };
 use axum_session::Session;
-use crate::database::session_manager::LaravelSessionStore;
+use crate::database::session_manager::RustBasicSessionStore;
 use rand::{distributions::Alphanumeric, Rng};
 
 pub async fn csrf_middleware(
-    session: Session<LaravelSessionStore>,
+    session: Session<RustBasicSessionStore>,
     req: Request<Body>,
     next: Next,
 ) -> Result<Response, StatusCode> {

@@ -9,10 +9,10 @@ use axum::{
     response::{IntoResponse, Redirect, Response},
 };
 use axum_session::Session;
-use crate::database::session_manager::LaravelSessionStore;
+use crate::database::session_manager::RustBasicSessionStore;
 
 pub async fn auth_middleware(
-    session: Session<LaravelSessionStore>,
+    session: Session<RustBasicSessionStore>,
     req: Request,
     next: Next,
 ) -> Response {
@@ -29,7 +29,7 @@ pub async fn auth_middleware(
 }
 
 pub async fn guest_middleware(
-    session: Session<LaravelSessionStore>,
+    session: Session<RustBasicSessionStore>,
     req: Request,
     next: Next,
 ) -> Response {
