@@ -40,23 +40,14 @@ pub async fn init_sessions(cfg: &Config) {
 
     let pool = sqlx::SqlitePool::connect(&db_url).await.expect("Gagal terhubung ke database session");
 
-    // Eksekusi SQL untuk membuat tabel session ala Laravel
-    sqlx::query(
-        "CREATE TABLE IF NOT EXISTS sessions (
-            id VARCHAR(255) PRIMARY KEY,
-            user_id VARCHAR(255) NULL,
-            ip_address VARCHAR(45) NULL,
-            user_agent TEXT NULL,
-            payload TEXT NOT NULL,
-            last_activity INTEGER NOT NULL
-        )"
-    )
-    .execute(&pool)
-    .await
-    .expect("Gagal membuat tabel sessions");
+    // Jalankan migrasi otomatis
+    run_migrations(&pool).await;
+}
 
-    sqlx::query("CREATE INDEX IF NOT EXISTS sessions_last_activity_index ON sessions(last_activity)")
-        .execute(&pool)
+/// Fungsi umum untuk menjalankan migrasi
+pub async fn run_migrations(pool: &sqlx::SqlitePool) {
+    sqlx::migrate!("./database/migrations")
+        .run(pool)
         .await
-        .expect("Gagal membuat index sessions");
+        .expect("Gagal menjalankan migrasi database");
 }

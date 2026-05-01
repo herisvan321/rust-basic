@@ -40,8 +40,10 @@ Gunakan file `.env` untuk mengatur perilaku aplikasi tanpa mengubah kode:
 
 ## 🗄️ 3. Database & Session
 
-### Koneksi Database
-Aplikasi menggunakan **Sea-ORM**. Koneksi diatur di `src/database/mod.rs`. Secara default, SQLite akan disimpan di folder `database/`.
+### Database Migration
+Aplikasi menggunakan sistem migrasi SQLx. File migrasi disimpan di `database/migrations/`.
+- Migrasi dijalankan otomatis saat aplikasi dijalankan.
+- Gunakan format nama file `YYYYMMDDHHMMSS_deskripsi.sql`.
 
 ### Laravel-Style Session
 Session disimpan di tabel `sessions` dengan kolom:

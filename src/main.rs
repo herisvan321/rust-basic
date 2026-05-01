@@ -23,9 +23,15 @@ async fn main() {
     // 3. Muat Konfigurasi
     let cfg = Config::load();
 
-    // 4. Hubungkan ke Database (Sea-ORM)
+    // 4. Hubungkan ke Database (Sea-ORM) & Jalankan Migrasi
     let _db = database::connect(&cfg).await;
-    tracing::info!("Database terhubung menggunakan driver: {}", cfg.db_connection);
+    
+    // Jalankan migrasi pada database utama (untuk tabel users, dll)
+    let main_db_url = format!("sqlite://database/{}.sqlite?mode=rwc", cfg.db_database);
+    let main_pool = sqlx::SqlitePool::connect(&main_db_url).await.expect("Gagal terhubung ke database utama");
+    database::run_migrations(&main_pool).await;
+    
+    tracing::info!("Database terhubung dan migrasi selesai (driver: {})", cfg.db_connection);
 
     // 5. Inisialisasi Tabel Session (Laravel Style)
     database::init_sessions(&cfg).await;
