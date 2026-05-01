@@ -5,6 +5,7 @@
 
 use std::env;
 
+#[derive(Debug, Clone)]
 pub struct Config {
     pub app_name: String,
     pub app_port: u16,
@@ -49,6 +50,15 @@ impl Config {
             
             // Session
             session_driver: env::var("SESSION_DRIVER").unwrap_or_else(|_| "database".to_string()),
+        }
+    }
+
+    #[allow(dead_code)]
+    pub fn db_backend(&self) -> sea_orm::DbBackend {
+        if self.db_connection == "mysql" {
+            sea_orm::DbBackend::MySql
+        } else {
+            sea_orm::DbBackend::Sqlite
         }
     }
 }

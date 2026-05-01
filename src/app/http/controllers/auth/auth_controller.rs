@@ -4,15 +4,16 @@
  * --------------------------------------------------------- */
 
 use crate::app::view;
+use crate::app::models::users;
 use crate::config::requests::Request;
 use crate::config::responses::ResponseHelper;
-use axum::response::IntoResponse;
+use crate::config::server::AppState;
+use axum::{response::IntoResponse, extract::State};
 use bcrypt::{hash, verify, DEFAULT_COST};
 use serde::Deserialize;
 use validator::Validate;
 use minijinja::context;
-use sqlx::sqlite::SqlitePool;
-use crate::config::Config;
+use sea_orm::{EntityTrait, ColumnTrait, QueryFilter, Set};
 
 #[derive(Deserialize, Validate)]
 pub struct RegisterRequest {
@@ -47,67 +48,65 @@ impl AuthController {
     }
 
     /// Proses Pendaftaran
-    pub async fn register(req: Request) -> impl IntoResponse {
+    pub async fn register(State(state): State<AppState>, req: Request) -> impl IntoResponse {
         // 1. Validasi Input
         let data = match req.validate::<RegisterRequest>() {
             Ok(d) => d,
             Err(_) => return ResponseHelper::redirect("/register"),
         };
 
-        // 2. Cek apakah email sudah terdaftar
-        let cfg = Config::load();
-        let db_url = format!("sqlite://database/{}.sqlite", cfg.db_database);
-        let pool = SqlitePool::connect(&db_url).await.unwrap();
-
-        let exists: Option<i64> = sqlx::query_scalar("SELECT id FROM users WHERE email = ?")
-            .bind(&data.email)
-            .fetch_optional(&pool)
+        // 2. Cek apakah email sudah terdaftar (Sea-ORM)
+        let existing = users::Entity::find()
+            .filter(users::Column::Email.eq(&data.email))
+            .one(&state.db)
             .await
-            .unwrap();
+            .ok()
+            .flatten();
 
-        if exists.is_some() {
+        if existing.is_some() {
             return ResponseHelper::redirect_with_error("/register", "Email sudah terdaftar", req.session);
         }
 
         // 3. Hash Password
         let hashed = hash(data.password, DEFAULT_COST).unwrap();
 
-        // 4. Simpan ke Database
-        sqlx::query("INSERT INTO users (name, email, password) VALUES (?, ?, ?)")
-            .bind(&data.name)
-            .bind(&data.email)
-            .bind(&hashed)
-            .execute(&pool)
-            .await
-            .unwrap();
+        // 4. Simpan ke Database (Sea-ORM ActiveModel)
+        let new_user = users::ActiveModel {
+            name: Set(data.name),
+            email: Set(data.email),
+            password: Set(hashed),
+            ..Default::default()
+        };
+
+        if let Err(e) = users::Entity::insert(new_user).exec(&state.db).await {
+            tracing::error!("Gagal menyimpan user: {}", e);
+            return ResponseHelper::redirect_with_error("/register", "Gagal mendaftar, coba lagi.", req.session);
+        }
 
         ResponseHelper::redirect_with_success("/login", "Pendaftaran berhasil! Silakan login.", req.session)
     }
 
     /// Proses Login
-    pub async fn login(req: Request) -> impl IntoResponse {
+    pub async fn login(State(state): State<AppState>, req: Request) -> impl IntoResponse {
         // 1. Validasi Input
         let data = match req.validate::<LoginRequest>() {
             Ok(d) => d,
             Err(_) => return ResponseHelper::redirect("/login"),
         };
 
-        // 2. Ambil User dari DB
-        let cfg = Config::load();
-        let db_url = format!("sqlite://database/{}.sqlite", cfg.db_database);
-        let pool = SqlitePool::connect(&db_url).await.unwrap();
-
-        let user: Option<(i64, String)> = sqlx::query_as("SELECT id, password FROM users WHERE email = ?")
-            .bind(&data.email)
-            .fetch_optional(&pool)
+        // 2. Ambil User dari DB (Sea-ORM)
+        let user = users::Entity::find()
+            .filter(users::Column::Email.eq(&data.email))
+            .one(&state.db)
             .await
-            .unwrap();
+            .ok()
+            .flatten();
 
-        if let Some((id, hashed)) = user {
+        if let Some(u) = user {
             // 3. Verifikasi Password
-            if verify(data.password, &hashed).unwrap() {
+            if verify(data.password, &u.password).unwrap_or(false) {
                 // 4. Set Session
-                req.session.set("user_id", id);
+                req.session.set("user_id", u.id);
                 return ResponseHelper::redirect_with_success("/dashboard", "Selamat datang kembali!", req.session);
             }
         }

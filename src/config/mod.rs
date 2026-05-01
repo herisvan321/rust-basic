@@ -10,6 +10,7 @@ pub mod server;
 pub mod logger;
 pub mod requests;
 pub mod responses;
+pub mod view;
 
 // Re-export Config agar bisa dipanggil dengan crate::config::Config
 pub use app::Config;

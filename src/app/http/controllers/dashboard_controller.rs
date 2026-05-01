@@ -4,42 +4,43 @@
  * --------------------------------------------------------- */
 
 use crate::app::view;
+use crate::app::models::users;
 use crate::config::requests::Request;
-use axum::response::IntoResponse;
+use axum::{response::IntoResponse, extract::State};
 use minijinja::context;
-use sqlx::sqlite::SqlitePool;
-use crate::config::Config;
+use crate::config::server::AppState;
+use sea_orm::{EntityTrait, PaginatorTrait};
 
 pub struct DashboardController;
 
 impl DashboardController {
-    pub async fn index(req: Request) -> impl IntoResponse {
+    pub async fn index(State(state): State<AppState>, req: Request) -> impl IntoResponse {
         // 1. Ambil user_id dari session
-        let user_id = req.session.get::<i64>("user_id").unwrap();
+        let user_id = req.session.get::<i32>("user_id").unwrap_or(0);
 
-        // 2. Koneksi ke Database
-        let cfg = Config::load();
-        let db_url = format!("sqlite://database/{}.sqlite", cfg.db_database);
-        let pool = SqlitePool::connect(&db_url).await.unwrap();
-
-        // 3. Ambil data user
-        let user: (String, String) = sqlx::query_as("SELECT name, email FROM users WHERE id = ?")
-            .bind(user_id)
-            .fetch_one(&pool)
+        // 2. Ambil data user menggunakan Sea-ORM Model
+        let user = users::Entity::find_by_id(user_id)
+            .one(&state.db)
             .await
-            .unwrap_or_else(|_| ("User".to_string(), "".to_string()));
+            .ok()
+            .flatten();
 
-        // 4. Ambil statistik sederhana (total user)
-        let total_users: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM users")
-            .fetch_one(&pool)
+        let (user_name, user_email) = match &user {
+            Some(u) => (u.name.clone(), u.email.clone()),
+            None => ("User".to_string(), "".to_string()),
+        };
+
+        // 3. Ambil statistik (total user)
+        let total_users = users::Entity::find()
+            .count(&state.db)
             .await
-            .unwrap_or(0);
+            .unwrap_or(0) as i64;
 
-        // 5. Render tampilan dashboard
+        // 4. Render tampilan dashboard
         view(&req, "dashboard.html", context! {
             title => "Dashboard Utama",
-            user_name => user.0,
-            user_email => user.1,
+            user_name => user_name,
+            user_email => user_email,
             total_users => total_users
         })
     }

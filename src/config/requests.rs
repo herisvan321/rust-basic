@@ -18,6 +18,7 @@ pub struct Request {
 }
 
 impl Request {
+    #[allow(dead_code)]
     pub fn input(&self, key: &str) -> Option<&Value> {
         self.inputs.get(key)
     }

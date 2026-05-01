@@ -18,7 +18,7 @@ async fn main() {
 
     // 3. Setup Database & Sea-ORM
     config::database::setup_database(&cfg).await;
-    let _db = database::connect(&cfg).await;
+    let db = database::connect(&cfg).await;
     
     // 4. Inisialisasi Session Store
     database::init_sessions(&cfg).await;
@@ -26,5 +26,5 @@ async fn main() {
 
     // 5. Setup Statics & Jalankan Server
     let static_files = ServeDir::new("public");
-    config::server::start_server(&cfg, session_store, static_files).await;
+    config::server::start_server(cfg, session_store, static_files, db).await;
 }
