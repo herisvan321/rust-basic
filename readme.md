@@ -17,12 +17,12 @@ Aplikasi web modern berbasis Rust dengan arsitektur **Laravel-inspired**. Diranc
 ## 📂 Struktur Proyek Terbaru
 ```text
 rustbasic/
-├── config/               # Loader Konfigurasi (.env)
 ├── database/             # Tempat penyimpanan SQLite (.sqlite) & SQL Schema
 ├── public/               # File statis (CSS, JS, Gambar)
 ├── resources/            # Template HTML (Minijinja)
 ├── src/
 │   ├── main.rs           # Entry Point & Middleware Session
+│   ├── config/           # Loader Konfigurasi (.env)
 │   ├── database/         # Koneksi DB & Custom Session Store
 │   ├── routes/           # Web & API Routing
 │   └── app/              # Http Controllers
