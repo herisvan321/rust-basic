@@ -1,37 +1,36 @@
-# 🚀 RustBasic (Axum SPA)
+# 🚀 RustBasic (Axum SPA - Version 2026)
 
-Aplikasi web modern berbasis Rust dengan arsitektur **Laravel-inspired**. Dirancang untuk performa maksimal, keamanan tinggi, dan kemudahan pengembangan.
+Aplikasi web modern berbasis Rust dengan arsitektur **Laravel-inspired**. Dirancang untuk performa maksimal, keamanan tinggi, dan pengalaman pengembang yang luar biasa.
 
 ---
 
 ## 💎 Fitur Unggulan
 - **⚡ Performa Axum**: Backend super cepat dengan framework Axum 0.8 dan Tokio.
-- **📊 Premium Dashboard**: Panel kendali modern dengan statistik real-time dan desain glassmorphism.
-- **🐞 Smart Error Reporting**: Halaman debug detail saat pengembangan dan halaman minimalis saat produksi.
-- **🗄️ Dual-Database Ready**: Dukungan otomatis untuk **SQLite** dan **MySQL** menggunakan **Sea-ORM**.
-- **🔑 Session ala Laravel**: Sistem session dengan skema tabel database standar Laravel.
-- **🛡️ CSRF & Security Ready**: Proteksi CSRF terintegrasi dengan HTMX dan Security Headers otomatis.
-- **🎨 Modern Monolith UI**: Single Page Application (SPA) experience menggunakan HTMX dan Alpine.js.
-- **📂 Modular Structure**: Organisasi kode yang bersih mengikuti pola MVC Laravel.
+- **🎨 Premium Splitscreen UI**: Desain layar terbagi yang modern dan mewah tanpa kartu (*cardless*).
+- **📊 Premium Dashboard**: Panel kendali modern dengan statistik real-time dan navigasi sisi kiri yang elegan.
+- **🐞 Smart Error Reporting**: Halaman debug detail saat pengembangan (Stack Trace, Template Info) dan halaman minimalis saat produksi.
+- **🗄️ Multi-Database Support**: Dukungan native untuk **SQLite** dan **MySQL** melalui SQLx & Sea-ORM.
+- **🔑 Session RustBasic**: Sistem session yang aman dan terenkripsi disimpan di database (RustBasicSessionStore).
+- **🛡️ CSRF & Security Ready**: Proteksi CSRF terintegrasi dan Security Headers (CSP) otomatis.
+- **🎨 Modern Monolith SPA**: Pengalaman Single Page Application (SPA) tanpa reload menggunakan HTMX dan Alpine.js.
+- **📂 Ultra-Clean Architecture**: `main.rs` yang sangat minimalis (30 baris) dengan konfigurasi modular.
 
 ---
 
 ## 📂 Struktur Proyek Terbaru
 ```text
 rustbasic/
-├── database/             # SQLite DB & SQL Schema
-├── public/               # Static Files (CSS, JS)
-├── resources/            # views/ (Minijinja templates)
+├── config/               # Modul konfigurasi (.env loader)
+├── database/             # Lokasi database SQLite & SQL migrasi
+├── public/               # File statis (CSS, JS, Gambar)
+├── resources/
+│   └── views/            # Template HTML (Minijinja)
 ├── src/
-│   ├── main.rs           # Core Initialization
-│   ├── config/           # .env configuration
-│   ├── database/         # DB Connections & Sessions
-│   ├── routes/           # Routing Logic
-│   └── app/              # Core Application Logic
-│       └── http/         
-│           ├── controllers/ # Auth (sub-folder), Dashboard, etc.
-│           ├── requests/    # Form Validation
-│           └── responses/   # Laravel-style Helpers
+│   ├── main.rs           # Entry point (Ultra-Clean)
+│   ├── app/              # Core Application Logic
+│   ├── config/           # Modular Configuration (DB, Session, Server, Log)
+│   ├── database/         # Connections & Session Store
+│   └── routes/           # Web Routes
 └── .env                  # Environment Variables
 ```
 
@@ -40,14 +39,9 @@ rustbasic/
 ## 🚀 Cara Menjalankan
 
 ### 1. Persiapan Lingkungan
-Salin file `.env.example` ke `.env` (atau buat file `.env` baru) dan sesuaikan:
-```env
-APP_NAME=RustBasic
-APP_PORT=4000
-APP_DEBUG=true
-DB_CONNECTION=sqlite
-DB_DATABASE=rustbasic
-SESSION_DRIVER=database
+Salin file `.env.example` ke `.env` dan sesuaikan pengaturan Anda:
+```bash
+cp .env.example .env
 ```
 
 ### 2. Jalankan Aplikasi
@@ -59,10 +53,10 @@ Setelah berjalan, akses di:
 
 ---
 
-## 📝 Troubleshooting & Tips
-- **Debug Mode**: Aktifkan `APP_DEBUG=true` di `.env` untuk melihat detail error yang cantik saat terjadi masalah render.
-- **Database Error?** Jika mendapat error "readonly database", pastikan folder `database/` memiliki izin tulis dan gunakan format `sqlite:database/filename.sqlite` di kode.
-- **SPA Experience**: Seluruh navigasi menggunakan `hx-boost`, memberikan sensasi aplikasi instan tanpa reload halaman.
+## 📝 Tips Pengembangan
+- **Tidy Terminal**: Log query database telah difilter agar terminal tetap bersih dan fokus pada log aplikasi.
+- **Debug Mode**: Aktifkan `APP_DEBUG=true` di `.env` untuk mendapatkan visualisasi error yang mendetail selama pengembangan.
+- **Splitscreen UI**: Gunakan utility class di `style.css` untuk membangun halaman baru dengan tema splitscreen yang konsisten.
 
 ---
-*Dibuat dengan ❤️ untuk komunitas Rust Indonesia. Arsitektur Bersih, Desain Mewah.*
+*Dibuat dengan ❤️ untuk ekosistem Rust. Arsitektur Bersih, Desain Premium, Kecepatan Cahaya.*

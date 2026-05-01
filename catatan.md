@@ -4,7 +4,9 @@ Dokumentasi ini berisi panduan struktur folder, fitur, dan cara penggunaan frame
 
 ---
 
-## 📂 1. Struktur Folder (Struktur Modular)
+## 📂 1. Struktur Folder (Struktur Modular & Ultra-Clean)
+
+Aplikasi telah dipisahkan menjadi modul-modul kecil untuk skalabilitas tinggi:
 
 ```text
 rustbasic/
@@ -14,14 +16,22 @@ rustbasic/
 ├── resources/
 │   └── views/            # Template HTML (Minijinja)
 ├── src/
-│   ├── main.rs           # Entry point & Inisialisasi Middleware
+│   ├── main.rs           # Entry point (Ultra-Clean, hanya 30 baris)
 │   ├── app/              # Folder Inti Aplikasi
-│   │   ├── http/         # Logic HTTP (Controllers, Requests, Responses, Middleware)
+│   │   ├── http/         # Logic HTTP (Controllers, Middleware)
 │   │   ├── providers/    # Service Providers (Database, View)
 │   │   └── mod.rs        # Helper global (seperti fungsi render)
-│   ├── database/         # Koneksi DB & Session Manager (Laravel Style)
-│   ├── routes/           # Pengaturan rute (web.rs, mod.rs)
-│   └── config/           # Definisi struct konfigurasi
+│   ├── config/           # Pusat Konfigurasi & Inisialisasi
+│   │   ├── app.rs        # Struct Config & Load .env
+│   │   ├── database.rs   # Setup DB (MySQL/SQLite) & Migrasi
+│   │   ├── session.rs    # Setup Session Store
+│   │   ├── server.rs     # Setup Router & Run Server
+│   │   ├── logger.rs     # Setup Logging & Startup Banner
+│   │   ├── requests.rs   # Request Helper (Laravel Style)
+│   │   ├── responses.rs  # Response Helper (Laravel Style)
+│   │   └── mod.rs        # Re-export seluruh konfigurasi
+│   ├── database/         # Koneksi DB & RustBasicSessionStore
+│   └── routes/           # Pengaturan rute (web.rs, mod.rs)
 └── .env                  # Pengaturan environment (Port, DB, App Key)
 ```
 
@@ -29,114 +39,64 @@ rustbasic/
 
 ## ⚙️ 2. Konfigurasi (.env)
 
-Gunakan file `.env` untuk mengatur perilaku aplikasi tanpa mengubah kode:
+Gunakann file `.env` untuk mengatur perilaku aplikasi:
 - `APP_NAME`: Nama aplikasi Anda.
-- `APP_PORT`: Port server (default: 4000).
-- `APP_KEY`: Kunci enkripsi (wajib 64 byte atau akan diderivasi otomatis).
+- `APP_KEY`: Kunci enkripsi (wajib diawali `base64:`).
 - `DB_CONNECTION`: `sqlite` atau `mysql`.
 - `SESSION_DRIVER`: `database` atau `file`.
+- `APP_DEBUG`: `true` untuk mode pengembang (detil error), `false` untuk produksi.
 
 ---
 
-## 🗄️ 3. Database & Session
+## 🗄️ 3. Database Multi-Driver & Session
 
-### Database Migration
-Aplikasi menggunakan sistem migrasi SQLx. File migrasi disimpan di `database/migrations/`.
-- Migrasi dijalankan otomatis saat aplikasi dijalankan.
-- Gunakan format nama file `YYYYMMDDHHMMSS_deskripsi.sql`.
+### Multi-Database Support
+Aplikasi kini mendukung **SQLite** dan **MySQL** secara native melalui `sqlx::AnyPool`. Konfigurasi otomatis berubah hanya dengan mengganti variabel di `.env`.
 
-### Laravel-Style Session
-Session disimpan di tabel `sessions` dengan kolom:
-`id`, `user_id`, `ip_address`, `user_agent`, `payload`, `last_activity`.
-Data dienkripsi secara otomatis menggunakan `APP_KEY`.
+### RustBasicSessionStore
+Session manager khusus yang menyimpan data secara terenkripsi di database. Nama modul telah diperbarui menjadi `RustBasicSessionStore` untuk mencerminkan identitas framework.
 
 ---
 
-## 🎨 4. Frontend Stack (SPA & UI)
+## 🎨 4. Frontend & UI (Premium Splitscreen)
 
-Aplikasi ini menggunakan pendekatan **Modern Monolith** untuk pengalaman SPA yang ringan:
-
-- **✨ HTMX**: Mengatur navigasi antar halaman (AJAX) sehingga aplikasi terasa seperti Single Page Application (SPA) tanpa reload.
-- **🎨 Retro & Y2K Light UI**: Desain "Crystal & Glossy" yang cerah dengan warna Sky Cyan & Bubblegum Pink. Menggunakan efek grid halus dan Glassmorphism yang sangat jernih untuk kesan millennium yang bersih.
-- **🪄 Alpine.js**: Menangani interaktivitas di sisi client (seperti modal, dropdown, dan animasi) secara deklaratif.
+Desain UI telah ditingkatkan ke level premium tanpa menggunakan kartu (*cardless*):
+- **Splitscreen Layout**: Tampilan layar terbagi yang modern untuk halaman login, daftar, dan dashboard.
+- **Visual Excellence**: Menggunakan gradasi jernih, tipografi modern (Inter), dan mikro-animasi.
+- **SPA Experience**: Navigasi instan tanpa reload halaman menggunakan **HTMX** dan **Alpine.js**.
 
 ---
 
 ## 📥 5. Request & Response (Laravel Style)
 
+Kini helper Request & Response berada di dalam folder `config` untuk akses yang lebih terpusat:
+
 ### Menggunakan Request
-Anda bisa mengambil input dari URL atau form dengan mudah:
 ```rust
-pub async fn controller_method(req: Request) -> impl IntoResponse {
-    let name = req.input("name").unwrap_or_default();
-    let all = req.all(); // Mengambil semua input dalam bentuk JSON
+pub async fn controller(req: Request) -> impl IntoResponse {
+    let name = req.input_as_str("name").unwrap_or("Tamu");
+    let all = req.all();
 }
 ```
 
 ### Menggunakan Response
 ```rust
-// Mengembalikan JSON
-Response::json(json!({ "status": "ok" }))
-
-// Mengembalikan View (HTML)
-render("nama_file.html", context! { data => "isi" })
-
-// Redirect
-Response::redirect("/login")
+ResponseHelper::json(data);
+ResponseHelper::view(html);
+ResponseHelper::redirect_with_success("/home", "Berhasil!", req.session);
 ```
 
 ---
 
-## 🛡️ 6. Keamanan (Security)
+## 🛡️ 6. Keamanan & Performa Terminal
 
-### CSRF Protection
-Melindungi dari serangan CSRF. Wajib untuk method `POST`, `PUT`, `PATCH`, dan `DELETE`.
-**Cara Penggunaan di Form (HTMX):**
-```html
-<form hx-post="/submit" hx-headers='{"X-CSRF-TOKEN": "{{ csrf_token }}"}'>
-    ...
-</form>
-```
+### Keamanan Terintegrasi
+- **CSRF Protection**: Otomatis memvalidasi token pada request mutasi.
+- **CSP & Security Headers**: Terkonfigurasi untuk memblokir script inline berbahaya dan clickjacking.
 
-### Security Headers
-Aplikasi menyertakan:
-- **CSP**: Mengizinkan script/style dari sumber terpercaya.
-- **X-Frame-Options**: Mencegah Clickjacking.
-- **X-Content-Type-Options**: Mencegah MIME sniffing.
+### Terminal Output (Tidy Logs)
+Terminal telah dibersihkan dari log query SQL yang berulang-ulang. Hanya log penting (Error, Warn, App Debug) yang ditampilkan. Dilengkapi dengan **Startup Banner** ASCII saat aplikasi dijalankan.
 
 ---
 
-## 🚀 7. Cara Menambah Fitur Baru
-
-1.  **Buat Template**: Tambah file `.html` di `resources/views/`.
-2.  **Buat Controller**: Tambah fungsi di `src/app/http/controllers/`.
-3.  **Daftarkan Rute**: Tambah baris baru di `src/routes/web.rs`.
-    ```rust
-    .route("/url-baru", get(nama_controller::fungsi))
-    ```
-
----
-
-## 🐞 8. Debug Mode & Error Handling
-
-### APP_DEBUG
-Aplikasi mendukung mode debug yang dapat diaktifkan melalui `.env`:
-- `APP_DEBUG=true`: Menampilkan detail error (stack trace, detail template, environment) saat terjadi kesalahan render atau 404.
-- `APP_DEBUG=false`: Menampilkan halaman error minimalis yang aman untuk pengguna umum.
-
-### Custom Error Pages
-Halaman error kustom terletak di `resources/views/errors/`:
-- `minimal.html`: Untuk tampilan produksi.
-- `debug.html`: Untuk tampilan diagnostik saat pengembangan.
-
----
-
-## 📊 9. Dashboard & User Area
-
-Aplikasi menyertakan dashboard premium yang:
-- Mengambil data user secara dinamis dari database.
-- Menampilkan statistik real-time (seperti jumlah total pengguna).
-- Menggunakan animasi CSS dan Glassmorphism untuk tampilan yang modern.
-
----
-*Dokumentasi ini diperbarui untuk mencerminkan fitur Dashboard, Debug Mode, dan pengorganisasian Controller yang lebih rapi.*
+*Dokumentasi ini diperbarui Mei 2026 mencerminkan arsitektur Modular, Dukungan MySQL, dan Desain Premium Splitscreen.*
