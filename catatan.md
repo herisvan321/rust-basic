@@ -116,4 +116,27 @@ Aplikasi menyertakan:
     ```
 
 ---
-*Dokumentasi ini dibuat untuk membantu pengembangan RustBasic agar tetap terstruktur dan aman.*
+
+## 🐞 8. Debug Mode & Error Handling
+
+### APP_DEBUG
+Aplikasi mendukung mode debug yang dapat diaktifkan melalui `.env`:
+- `APP_DEBUG=true`: Menampilkan detail error (stack trace, detail template, environment) saat terjadi kesalahan render atau 404.
+- `APP_DEBUG=false`: Menampilkan halaman error minimalis yang aman untuk pengguna umum.
+
+### Custom Error Pages
+Halaman error kustom terletak di `resources/views/errors/`:
+- `minimal.html`: Untuk tampilan produksi.
+- `debug.html`: Untuk tampilan diagnostik saat pengembangan.
+
+---
+
+## 📊 9. Dashboard & User Area
+
+Aplikasi menyertakan dashboard premium yang:
+- Mengambil data user secara dinamis dari database.
+- Menampilkan statistik real-time (seperti jumlah total pengguna).
+- Menggunakan animasi CSS dan Glassmorphism untuk tampilan yang modern.
+
+---
+*Dokumentasi ini diperbarui untuk mencerminkan fitur Dashboard, Debug Mode, dan pengorganisasian Controller yang lebih rapi.*

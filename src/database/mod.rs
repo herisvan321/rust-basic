@@ -13,7 +13,7 @@ pub async fn connect(cfg: &Config) -> DatabaseConnection {
         )
     } else {
         // Default ke SQLite (disimpan di folder database/)
-        format!("sqlite://database/{}.sqlite?mode=rwc", cfg.db_database)
+        format!("sqlite:database/{}.sqlite?mode=rwc", cfg.db_database)
     };
 
     // 2. Konfigurasi Opsi Koneksi
@@ -33,9 +33,9 @@ pub async fn connect(cfg: &Config) -> DatabaseConnection {
 
 pub async fn init_sessions(cfg: &Config) {
     let db_url = if cfg.session_driver == "file" {
-        "sqlite://database/sessions.sqlite?mode=rwc".to_string()
+        "sqlite:database/sessions.sqlite?mode=rwc".to_string()
     } else {
-        format!("sqlite://database/{}.sqlite?mode=rwc", cfg.db_database)
+        format!("sqlite:database/{}.sqlite?mode=rwc", cfg.db_database)
     };
 
     let pool = sqlx::SqlitePool::connect(&db_url).await.expect("Gagal terhubung ke database session");

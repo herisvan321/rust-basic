@@ -27,7 +27,7 @@ async fn main() {
     let _db = database::connect(&cfg).await;
     
     // Jalankan migrasi pada database utama (untuk tabel users, dll)
-    let main_db_url = format!("sqlite://database/{}.sqlite?mode=rwc", cfg.db_database);
+    let main_db_url = format!("sqlite:database/{}.sqlite?mode=rwc", cfg.db_database);
     let main_pool = sqlx::SqlitePool::connect(&main_db_url).await.expect("Gagal terhubung ke database utama");
     database::run_migrations(&main_pool).await;
     
@@ -56,9 +56,9 @@ async fn main() {
         .with_key(session_key);
 
     let session_db_url = if cfg.session_driver == "file" {
-        "sqlite://database/sessions.sqlite?mode=rwc".to_string()
+        "sqlite:database/sessions.sqlite?mode=rwc".to_string()
     } else {
-        format!("sqlite://database/{}.sqlite?mode=rwc", cfg.db_database)
+        format!("sqlite:database/{}.sqlite?mode=rwc", cfg.db_database)
     };
 
     let session_pool = sqlx::SqlitePool::connect(&session_db_url).await.unwrap();

@@ -5,33 +5,34 @@ Aplikasi web modern berbasis Rust dengan arsitektur **Laravel-inspired**. Diranc
 ---
 
 ## 💎 Fitur Unggulan
-- **⚡ Performa Axum**: Backend super cepat dengan framework Axum dan Tokio.
+- **⚡ Performa Axum**: Backend super cepat dengan framework Axum 0.8 dan Tokio.
+- **📊 Premium Dashboard**: Panel kendali modern dengan statistik real-time dan desain glassmorphism.
+- **🐞 Smart Error Reporting**: Halaman debug detail saat pengembangan dan halaman minimalis saat produksi.
 - **🗄️ Dual-Database Ready**: Dukungan otomatis untuk **SQLite** dan **MySQL** menggunakan **Sea-ORM**.
-- **🔑 Session ala Laravel**: Sistem session dengan skema tabel database standar Laravel (IP Address, User Agent, dll).
-- **📥 Request & Response Helpers**: Gunakan `$request->input()` dan `Response::json()` layaknya di Laravel.
-- **⚙️ Config via .env**: Pengaturan aplikasi terpusat dalam file `.env` (Port, DB, App Key).
-- **🎨 Premium UI**: Desain modern menggunakan Vanilla CSS, HTMX, dan Alpine.js.
-- **📂 Modular Structure**: Folder terorganisir rapi (`config/`, `database/`, `app/`, `routes/`).
+- **🔑 Session ala Laravel**: Sistem session dengan skema tabel database standar Laravel.
+- **🛡️ CSRF & Security Ready**: Proteksi CSRF terintegrasi dengan HTMX dan Security Headers otomatis.
+- **🎨 Modern Monolith UI**: Single Page Application (SPA) experience menggunakan HTMX dan Alpine.js.
+- **📂 Modular Structure**: Organisasi kode yang bersih mengikuti pola MVC Laravel.
 
 ---
 
 ## 📂 Struktur Proyek Terbaru
 ```text
 rustbasic/
-├── database/             # Tempat penyimpanan SQLite (.sqlite) & SQL Schema
-├── public/               # File statis (CSS, JS, Gambar)
-├── resources/            # Template HTML (Minijinja)
+├── database/             # SQLite DB & SQL Schema
+├── public/               # Static Files (CSS, JS)
+├── resources/            # views/ (Minijinja templates)
 ├── src/
-│   ├── main.rs           # Entry Point & Middleware Session
-│   ├── config/           # Loader Konfigurasi (.env)
-│   ├── database/         # Koneksi DB & Custom Session Store
-│   ├── routes/           # Web & API Routing
-│   └── app/              # Folder Inti Aplikasi
-│       └── http/         # Logic HTTP (Controllers, Requests, Responses)
-│           ├── controllers/
-│           ├── requests/
-│           └── responses/
-└── .env                  # File Pengaturan Utama (Rahasia)
+│   ├── main.rs           # Core Initialization
+│   ├── config/           # .env configuration
+│   ├── database/         # DB Connections & Sessions
+│   ├── routes/           # Routing Logic
+│   └── app/              # Core Application Logic
+│       └── http/         
+│           ├── controllers/ # Auth (sub-folder), Dashboard, etc.
+│           ├── requests/    # Form Validation
+│           └── responses/   # Laravel-style Helpers
+└── .env                  # Environment Variables
 ```
 
 ---
@@ -39,10 +40,11 @@ rustbasic/
 ## 🚀 Cara Menjalankan
 
 ### 1. Persiapan Lingkungan
-Salin file `.env.example` ke `.env` (jika ada) atau pastikan file `.env` Anda sudah benar:
+Salin file `.env.example` ke `.env` (atau buat file `.env` baru) dan sesuaikan:
 ```env
 APP_NAME=RustBasic
 APP_PORT=4000
+APP_DEBUG=true
 DB_CONNECTION=sqlite
 DB_DATABASE=rustbasic
 SESSION_DRIVER=database
@@ -57,29 +59,10 @@ Setelah berjalan, akses di:
 
 ---
 
-## 📝 Contoh Penggunaan Laravel Style
-
-### Request & Response
-```rust
-pub async fn store(req: Request) -> impl IntoResponse {
-    let name = req.input("name").unwrap_or_default();
-    Response::json(json!({ "status": "success", "user": name }))
-}
-```
+## 📝 Troubleshooting & Tips
+- **Debug Mode**: Aktifkan `APP_DEBUG=true` di `.env` untuk melihat detail error yang cantik saat terjadi masalah render.
+- **Database Error?** Jika mendapat error "readonly database", pastikan folder `database/` memiliki izin tulis dan gunakan format `sqlite:database/filename.sqlite` di kode.
+- **SPA Experience**: Seluruh navigasi menggunakan `hx-boost`, memberikan sensasi aplikasi instan tanpa reload halaman.
 
 ---
-
-## 📝 Konfigurasi Database & Session
-- **SQLite**: Secara otomatis disimpan di dalam folder `database/`.
-- **MySQL**: Cukup ubah `DB_CONNECTION=mysql` dan isi kredensial di `.env`.
-- **Session**: Tabel `sessions` akan dibuat otomatis di database dengan kolom audit lengkap (ID, Payload, Last Activity).
-
----
-
-## 🛠️ Troubleshooting
-- **Error Database?** Pastikan folder `database/` ada dan memiliki izin tulis.
-- **Port Bentrok?** Ubah `APP_PORT` di file `.env`.
-- **Cargo Error?** Pastikan Anda menggunakan versi Rust terbaru (`rustup update`).
-
----
-*Dibuat dengan ❤️ untuk komunitas Rust Indonesia. Arsitektur Bersih, Kode Rapi.*
+*Dibuat dengan ❤️ untuk komunitas Rust Indonesia. Arsitektur Bersih, Desain Mewah.*

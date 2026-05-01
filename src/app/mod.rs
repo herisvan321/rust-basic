@@ -81,11 +81,35 @@ pub fn view(req: &AppRequest, template: &str, ctx: minijinja::Value) -> Response
 }
 
 fn render_internal(template: &str, context: minijinja::Value) -> Response {
+    let cfg = crate::config::Config::load();
+    tracing::debug!("Rendering template: {} (APP_DEBUG: {})", template, cfg.app_debug);
+
     match JINJA.get_template(template) {
-        Ok(tmpl) => match tmpl.render(context) {
+        Ok(tmpl) => match tmpl.render(context.clone()) {
             Ok(rendered) => Html(rendered).into_response(),
             Err(err) => {
                 tracing::error!("Gagal render template: {}", err);
+                
+                if cfg.app_debug {
+                    match JINJA.get_template("errors/debug.html") {
+                        Ok(debug_tmpl) => {
+                            let debug_ctx = context! {
+                                code => 500,
+                                title => "Template Render Error",
+                                error_detail => err.to_string(),
+                                template_name => template,
+                                env => "local",
+                                now => chrono::Local::now().format("%Y-%m-%d %H:%M:%S").to_string()
+                            };
+                            match debug_tmpl.render(debug_ctx) {
+                                Ok(rendered) => return Html(rendered).into_response(),
+                                Err(_) => return (StatusCode::INTERNAL_SERVER_ERROR, "Critical Debug Render Error").into_response(),
+                            }
+                        },
+                        Err(_) => return (StatusCode::INTERNAL_SERVER_ERROR, "Debug Template Missing").into_response(),
+                    }
+                }
+
                 match JINJA.get_template("errors/minimal.html") {
                     Ok(tmpl) => match tmpl.render(context! { code => 500, title => "Server Error", message => "Terjadi kesalahan saat memproses tampilan." }) {
                         Ok(rendered) => Html(rendered).into_response(),
@@ -97,6 +121,27 @@ fn render_internal(template: &str, context: minijinja::Value) -> Response {
         },
         Err(err) => {
             tracing::error!("Template tidak ditemukan: {}", err);
+
+            if cfg.app_debug {
+                match JINJA.get_template("errors/debug.html") {
+                    Ok(debug_tmpl) => {
+                        let debug_ctx = context! {
+                            code => 404,
+                            title => "Template Not Found",
+                            error_detail => err.to_string(),
+                            template_name => template,
+                            env => "local",
+                            now => chrono::Local::now().format("%Y-%m-%d %H:%M:%S").to_string()
+                        };
+                        match debug_tmpl.render(debug_ctx) {
+                            Ok(rendered) => return Html(rendered).into_response(),
+                            Err(_) => return (StatusCode::NOT_FOUND, "Critical Debug Render Error").into_response(),
+                        }
+                    },
+                    Err(_) => return (StatusCode::NOT_FOUND, "Debug Template Missing").into_response(),
+                }
+            }
+
             match JINJA.get_template("errors/minimal.html") {
                 Ok(tmpl) => match tmpl.render(context! { code => 404, title => "Page Not Found", message => "Halaman atau template tidak ditemukan." }) {
                     Ok(rendered) => Html(rendered).into_response(),

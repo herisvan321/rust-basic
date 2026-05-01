@@ -11,6 +11,7 @@ pub struct Config {
     pub app_host: String,
     #[allow(dead_code)] 
     pub app_key: String,
+    pub app_debug: bool,
     
     // 🗄️ Database
     pub db_connection: String,
@@ -34,6 +35,7 @@ impl Config {
                 .expect("APP_PORT harus berupa angka"),
             app_host: env::var("APP_HOST").unwrap_or_else(|_| "0.0.0.0".to_string()),
             app_key: env::var("APP_KEY").unwrap_or_else(|_| "default_secret_key".to_string()),
+            app_debug: env::var("APP_DEBUG").unwrap_or_else(|_| "false".to_string()) == "true",
             
             // Database
             db_connection: env::var("DB_CONNECTION").unwrap_or_else(|_| "sqlite".to_string()),
