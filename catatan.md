@@ -55,7 +55,7 @@ Data dienkripsi secara otomatis menggunakan `APP_KEY`.
 Aplikasi ini menggunakan pendekatan **Modern Monolith** untuk pengalaman SPA yang ringan:
 
 - **✨ HTMX**: Mengatur navigasi antar halaman (AJAX) sehingga aplikasi terasa seperti Single Page Application (SPA) tanpa reload.
-- **🎨 Retro & Y2K UI**: Desain "Millennium Aesthetic" yang halus dengan warna neon (Cyan & Pink), bentuk yang membulat (bubbly), dan efek scanline tipis untuk kesan futuristik klasik.
+- **🎨 Retro & Y2K Light UI**: Desain "Crystal & Glossy" yang cerah dengan warna Sky Cyan & Bubblegum Pink. Menggunakan efek grid halus dan Glassmorphism yang sangat jernih untuk kesan millennium yang bersih.
 - **🪄 Alpine.js**: Menangani interaktivitas di sisi client (seperti modal, dropdown, dan animasi) secara deklaratif.
 
 ---

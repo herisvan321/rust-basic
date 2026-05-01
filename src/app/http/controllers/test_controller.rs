@@ -5,7 +5,6 @@
 
 use crate::app::render;
 use crate::app::http::requests::Request;
-use crate::app::http::responses::Response;
 use axum::response::IntoResponse;
 use axum_session::Session;
 use crate::database::session_manager::LaravelSessionStore;

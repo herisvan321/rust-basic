@@ -13,6 +13,7 @@ use std::collections::HashMap;
 pub struct Request {
     pub inputs: Value,
     pub method: Method,
+    #[allow(dead_code)]
     pub headers: HashMap<String, String>,
 }
 
@@ -35,6 +36,7 @@ impl Request {
     }
 
     /// Mengambil header berdasarkan key
+    #[allow(dead_code)]
     pub fn header(&self, key: &str) -> Option<String> {
         self.headers.get(key).cloned()
     }

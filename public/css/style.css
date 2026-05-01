@@ -1,17 +1,17 @@
 /* ---------------------------------------------------------
- * 📑 LABEL: GAYA TAMPILAN RETRO & Y2K (style.css)
- * Desain bergaya milenium baru dengan sentuhan modern halus.
+ * 📑 LABEL: GAYA TAMPILAN RETRO & Y2K LIGHT (style.css)
+ * Desain cerah bergaya milenium baru (Frutiger Aero vibes).
  * --------------------------------------------------------- */
 
 :root {
-  --primary: #00f3ff;    /* Cyber Cyan */
-  --secondary: #ff007f;  /* Electric Pink */
-  --accent: #bc13fe;     /* Neon Purple */
-  --bg-dark: #050505;    /* Deep Space */
-  --bg-panel: rgba(15, 15, 25, 0.85);
-  --glass-border: rgba(255, 255, 255, 0.15);
-  --text-main: #ffffff;
-  --text-muted: #a0a0c0;
+  --primary: #00bcd4;    /* Sky Cyan */
+  --secondary: #ff4081;  /* Bubblegum Pink */
+  --accent: #7c4dff;     /* Soft Purple */
+  --bg-light: #fdfdff;   /* Crystal White */
+  --bg-panel: rgba(255, 255, 255, 0.75);
+  --glass-border: rgba(0, 0, 0, 0.08);
+  --text-main: #1a1a2e;
+  --text-muted: #6b7280;
   --font-main: 'Inter', sans-serif;
 }
 
@@ -23,30 +23,30 @@
 
 body {
   font-family: var(--font-main);
-  background-color: var(--bg-dark);
+  background-color: var(--bg-light);
   color: var(--text-main);
   min-height: 100vh;
   overflow-x: hidden;
-  /* Retro Gradient Mesh */
+  /* Retro Light Gradient Mesh */
   background: 
-    radial-gradient(circle at 0% 0%, rgba(188, 19, 254, 0.15) 0%, transparent 40%),
-    radial-gradient(circle at 100% 100%, rgba(0, 243, 255, 0.15) 0%, transparent 40%),
-    radial-gradient(circle at 50% 50%, rgba(255, 0, 127, 0.05) 0%, transparent 50%),
-    var(--bg-dark);
+    radial-gradient(circle at 0% 0%, rgba(0, 188, 212, 0.1) 0%, transparent 40%),
+    radial-gradient(circle at 100% 100%, rgba(255, 64, 129, 0.1) 0%, transparent 40%),
+    radial-gradient(circle at 50% 50%, rgba(124, 77, 255, 0.05) 0%, transparent 50%),
+    var(--bg-light);
   line-height: 1.5;
 }
 
-/* Scanline Effect (Halus) */
+/* Subtle Grid Effect for Retro Vibe */
 body::before {
   content: "";
   position: fixed;
   top: 0; left: 0; width: 100%; height: 100%;
-  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), 
-              linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
-  background-size: 100% 2px, 3px 100%;
+  background-image: 
+    linear-gradient(rgba(0, 188, 212, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 188, 212, 0.05) 1px, transparent 1px);
+  background-size: 40px 40px;
   pointer-events: none;
-  z-index: 999;
-  opacity: 0.3;
+  z-index: -1;
 }
 
 .flex-center {
@@ -59,28 +59,18 @@ body::before {
 
 .glass-panel {
   background: var(--bg-panel);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 2px solid var(--glass-border);
-  border-radius: 2rem; /* Bubbly Y2K style */
+  backdrop-filter: blur(25px) saturate(180%);
+  -webkit-backdrop-filter: blur(25px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  border-radius: 2.5rem; /* Extra bubbly */
   padding: 3.5rem;
   box-shadow: 
-    0 20px 50px rgba(0, 0, 0, 0.5),
-    inset 0 0 20px rgba(255, 255, 255, 0.05);
+    0 15px 35px rgba(0, 0, 0, 0.05),
+    0 5px 15px rgba(0, 0, 0, 0.03);
   max-width: 800px;
   width: 100%;
   animation: floatIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
   position: relative;
-  overflow: hidden;
-}
-
-/* Accent Glow */
-.glass-panel::after {
-  content: "";
-  position: absolute;
-  top: -50%; left: -50%; width: 200%; height: 200%;
-  background: radial-gradient(circle at center, rgba(0, 243, 255, 0.05) 0%, transparent 70%);
-  pointer-events: none;
 }
 
 .title {
@@ -92,62 +82,58 @@ body::before {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  filter: drop-shadow(0 0 10px rgba(0, 243, 255, 0.3));
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
 }
 
 .subtitle {
   font-size: 1.25rem;
   color: var(--text-muted);
   margin-bottom: 2.5rem;
-  font-weight: 400;
+  font-weight: 500;
   max-width: 500px;
   margin-left: auto;
   margin-right: auto;
 }
 
-/* Button Retro-Y2K */
+/* Button Retro-Y2K Light */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem 2.5rem;
+  padding: 1.1rem 2.5rem;
   font-size: 1rem;
   font-weight: 700;
-  border-radius: 1.25rem;
+  border-radius: 1.5rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   text-decoration: none;
-  position: relative;
-  overflow: hidden;
-  border: 2px solid transparent;
+  border: none;
 }
 
 .btn-primary {
-  background: var(--primary);
-  color: #000;
-  box-shadow: 0 0 20px rgba(0, 243, 255, 0.4);
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: #fff;
+  box-shadow: 0 10px 20px rgba(0, 188, 212, 0.2);
 }
 
 .btn-primary:hover {
-  background: transparent;
-  color: var(--primary);
-  border-color: var(--primary);
-  box-shadow: 0 0 30px rgba(0, 243, 255, 0.6);
-  transform: scale(1.05);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 15px 30px rgba(0, 188, 212, 0.3);
 }
 
 .btn-outline {
-  border: 2px solid var(--glass-border);
+  background: #fff;
+  border: 1px solid var(--glass-border);
   color: var(--text-main);
-  background: transparent;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
 
 .btn-outline:hover {
+  background: var(--bg-light);
   border-color: var(--secondary);
   color: var(--secondary);
-  box-shadow: 0 0 20px rgba(255, 0, 127, 0.3);
 }
 
 /* Badges / Tech Stack */
@@ -160,30 +146,29 @@ body::before {
 }
 
 .badge {
-  background: rgba(255, 255, 255, 0.03);
+  background: #fff;
   border: 1px solid var(--glass-border);
-  padding: 0.5rem 1.25rem;
-  border-radius: 1rem;
+  padding: 0.6rem 1.4rem;
+  border-radius: 2rem;
   font-size: 0.85rem;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-muted);
   transition: all 0.3s ease;
-  backdrop-filter: blur(5px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
 }
 
 .badge:hover {
-  background: rgba(0, 243, 255, 0.1);
-  border-color: var(--primary);
-  color: var(--primary);
-  transform: translateY(-3px) rotate(2deg);
+  background: var(--primary);
+  color: #fff;
+  transform: scale(1.1) rotate(-2deg);
 }
 
 /* Form Styling */
 .form-label {
   display: block;
   font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--primary);
+  font-weight: 700;
+  color: var(--accent);
   margin-bottom: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -191,11 +176,11 @@ body::before {
 
 .form-control {
   width: 100%;
-  background: rgba(255, 255, 255, 0.05);
+  background: #fff;
   border: 2px solid var(--glass-border);
-  border-radius: 1rem;
-  padding: 1rem 1.25rem;
-  color: #fff;
+  border-radius: 1.25rem;
+  padding: 1.1rem 1.5rem;
+  color: var(--text-main);
   font-size: 1rem;
   transition: all 0.3s ease;
   outline: none;
@@ -203,8 +188,7 @@ body::before {
 
 .form-control:focus {
   border-color: var(--primary);
-  background: rgba(0, 243, 255, 0.05);
-  box-shadow: 0 0 15px rgba(0, 243, 255, 0.2);
+  box-shadow: 0 0 15px rgba(0, 188, 212, 0.1);
 }
 
 /* Animations */
@@ -221,17 +205,17 @@ body::before {
 
 /* Alert Boxes */
 .alert {
-  padding: 1rem 1.5rem;
-  border-radius: 1rem;
+  padding: 1.25rem 1.75rem;
+  border-radius: 1.25rem;
   margin-bottom: 1.5rem;
   font-size: 0.9rem;
-  border: 1px solid transparent;
+  font-weight: 500;
 }
 
 .alert-info {
-  background: rgba(0, 243, 255, 0.1);
-  border-color: var(--primary);
-  color: var(--primary);
+  background: rgba(0, 188, 212, 0.05);
+  border: 1px solid var(--primary);
+  color: #008ba3;
 }
 
 /* Utils */
@@ -242,7 +226,7 @@ body::before {
 .mb-4 { margin-bottom: 1.5rem; }
 .w-100 { width: 100%; }
 .p-4 { padding: 1.5rem; }
-.bg-dark-soft { background: rgba(0, 0, 0, 0.3); }
-.border-radius-sm { border-radius: 0.75rem; }
+.bg-dark-soft { background: #f8f9fa; border: 1px solid var(--glass-border); }
+.border-radius-sm { border-radius: 1rem; }
 .tracking-widest { letter-spacing: 0.2em; }
 .text-uppercase { text-transform: uppercase; }
