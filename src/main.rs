@@ -69,10 +69,11 @@ async fn main() {
     // 8. Gabungkan Rute dan Jalankan Server dengan Layer Keamanan
     let app = Router::new()
         .merge(routes::web::router())
+        .nest_service("/public", static_files) // Pindahkan static files ke /public prefix agar tidak bentrok dengan fallback
         .layer(axum::middleware::from_fn(app::http::middleware::csrf::csrf_middleware))
         .layer(axum::middleware::from_fn(app::http::middleware::security_headers::security_headers_middleware))
         .layer(SessionLayer::new(session_store))
-        .fallback_service(static_files);
+        .fallback(app::http::controllers::error_controller::ErrorController::not_found);
 
     let addr_str = format!("{}:{}", cfg.app_host, cfg.app_port);
     let addr: SocketAddr = addr_str.parse().expect("Alamat server tidak valid");

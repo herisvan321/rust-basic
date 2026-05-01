@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ code }} | {{ title }}</title>
+    <link rel="stylesheet" href="/public/css/style.css">
+    <style>
+        .error-code {
+            font-size: 8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1;
+            margin-bottom: 1rem;
+            opacity: 0.8;
+        }
+        .divider {
+            width: 50px;
+            height: 4px;
+            background: var(--primary);
+            margin: 2rem auto;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body class="bg-dark text-light">
+    <div class="flex-center min-h-screen">
+        <div class="glass-panel" style="max-width: 600px; text-align: center; padding: 4rem 2rem;">
+            <div class="error-code">{{ code }}</div>
+            <h1 class="text-uppercase tracking-widest mb-2" style="font-size: 1.5rem; letter-spacing: 0.3em;">
+                {{ title }}
+            </h1>
+            
+            <div class="divider"></div>
+            
+            <p class="text-muted mb-5" style="font-size: 1.1rem;">
+                {{ message }}
+            </p>
+            
+            <a href="/" class="btn btn-primary px-5">
+                KEMBALI KE BERANDA
+            </a>
+        </div>
+    </div>
+</body>
+</html>

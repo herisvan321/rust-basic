@@ -45,10 +45,10 @@ pub async fn csrf_middleware(
         
         if let Some(h_token) = header_token {
             if h_token != token {
-                return Err(StatusCode::FORBIDDEN);
+                return Err(StatusCode::from_u16(419).unwrap());
             }
         } else {
-            return Err(StatusCode::FORBIDDEN);
+            return Err(StatusCode::from_u16(419).unwrap());
         }
     }
 
