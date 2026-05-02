@@ -47,6 +47,11 @@ Membersihkan sistem secara menyeluruh:
 1. Mengosongkan file log di `storage/logs/` (truncate).
 2. Menghapus seluruh data sesi di database.
 - **Contoh**: `cargo rustbasic cache:clear`
+    
+### `key:generate`
+Membuat kunci aplikasi baru (`APP_KEY`) yang aman.
+- **Fungsi**: Menghasilkan 32-byte random key, di-encode ke base64, dan otomatis memperbarui file `.env`.
+- **Contoh**: `cargo rustbasic key:generate`
 
 ---
 

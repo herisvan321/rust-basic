@@ -105,6 +105,7 @@ Akses aplikasi di:
 
 - **Session Security**: Sesi disimpan di database dan divalidasi silang dengan alamat IP pengguna pada setiap request.
 - **Log Management**: Gunakan `cargo rustbasic cache:clear` untuk membersihkan cache dan memotong (truncate) file log tanpa menghapusnya.
+- **Key Generation**: Gunakan `cargo rustbasic key:generate` untuk membuat kunci aplikasi (`APP_KEY`) baru yang aman di file `.env`.
 
 ---
 

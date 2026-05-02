@@ -207,3 +207,4 @@
 2026-05-02T11:36:44.826700Z DEBUG Rendering template: auth/register.html (APP_DEBUG: true)
 2026-05-02T11:36:47.676156Z  INFO Request method=GET path=/login ip=127.0.0.1
 2026-05-02T11:36:47.676738Z DEBUG Rendering template: auth/login.html (APP_DEBUG: true)
+2026-05-02T16:42:42.850938Z  INFO rustbasic berjalan di: http://0.0.0.0:4000

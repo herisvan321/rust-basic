@@ -67,6 +67,7 @@ RustBasic meninggalkan library JavaScript berat (seperti Alpine.js) dan beralih 
 
 ```bash
 cargo serve                        # Menjalankan server (Auto-Reload + Watch .env)
+cargo rustbasic key:generate      # Membuat APP_KEY baru di file .env
 cargo rustbasic cache:clear       # Truncate logs & clear sessions
 cargo rustbasic route:list         # Menampilkan daftar route dalam tabel
 cargo rustbasic build              # Menu build interaktif

@@ -9,6 +9,9 @@ use rustbasic::config::database::connect;
 use rustbasic::config::database::run_migrations;
 use regex::Regex;
 use colored::*;
+use base64::{Engine as _, engine::general_purpose};
+use rand::RngCore;
+
 
 #[tokio::main]
 async fn main() {
@@ -75,6 +78,9 @@ async fn main() {
         "check:security" => {
             check_security();
         }
+        "key:generate" => {
+            generate_app_key();
+        }
         _ => {
             println!("{} {}", "❌ Error: Perintah tidak dikenal:".red().bold(), command.yellow());
             print_help();
@@ -96,6 +102,8 @@ fn print_help() {
     println!("  {} {}             {}", "cargo rustbasic".blue(), "check:update".green(), "Cek versi terbaru paket (dependencies)".dimmed());
     println!("  {} {}           {}", "cargo rustbasic".blue(), "check:security".green(), "Audit keamanan aplikasi".dimmed());
     println!("  {} {}               {}", "cargo rustbasic".blue(), "cache:clear".green(), "Membersihkan logs dan database sessions".dimmed());
+    println!("  {} {}             {}", "cargo rustbasic".blue(), "key:generate".green(), "Membuat APP_KEY baru di file .env".dimmed());
+
     println!();
 }
 
@@ -696,4 +704,39 @@ fn to_snake_case(s: &str) -> String {
         snake.push(ch.to_ascii_lowercase());
     }
     snake
+}
+
+fn generate_app_key() {
+    println!("\n{}", "🔑 Generating Application Key...".magenta().bold());
+
+    // 1. Generate 32-byte random key
+    let mut key = [0u8; 32];
+    rand::rng().fill_bytes(&mut key);
+    
+    // 2. Encode to base64
+    let encoded = general_purpose::STANDARD.encode(key);
+    let key_str = format!("base64:{}", encoded);
+    
+    // 3. Update .env file
+    let env_path = ".env";
+    match fs::read_to_string(env_path) {
+        Ok(content) => {
+            let re = Regex::new(r"(?m)^APP_KEY=.*").unwrap();
+            let new_content = if re.is_match(&content) {
+                re.replace(&content, &format!("APP_KEY={}", key_str)).to_string()
+            } else {
+                format!("{}\nAPP_KEY={}", content.trim_end(), key_str)
+            };
+
+            if let Err(e) = fs::write(env_path, new_content) {
+                println!("{} Gagal menulis ke file .env: {}", "❌ Error:".red(), e);
+            } else {
+                println!("{} {}", "✅ Application key set successfully:".green(), key_str.cyan());
+                println!("{}", "💡 Pastikan untuk tidak membagikan APP_KEY ini ke publik!".dimmed());
+            }
+        }
+        Err(_) => {
+            println!("{} File .env tidak ditemukan.", "❌ Error:".red());
+        }
+    }
 }
