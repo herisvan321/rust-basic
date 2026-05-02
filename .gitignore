@@ -2,7 +2,7 @@
 .env
 !.env.example
 /database/*.sqlite
-/storage/logs/*.log
+/storage/logs
 /storage/uploads
 # macOS junk files
 .DS_Store
