@@ -44,6 +44,7 @@ cargo rustbasic make:model Product -m
 ### 4. Menjalankan Migrasi
 Migrasi sekarang bersifat manual untuk keamanan data:
 ```bash
+cargo rustbasic make:controller Name
 cargo rustbasic migrate
 ```
 

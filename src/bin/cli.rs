@@ -40,6 +40,13 @@ async fn main() {
             }
             make_rust_migration(&args[2]);
         }
+        "make:controller" => {
+            if args.len() < 3 {
+                println!("❌ Error: Nama controller tidak ditentukan.");
+                return;
+            }
+            make_controller(&args[2]);
+        }
         "migrate" => {
             run_manual_migrations().await;
         }
@@ -55,6 +62,7 @@ fn print_help() {
     println!("Penggunaan:");
     println!("  cargo rustbasic make:model <Nama> [-m]   Membuat model Sea-ORM (dan migration Rust)");
     println!("  cargo rustbasic make:migration <Nama>    Membuat file migration Rust");
+    println!("  cargo rustbasic make:controller <Nama>  Membuat controller Axum");
     println!("  cargo rustbasic migrate                  Menjalankan migrasi database (Sea-ORM)");
 }
 
@@ -66,6 +74,66 @@ async fn run_manual_migrations() {
     run_migrations(&db).await;
     
     println!("✅ Migrasi selesai!");
+}
+
+fn make_controller(name: &str) {
+    let clean_name = name.replace("Controller", "");
+    let snake_name = to_snake_case(&clean_name);
+    let class_name = format!("{}Controller", clean_name);
+    let file_name = format!("{}_controller.rs", snake_name);
+    let file_path = format!("src/app/http/controllers/{}", file_name);
+
+    if std::path::Path::new(&file_path).exists() {
+        println!("⚠️  Controller {} sudah ada.", file_path);
+        return;
+    }
+
+    let template = format!(
+r#"/* ---------------------------------------------------------
+ * 📑 LABEL: {class_name} ({file_name})
+ * --------------------------------------------------------- */
+
+use crate::app::view;
+use crate::config::requests::Request;
+use axum::response::IntoResponse;
+use minijinja::context;
+
+pub struct {class_name};
+
+impl {class_name} {{
+    pub async fn index(req: Request) -> impl IntoResponse {{
+        view(&req, "{snake_name}.html", context! {{
+            title => "{class_name}"
+        }})
+    }}
+}}
+"#, class_name = class_name, file_name = file_name, snake_name = snake_name);
+
+    fs::write(&file_path, template).expect("Gagal membuat file controller");
+    println!("✅ Controller dibuat: {}", file_path);
+
+    update_controller_mod_rs(&file_name.replace(".rs", ""));
+}
+
+fn update_controller_mod_rs(mod_name: &str) {
+    let mod_path = "src/app/http/controllers/mod.rs";
+    let mut content = String::new();
+    if let Ok(mut file) = fs::File::open(mod_path) {
+        file.read_to_string(&mut content).ok();
+    }
+
+    let line = format!("pub mod {};", mod_name);
+    if content.contains(&line) {
+        return;
+    }
+
+    let mut file = OpenOptions::new()
+        .append(true)
+        .open(mod_path)
+        .expect("Gagal membuka controllers/mod.rs");
+
+    writeln!(file, "{}", line).ok();
+    println!("📝 controllers/mod.rs diperbarui.");
 }
 
 fn make_model(name: &str) {
@@ -108,6 +176,11 @@ fn make_rust_migration(name: &str) {
     let timestamp = Local::now().format("%Y%m%d_%H%M%S").to_string();
     let mod_name = format!("m{}_{}", timestamp, snake_name);
     let file_path = format!("database/migrations/{}.rs", mod_name);
+
+    if std::path::Path::new(&file_path).exists() {
+        println!("⚠️  Migration {} sudah ada.", file_path);
+        return;
+    }
 
     let struct_name = name.chars().filter(|c| c.is_alphanumeric()).collect::<String>();
     let table_iden = format!("{}s", struct_name);
@@ -168,7 +241,7 @@ impl MigrationTrait for Migration {{
             .await
     }}
 }}
-"#, table_iden = table_iden);
+"#, table_iden = table_iden, mod_name = mod_name);
 
     fs::write(&file_path, template).expect("Gagal membuat file migration");
     println!("✅ Migration Rust dibuat: {}", file_path);
@@ -201,12 +274,22 @@ fn update_migration_mod_rs(mod_name: &str) {
 
 fn update_mod_rs(class_name: &str, snake_name: &str) {
     let mod_path = "src/app/models/mod.rs";
+    let mut content = String::new();
+    if let Ok(mut file) = fs::File::open(mod_path) {
+        file.read_to_string(&mut content).ok();
+    }
+
+    let mod_line = format!("pub mod {};", snake_name);
+    if content.contains(&mod_line) {
+        return;
+    }
+
     let mut file = OpenOptions::new()
         .append(true)
         .open(mod_path)
         .expect("Gagal membuka models/mod.rs");
 
-    writeln!(file, "pub mod {};", snake_name).ok();
+    writeln!(file, "{}", mod_line).ok();
     writeln!(file, "pub use {}::Entity as {};", snake_name, class_name).ok();
     
     println!("📝 models/mod.rs diperbarui.");

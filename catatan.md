@@ -113,6 +113,7 @@ Gunakan perintah singkat (mirip Laravel) untuk alur pengembangan yang cepat:
 ```bash
 cargo serve                        # Menjalankan server (Auto-Reload)
 cargo rustbasic make:model Name -m # Membuat model & migration (Sea-ORM)
+cargo rustbasic make:controller Name
 cargo rustbasic migrate            # Menjalankan migrasi manual
 ```
 
