@@ -3,11 +3,16 @@
 # File ini berisi daftar "bahan baku" atau library yang digunakan.
 # ---------------------------------------------------------
 
+[[bin]]
+name = "rustbasic" #ganti ini jika ingin merubah nama file utama
+path = "src/main.rs"
+
 [package]
 name = "rustbasic"
 version = "0.0.1"
 edition = "2024"
-default-run = "rustbasic"
+default-run = "rustbasic" #ganti ini jika ingin merubah nama file utama
+
 
 [[bin]]
 name = "cli"

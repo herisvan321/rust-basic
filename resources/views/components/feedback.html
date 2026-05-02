@@ -9,6 +9,12 @@
 
 {# 2. HTMX Indicator #}
 {% macro indicator(id="indicator", label="Memproses...") %}
+<!-- Progress Bar Tipis di Atas -->
+<div class="htmx-indicator-bar">
+    <div class="htmx-indicator-bar-inner"></div>
+</div>
+
+<!-- Overlay Loading Full Screen -->
 <div id="{{ id }}" class="htmx-indicator feedback-overlay">
     <div class="feedback-content">
         {{ spinner() }}
