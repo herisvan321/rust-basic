@@ -59,6 +59,9 @@ async fn main() {
         "build" => {
             build_project();
         }
+        "check:update" => {
+            check_updates();
+        }
         _ => {
             println!("{} {}", "❌ Error: Perintah tidak dikenal:".red().bold(), command.yellow());
             print_help();
@@ -76,7 +79,48 @@ fn print_help() {
     println!("  {} {}                  {}", "cargo rustbasic".blue(), "migrate".green(), "Menjalankan migrasi database (Sea-ORM)".dimmed());
     println!("  {} {}               {}", "cargo rustbasic".blue(), "route:list".green(), "Menampilkan daftar route".dimmed());
     println!("  {} {}                    {}", "cargo rustbasic".blue(), "build".green(), "Membangun project dengan pilihan".dimmed());
+    println!("  {} {}             {}", "cargo rustbasic".blue(), "check:update".green(), "Cek versi terbaru paket (dependencies)".dimmed());
     println!();
+}
+
+fn check_updates() {
+    println!("\n{}", "🔍 Mengecek versi terbaru paket...".cyan().bold());
+    println!("{}", "Tunggu sebentar, sedang menghubungi crates.io...".dimmed());
+
+    let output = Command::new("cargo")
+        .args(["update", "--dry-run", "--verbose"])
+        .output()
+        .expect("Gagal menjalankan cargo update");
+
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    
+    // Regex untuk menangkap: Unchanged name v1.0.0 (available: v2.0.0)
+    let re = Regex::new(r"Unchanged\s+([^\s]+)\s+v([^\s]+)\s+\(available:\s+v([^\)]+)\)").unwrap();
+
+    let mut found = false;
+    println!("\n{}", "+---------------------------+------------+------------+".magenta());
+    println!("{}", "| PACKAGE NAME              | CURRENT    | LATEST     |".magenta().bold());
+    println!("{}", "+---------------------------+------------+------------+".magenta());
+
+    for line in stderr.lines() {
+        if let Some(cap) = re.captures(line) {
+            found = true;
+            let name = &cap[1];
+            let current = &cap[2];
+            let latest = &cap[3];
+
+            println!("| {:<25} | {:<10} | {:<10} |", name.cyan(), current.yellow(), latest.green().bold());
+        }
+    }
+
+    if !found {
+        println!("| {:<51} |", "Semua paket sudah menggunakan versi terbaru!".green());
+    }
+    println!("{}\n", "+---------------------------+------------+------------+".magenta());
+
+    if found {
+        println!("{}", "💡 Tips: Jalankan 'cargo update' untuk memperbarui paket yang kompatibel.".yellow());
+    }
 }
 
 fn build_project() {
