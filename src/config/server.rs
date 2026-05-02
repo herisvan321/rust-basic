@@ -1,13 +1,18 @@
 use axum::{Router, middleware};
 use tower_http::services::ServeDir;
+use tower_governor::{governor::GovernorConfigBuilder, GovernorLayer, key_extractor::SmartIpKeyExtractor};
 use axum_session::{SessionLayer, SessionStore};
 use crate::{routes, app};
 use crate::config::Config;
 use crate::config::session_manager::RustBasicSessionStore;
+use crate::app::http::controllers::error_controller::ErrorController;
+use tower_governor::GovernorError;
+use axum::response::IntoResponse;
 use std::net::SocketAddr;
 use sea_orm::DatabaseConnection;
 use std::sync::Arc;
 use std::process::Command;
+use std::time::Duration;
 
 #[derive(Clone)]
 #[allow(dead_code)]
@@ -25,16 +30,33 @@ pub async fn start_server(
     // 0. Kill port jika sedang digunakan (Force Restart)
     kill_port_if_in_use(cfg.app_port);
 
+    // 0.5 Set Timezone Global
+    unsafe {
+        std::env::set_var("TZ", &cfg.app_timezone);
+    }
+
     // 1. Inisialisasi State
     let state = AppState {
         db,
         config: Arc::new(cfg.clone()),
     };
 
+    // 1.5 Konfigurasi Rate Limiting (100 request per menit)
+    let governor_conf = Arc::new(
+        GovernorConfigBuilder::default()
+            .key_extractor(SmartIpKeyExtractor)
+            .period(Duration::from_secs(60))
+            .burst_size(cfg.app_limit_request as u32)
+            .error_handler(handle_governor_error)
+            .finish()
+            .unwrap(),
+    );
+
     // 2. Bangun Router
     let app = Router::new()
         .merge(routes::web::router())
         .nest_service("/public", static_files)
+        .layer(GovernorLayer { config: governor_conf })
         .layer(middleware::from_fn(app::http::middleware::csrf::csrf_middleware))
         .layer(middleware::from_fn(app::http::middleware::security_headers::security_headers_middleware))
         .layer(SessionLayer::new(session_store))
@@ -47,9 +69,9 @@ pub async fn start_server(
     
     tracing::info!("{} berjalan di: http://{}", cfg.app_name, addr);
     
-    // 4. Jalankan Server
+    // 4. Jalankan Server dengan ConnectInfo agar IP bisa dideteksi
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
-    axum::serve(listener, app).await.unwrap();
+    axum::serve(listener, app.into_make_service_with_connect_info::<SocketAddr>()).await.unwrap();
 }
 
 /// Membunuh proses yang menggunakan port tertentu agar tidak terjadi error "Address already in use"
@@ -84,5 +106,18 @@ fn kill_port_if_in_use(port: u16) {
             .arg("-k")
             .arg(format!("{}/tcp", port))
             .output();
+    }
+}
+
+/// Menangani error dari Rate Limiter (Governor) dengan tampilan HTML Premium
+fn handle_governor_error(err: GovernorError) -> axum::response::Response {
+    match err {
+        GovernorError::TooManyRequests { wait_time, .. } => {
+            ErrorController::show(
+                429, 
+                &format!("Terlalu banyak permintaan. Silakan tunggu {} detik lagi.", wait_time)
+            ).into_response()
+        },
+        _ => ErrorController::show(500, "Terjadi kesalahan pada sistem pembatas request.").into_response(),
     }
 }

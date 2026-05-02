@@ -1,6 +1,6 @@
 # Middleware
 
-Middleware adalah lapisan yang memproses request sebelum sampai ke controller. Disimpan di `src/app/http/middlewares/`.
+Middleware adalah lapisan yang memproses request sebelum sampai ke controller. Disimpan di `src/app/http/middleware/`.
 
 ## Menggunakan Middleware
 Daftarkan middleware di `src/routes/mod.rs` atau `web.rs`:
@@ -9,6 +9,28 @@ Router::new()
     .route("/dashboard", get(handler))
     .layer(axum::middleware::from_fn(auth_middleware))
 ```
+
+## Membuat Middleware
+Gunakan CLI untuk membuat file middleware baru secara otomatis:
+```bash
+cargo rustbasic make:middleware Name
+```
+
+---
+
+# Rate Limiting & Security
+
+Aplikasi menyertakan perlindungan otomatis terhadap DDoS dan Brute Force menggunakan `tower-governor`.
+
+## Konfigurasi
+Atur batas request di file `.env`:
+```env
+APP_LIMIT_REQUEST=100
+```
+Ini akan membatasi setiap IP maksimal 100 request per menit.
+
+## Tampilan Error
+Jika batas terlampaui, aplikasi akan otomatis menampilkan halaman error **429 Too Many Requests** dengan sisa waktu tunggu yang dinamis.
 
 ---
 

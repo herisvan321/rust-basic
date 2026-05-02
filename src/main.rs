@@ -5,9 +5,9 @@ use rustbasic::config::Config;
 
 #[tokio::main]
 async fn main() {
-    // 1. Muat file .env & Inisialisasi Logger
+    // 1. Muat file .env & Inisialisasi Logger (Terminal + File)
     dotenv().ok();
-    config::logger::init();
+    let _guard = config::logger::init();
 
     // 2. Muat Konfigurasi
     let cfg = Config::load();

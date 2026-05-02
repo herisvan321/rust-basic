@@ -50,6 +50,13 @@ async fn main() {
             }
             make_controller(&args[2]);
         }
+        "make:middleware" => {
+            if args.len() < 3 {
+                println!("{}", "❌ Error: Nama middleware tidak ditentukan.".red().bold());
+                return;
+            }
+            make_middleware(&args[2]);
+        }
         "migrate" => {
             run_manual_migrations().await;
         }
@@ -58,6 +65,9 @@ async fn main() {
         }
         "build" => {
             build_project();
+        }
+        "cache:clear" => {
+            clear_cache().await;
         }
         "check:update" => {
             check_updates();
@@ -79,11 +89,13 @@ fn print_help() {
     println!("  {} {} <Nama> [-m]   {}", "cargo rustbasic".blue(), "make:model".green(), "Membuat model Sea-ORM (dan migration Rust)".dimmed());
     println!("  {} {} <Nama>    {}", "cargo rustbasic".blue(), "make:migration".green(), "Membuat file migration Rust".dimmed());
     println!("  {} {} <Nama>  {}", "cargo rustbasic".blue(), "make:controller".green(), "Membuat controller Axum".dimmed());
+    println!("  {} {} <Nama>  {}", "cargo rustbasic".blue(), "make:middleware".green(), "Membuat middleware Axum".dimmed());
     println!("  {} {}                  {}", "cargo rustbasic".blue(), "migrate".green(), "Menjalankan migrasi database (Sea-ORM)".dimmed());
     println!("  {} {}               {}", "cargo rustbasic".blue(), "route:list".green(), "Menampilkan daftar route".dimmed());
     println!("  {} {}                    {}", "cargo rustbasic".blue(), "build".green(), "Membangun project dengan pilihan".dimmed());
     println!("  {} {}             {}", "cargo rustbasic".blue(), "check:update".green(), "Cek versi terbaru paket (dependencies)".dimmed());
     println!("  {} {}           {}", "cargo rustbasic".blue(), "check:security".green(), "Audit keamanan aplikasi".dimmed());
+    println!("  {} {}               {}", "cargo rustbasic".blue(), "cache:clear".green(), "Membersihkan logs dan database sessions".dimmed());
     println!();
 }
 
@@ -169,6 +181,45 @@ fn check_security() {
     println!("\n{}", "Kesimpulan:".bold());
     println!("{}", "Framework ini sudah menerapkan standar keamanan dasar (OWASP Top 10) dengan baik.".green());
     println!("{}\n", "Selalu pastikan untuk memperbarui dependensi secara berkala.".dimmed());
+}
+
+async fn clear_cache() {
+    println!("\n{}", "🧹 Cleaning Cache & Logs...".magenta().bold());
+
+    // 1. Clear Logs
+    let log_dir = "storage/logs";
+    if let Ok(entries) = fs::read_dir(log_dir) {
+        let mut count = 0;
+        for entry in entries.flatten() {
+            let path = entry.path();
+            if path.is_file() {
+                let _ = fs::remove_file(path);
+                count += 1;
+            }
+        }
+        println!("   {} {} ({} file dihapus)", "✅ Logs:".green(), "Folder storage/logs telah dibersihkan.", count);
+    } else {
+        println!("   {} {}", "⚠️  Logs:".yellow(), "Folder storage/logs tidak ditemukan.");
+    }
+
+    // 2. Clear Sessions in DB
+    let cfg = Config::load();
+    let db = connect(&cfg).await;
+    
+    // Gunakan SQL mentah untuk truncate/delete session table
+    let truncate_sql = if cfg.db_connection == "mysql" {
+        "TRUNCATE TABLE sessions"
+    } else {
+        "DELETE FROM sessions"
+    };
+
+    use sea_orm::ConnectionTrait;
+    match db.execute(sea_orm::Statement::from_string(cfg.db_backend(), truncate_sql.to_string())).await {
+        Ok(_) => println!("   {} {}", "✅ Sessions:".green(), "Tabel sessions telah dikosongkan."),
+        Err(e) => println!("   {} {} ({})", "❌ Error:".red(), "Gagal membersihkan tabel sessions.", e),
+    }
+
+    println!("\n{}", "✨ Cache berhasil dibersihkan!".green().bold());
 }
 
 fn check_updates() {
@@ -408,6 +459,69 @@ fn update_controller_mod_rs(mod_name: &str) {
 
     writeln!(file, "{}", line).ok();
     println!("{} {}", "📝".blue(), "controllers/mod.rs diperbarui.".dimmed());
+}
+
+fn make_middleware(name: &str) {
+    let snake_name = to_snake_case(name).replace("_middleware", "");
+    let fn_name = format!("{}_middleware", snake_name);
+    let file_name = format!("{}.rs", snake_name);
+    let file_path = format!("src/app/http/middleware/{}", file_name);
+
+    if std::path::Path::new(&file_path).exists() {
+        println!("{} {} {}", "⚠️  Middleware".yellow(), file_path.cyan(), "sudah ada.".yellow());
+        return;
+    }
+
+    let template = format!(
+r#"/* ---------------------------------------------------------
+ * 📑 LABEL: {label} (middleware/{file_name})
+ * --------------------------------------------------------- */
+
+use axum::{{
+    extract::Request,
+    middleware::Next,
+    response::Response,
+}};
+
+pub async fn {fn_name}(
+    req: Request,
+    next: Next,
+) -> Response {{
+    // Lakukan sesuatu sebelum request sampai ke controller
+    
+    let response = next.run(req).await;
+    
+    // Lakukan sesuatu setelah request selesai diproses
+    
+    response
+}}
+"#, label = name.to_uppercase(), file_name = file_name, fn_name = fn_name);
+
+    fs::write(&file_path, template).expect("Gagal membuat file middleware");
+    println!("{} {}", "✅ Middleware dibuat:".green(), file_path.cyan());
+
+    update_middleware_mod_rs(&snake_name);
+}
+
+fn update_middleware_mod_rs(mod_name: &str) {
+    let mod_path = "src/app/http/middleware/mod.rs";
+    let mut content = String::new();
+    if let Ok(mut file) = fs::File::open(mod_path) {
+        file.read_to_string(&mut content).ok();
+    }
+
+    let line = format!("pub mod {};", mod_name);
+    if content.contains(&line) {
+        return;
+    }
+
+    let mut file = OpenOptions::new()
+        .append(true)
+        .open(mod_path)
+        .expect("Gagal membuka middleware/mod.rs");
+
+    writeln!(file, "{}", line).ok();
+    println!("{} {}", "📝".blue(), "middleware/mod.rs diperbarui.".dimmed());
 }
 
 fn make_model(name: &str) {

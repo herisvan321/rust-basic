@@ -47,6 +47,7 @@ Sama seperti framework modern lainnya, Anda dapat membuat komponen baru berbasis
 ```bash
 cargo rustbasic make:model Product -m
 cargo rustbasic make:controller Product
+cargo rustbasic make:middleware Logging
 ```
 
 ### 4. Menjalankan Migrasi
@@ -81,9 +82,9 @@ rustbasic/
 ├── src/
 │   ├── main.rs           # Entry point (Ultra-Clean)
 │   ├── app/              # Core Application Logic
-│   ├── config/           # Modular Configuration (DB, Session, Server, Log)
-│   ├── database/         # Connections & Session Store
+│   ├── config/           # Modular Configuration (DB Connection, Session, Server, Log)
 │   └── routes/           # Web Routes
+├── storage/              # Storage (Logs, Uploads, etc.)
 └── .env                  # Environment Variables
 ```
 

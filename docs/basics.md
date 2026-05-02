@@ -34,6 +34,7 @@ Controller bertugas menangani logika request dan mengembalikan response. Disimpa
 Gunakan CLI yang sudah mendukung warna dan tabel:
 ```bash
 cargo rustbasic make:controller Name
+cargo rustbasic make:middleware Name
 ```
 
 ## Melihat Daftar Route

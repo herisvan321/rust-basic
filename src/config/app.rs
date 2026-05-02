@@ -12,6 +12,8 @@ pub struct Config {
     pub app_host: String,
     pub app_key: String,
     pub app_debug: bool,
+    pub app_timezone: String,
+    pub app_limit_request: u64,
     
     // 🗄️ Database
     pub db_connection: String,
@@ -36,6 +38,11 @@ impl Config {
             app_host: env::var("APP_HOST").unwrap_or_else(|_| "0.0.0.0".to_string()),
             app_key: env::var("APP_KEY").unwrap_or_else(|_| "default_secret_key".to_string()),
             app_debug: env::var("APP_DEBUG").unwrap_or_else(|_| "false".to_string()) == "true",
+            app_timezone: env::var("APP_TIMEZONE").unwrap_or_else(|_| "UTC".to_string()),
+            app_limit_request: env::var("APP_LIMIT_REQUEST")
+                .unwrap_or_else(|_| "100".to_string())
+                .parse()
+                .expect("APP_LIMIT_REQUEST harus berupa angka"),
             
             // Database
             db_connection: env::var("DB_CONNECTION").unwrap_or_else(|_| "sqlite".to_string()),

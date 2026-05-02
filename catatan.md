@@ -22,15 +22,16 @@ rustbasic/
 │   │   └── mod.rs        # Helper global (seperti fungsi render)
 │   ├── config/           # Pusat Konfigurasi & Inisialisasi
 │   │   ├── app.rs        # Struct Config & Load .env
-│   │   ├── database.rs   # Setup DB (MySQL/SQLite) & Migrasi
-│   │   ├── session.rs    # Setup Session Store
+│   │   ├── database.rs   # Setup DB, Koneksi (Sea-ORM) & Migrasi
+│   │   ├── session.rs    # Setup Session Store & Init Tabel
 │   │   ├── server.rs     # Setup Router & Run Server
 │   │   ├── logger.rs     # Setup Logging & Startup Banner
 │   │   ├── requests.rs   # Request Helper (RustBasic Style)
 │   │   ├── responses.rs  # Response Helper (RustBasic Style)
 │   │   └── mod.rs        # Re-export seluruh konfigurasi
-│   ├── database/         # Koneksi DB & RustBasicSessionStore
 │   └── routes/           # Pengaturan rute (web.rs, mod.rs)
+├── storage/              # Penyimpanan File & Log
+│   └── logs/             # Log Aktivitas Server (Daily Rotation)
 └── .env                  # Pengaturan environment (Port, DB, App Key)
 ```
 
@@ -45,6 +46,8 @@ Gunakann file `.env` untuk mengatur perilaku aplikasi:
 - `DB_CONNECTION`: `sqlite` atau `mysql`.
 - `SESSION_DRIVER`: `database` atau `file`.
 - `APP_DEBUG`: `true` untuk mode pengembang (detil error), `false` untuk produksi.
+- `APP_TIMEZONE`: Zona waktu aplikasi (misal: `Asia/Jakarta`).
+- `APP_LIMIT_REQUEST`: Batas request per menit (keamanan DDoS/Brute Force).
 
 ---
 
@@ -126,6 +129,8 @@ Gunakan perintah singkat dengan tampilan terminal yang indah dan berwarna:
 cargo serve                        # Menjalankan server (Auto-Reload)
 cargo rustbasic make:model Name -m # Membuat model & migration (Sea-ORM)
 cargo rustbasic make:controller Name # Membuat controller baru
+cargo rustbasic make:middleware Name # Membuat middleware baru
+cargo rustbasic cache:clear       # Membersihkan logs dan database sessions
 cargo rustbasic build              # Menu build interaktif (Native/Windows/Linux/Mac)
 cargo rustbasic route:list         # Menampilkan daftar route dalam tabel
 cargo rustbasic migrate            # Menjalankan migrasi manual
