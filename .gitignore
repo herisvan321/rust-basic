@@ -4,3 +4,5 @@
 /database/*.sqlite
 /storage/logs/*.log
 /storage/uploads
+# macOS junk files
+.DS_Store
