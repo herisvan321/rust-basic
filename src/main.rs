@@ -1,6 +1,6 @@
 use tower_http::services::ServeDir;
 use dotenvy::dotenv;
-use rustbasic::{config, database};
+use rustbasic::config;
 use rustbasic::config::Config;
 
 #[tokio::main]
@@ -14,11 +14,11 @@ async fn main() {
 
     // 3. Setup Database & Sea-ORM
     config::database::setup_database(&cfg).await;
-    let db = database::connect(&cfg).await;
-    database::run_migrations(&db).await; // <-- Jalankan migrasi otomatis
+    let db = config::database::connect(&cfg).await;
+    config::database::run_migrations(&db).await; // <-- Jalankan migrasi otomatis
     
     // 4. Inisialisasi Session Store
-    database::init_sessions(&cfg).await;
+    config::session::init_sessions(&cfg).await;
     let session_store = config::session::setup_session(&cfg).await;
 
     // 5. Setup Statics & Jalankan Server

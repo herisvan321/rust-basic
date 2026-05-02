@@ -3,7 +3,7 @@ use axum::{
 };
 use serde::Serialize;
 use serde_json;
-use crate::database::session_manager::RustBasicSessionStore;
+use crate::config::session_manager::RustBasicSessionStore;
 
 pub struct ResponseHelper;
 

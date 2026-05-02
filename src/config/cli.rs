@@ -5,8 +5,8 @@ use std::process::Command;
 use chrono::Local;
 use dotenvy::dotenv;
 use rustbasic::config::Config;
-use rustbasic::database::connect;
-use rustbasic::database::run_migrations;
+use rustbasic::config::database::connect;
+use rustbasic::config::database::run_migrations;
 use regex::Regex;
 use colored::*;
 

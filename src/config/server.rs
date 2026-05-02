@@ -1,8 +1,9 @@
 use axum::{Router, middleware};
 use tower_http::services::ServeDir;
 use axum_session::{SessionLayer, SessionStore};
-use crate::{routes, app, database};
+use crate::{routes, app};
 use crate::config::Config;
+use crate::config::session_manager::RustBasicSessionStore;
 use std::net::SocketAddr;
 use sea_orm::DatabaseConnection;
 use std::sync::Arc;
@@ -17,7 +18,7 @@ pub struct AppState {
 
 pub async fn start_server(
     cfg: Config, 
-    session_store: SessionStore<database::session_manager::RustBasicSessionStore>,
+    session_store: SessionStore<RustBasicSessionStore>,
     static_files: ServeDir,
     db: DatabaseConnection
 ) {

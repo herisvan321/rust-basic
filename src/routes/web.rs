@@ -9,14 +9,14 @@ pub fn router() -> Router<AppState> {
         .route("/login", post(auth::auth_controller::AuthController::login))
         .route("/register", get(auth::auth_controller::AuthController::register_page))
         .route("/register", post(auth::auth_controller::AuthController::register))
+        .route("/test", get(welcome_controller::test_request))
+        .route("/test-csrf", get(test_controller::csrf_form))
+        .route("/test-csrf", post(test_controller::csrf_submit))
         .layer(from_fn(guest_middleware));
 
     let auth_routes = Router::new()
         .route("/dashboard", get(dashboard_controller::DashboardController::index))
         .route("/logout", post(auth::auth_controller::AuthController::logout))
-        .route("/test", get(welcome_controller::test_request))
-        .route("/test-csrf", get(test_controller::csrf_form))
-        .route("/test-csrf", post(test_controller::csrf_submit))
         .layer(from_fn(auth_middleware));
 
     Router::new()

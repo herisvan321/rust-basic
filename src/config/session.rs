@@ -1,10 +1,20 @@
 use axum_session::{SessionConfig, SessionStore, Key};
 use crate::config::Config;
-use crate::database;
+use crate::config::session_manager::RustBasicSessionStore;
 use sha2::{Sha512, Digest};
 use sqlx::AnyPool;
+use sea_orm::{ConnectionTrait, Database, sea_query, Iden};
+use sea_query::{Table, ColumnDef};
 
-pub async fn setup_session(cfg: &Config) -> SessionStore<database::session_manager::RustBasicSessionStore> {
+#[derive(Iden)]
+enum Sessions {
+    Table,
+    Id,
+    Payload,
+    LastActivity,
+}
+
+pub async fn setup_session(cfg: &Config) -> SessionStore<RustBasicSessionStore> {
     // 1. Decode APP_KEY
     let key_bytes = if cfg.app_key.starts_with("base64:") {
         use base64::{Engine as _, engine::general_purpose};
@@ -56,8 +66,37 @@ pub async fn setup_session(cfg: &Config) -> SessionStore<database::session_manag
         }
     };
     
-    SessionStore::<database::session_manager::RustBasicSessionStore>::new(
-        Some(database::session_manager::RustBasicSessionStore::new(session_pool)), 
+    SessionStore::<RustBasicSessionStore>::new(
+        Some(RustBasicSessionStore::new(session_pool)), 
         session_config
     ).await.expect("Gagal menginisialisasi SessionStore")
+}
+
+pub async fn init_sessions(cfg: &Config) {
+    let db_url = if cfg.session_driver == "file" {
+        "sqlite:database/sessions.sqlite?mode=rwc".to_string()
+    } else if cfg.db_connection == "mysql" {
+        format!(
+            "mysql://{}:{}@{}:{}/{}",
+            cfg.db_username, cfg.db_password, cfg.db_host, cfg.db_port, cfg.db_database
+        )
+    } else {
+        format!("sqlite:database/{}.sqlite?mode=rwc", cfg.db_database)
+    };
+
+    let db = Database::connect(&db_url).await.expect("Gagal terhubung ke database session");
+    let builder = db.get_database_backend();
+
+    // 2. Auto-Create Table Sessions jika belum ada menggunakan Sea-ORM
+    let table = Table::create()
+        .table(Sessions::Table)
+        .if_not_exists()
+        .col(ColumnDef::new(Sessions::Id).string_len(255).primary_key())
+        .col(ColumnDef::new(Sessions::Payload).text().not_null())
+        .col(ColumnDef::new(Sessions::LastActivity).big_integer().not_null())
+        .to_owned();
+
+    db.execute(builder.build(&table))
+        .await
+        .expect("Gagal membuat tabel session otomatis");
 }

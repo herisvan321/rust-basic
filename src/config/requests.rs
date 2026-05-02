@@ -7,7 +7,7 @@ use serde_json::{json, Value};
 use std::collections::HashMap;
 use validator::Validate;
 use axum_session::Session;
-use crate::database::session_manager::RustBasicSessionStore;
+use crate::config::session_manager::RustBasicSessionStore;
 
 pub struct Request {
     pub inputs: Value,
