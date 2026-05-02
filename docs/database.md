@@ -1,6 +1,6 @@
 # Database: Eloquent (Sea-ORM Entity)
 
-RustBasic menggunakan **Sea-ORM** sebagai ORM utama, yang memberikan pengalaman mirip Eloquent Laravel.
+RustBasic menggunakan **Sea-ORM** sebagai ORM utama, yang memberikan pengalaman yang sangat intuitif dan kuat.
 
 ## Mendefinisikan Model
 Model disimpan di `src/app/models/`. Buat otomatis via CLI:

@@ -1,6 +1,6 @@
 # 🚀 RustBasic (Axum SPA - Version 2026)
 
-Aplikasi web modern berbasis Rust dengan arsitektur **Laravel-inspired**. Dirancang untuk performa maksimal, keamanan tinggi, dan pengalaman pengembang yang luar biasa.
+Aplikasi web modern berbasis Rust dengan arsitektur **Clean Monolith**. Dirancang untuk performa maksimal, keamanan tinggi, dan pengalaman pengembang yang luar biasa.
 
 ---
 
@@ -35,17 +35,24 @@ cargo serve
 
 *Perintah ini secara otomatis menjalankan `cargo watch -x run -w src -w resources`.*
 
-### 3. Membuat Model & Migration
-Sama seperti Laravel, Anda dapat membuat model dan migration baru berbasis Rust (Sea-ORM) dengan mudah:
+### 3. Membuat Model, Migration & Controller
+Sama seperti framework modern lainnya, Anda dapat membuat komponen baru berbasis Rust (Sea-ORM/Axum) dengan mudah:
 ```bash
 cargo rustbasic make:model Product -m
+cargo rustbasic make:controller Product
 ```
 
 ### 4. Menjalankan Migrasi
-Migrasi sekarang bersifat manual untuk keamanan data:
+Migrasi bersifat manual untuk keamanan data:
 ```bash
-cargo rustbasic make:controller Name
 cargo rustbasic migrate
+```
+
+### 5. Fitur CLI Lainnya (Beautiful & Colorful)
+Nikmati pengalaman CLI yang indah dan berwarna:
+```bash
+cargo rustbasic route:list   # Menampilkan daftar route (Tabel)
+cargo rustbasic build        # Menu build interaktif (Native/Windows/Linux/Mac)
 ```
 
 ---

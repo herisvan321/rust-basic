@@ -1,11 +1,14 @@
 use std::env;
 use std::fs::{self, OpenOptions};
-use std::io::{Read, Write};
+use std::io::{self, Read, Write};
+use std::process::Command;
 use chrono::Local;
 use dotenvy::dotenv;
 use rustbasic::config::Config;
 use rustbasic::database::connect;
 use rustbasic::database::run_migrations;
+use regex::Regex;
+use colored::*;
 
 #[tokio::main]
 async fn main() {
@@ -22,7 +25,7 @@ async fn main() {
     match command.as_str() {
         "make:model" => {
             if args.len() < 3 {
-                println!("❌ Error: Nama model tidak ditentukan.");
+                println!("{}", "❌ Error: Nama model tidak ditentukan.".red().bold());
                 return;
             }
             let model_name = &args[2];
@@ -35,14 +38,14 @@ async fn main() {
         }
         "make:migration" => {
             if args.len() < 3 {
-                println!("❌ Error: Nama migration tidak ditentukan.");
+                println!("{}", "❌ Error: Nama migration tidak ditentukan.".red().bold());
                 return;
             }
             make_rust_migration(&args[2]);
         }
         "make:controller" => {
             if args.len() < 3 {
-                println!("❌ Error: Nama controller tidak ditentukan.");
+                println!("{}", "❌ Error: Nama controller tidak ditentukan.".red().bold());
                 return;
             }
             make_controller(&args[2]);
@@ -50,30 +53,169 @@ async fn main() {
         "migrate" => {
             run_manual_migrations().await;
         }
+        "route:list" => {
+            list_routes();
+        }
+        "build" => {
+            build_project();
+        }
         _ => {
-            println!("❌ Error: Perintah tidak dikenal: {}", command);
+            println!("{} {}", "❌ Error: Perintah tidak dikenal:".red().bold(), command.yellow());
             print_help();
         }
     }
 }
 
 fn print_help() {
-    println!("🛠️  RustBasic CLI");
-    println!("Penggunaan:");
-    println!("  cargo rustbasic make:model <Nama> [-m]   Membuat model Sea-ORM (dan migration Rust)");
-    println!("  cargo rustbasic make:migration <Nama>    Membuat file migration Rust");
-    println!("  cargo rustbasic make:controller <Nama>  Membuat controller Axum");
-    println!("  cargo rustbasic migrate                  Menjalankan migrasi database (Sea-ORM)");
+    println!("\n{}", "🛠️  RustBasic CLI".magenta().bold());
+    println!("{}", "=================".magenta());
+    println!("{}", "Penggunaan:".bold());
+    println!("  {} {} <Nama> [-m]   {}", "cargo rustbasic".blue(), "make:model".green(), "Membuat model Sea-ORM (dan migration Rust)".dimmed());
+    println!("  {} {} <Nama>    {}", "cargo rustbasic".blue(), "make:migration".green(), "Membuat file migration Rust".dimmed());
+    println!("  {} {} <Nama>  {}", "cargo rustbasic".blue(), "make:controller".green(), "Membuat controller Axum".dimmed());
+    println!("  {} {}                  {}", "cargo rustbasic".blue(), "migrate".green(), "Menjalankan migrasi database (Sea-ORM)".dimmed());
+    println!("  {} {}               {}", "cargo rustbasic".blue(), "route:list".green(), "Menampilkan daftar route".dimmed());
+    println!("  {} {}                    {}", "cargo rustbasic".blue(), "build".green(), "Membangun project dengan pilihan".dimmed());
+    println!();
+}
+
+fn build_project() {
+    println!("\n{}", "🚀 RustBasic Build Manager".magenta().bold());
+    println!("{}", "--------------------------".magenta());
+    
+    // 1. Pilih Target
+    println!("{}", "--- Pilih Target OS ---".cyan().bold());
+    println!("1) Native (Sesuai OS Anda)");
+    println!("2) Windows (x86_64-pc-windows-msvc)");
+    println!("3) Linux (x86_64-unknown-linux-gnu)");
+    println!("4) macOS ARM (aarch64-apple-darwin)");
+    println!("5) Batal");
+    print!("\n{}", "Masukkan pilihan target (1-5): ".bold());
+    io::stdout().flush().unwrap();
+
+    let mut target_choice = String::new();
+    io::stdin().read_line(&mut target_choice).ok();
+    let target_choice = target_choice.trim();
+
+    if target_choice == "5" {
+        println!("{}", "👋 Build dibatalkan.".yellow());
+        return;
+    }
+
+    let target = match target_choice {
+        "2" => Some("x86_64-pc-windows-msvc"),
+        "3" => Some("x86_64-unknown-linux-gnu"),
+        "4" => Some("aarch64-apple-darwin"),
+        _ => None, // Native
+    };
+
+    // 2. Pilih Mode
+    println!("\n{}", "--- Pilih Mode Build ---".cyan().bold());
+    println!("1) Development");
+    println!("2) Production (Release)");
+    print!("\n{}", "Masukkan pilihan mode (1-2): ".bold());
+    io::stdout().flush().unwrap();
+
+    let mut mode_choice = String::new();
+    io::stdin().read_line(&mut mode_choice).ok();
+    let is_release = mode_choice.trim() == "2";
+
+    // 3. Eksekusi Build
+    println!("\n{}", "🛠️  Menyiapkan build...".blue());
+
+    let has_zigbuild = Command::new("cargo")
+        .arg("zigbuild")
+        .arg("--version")
+        .output()
+        .is_ok();
+
+    let mut cmd = if has_zigbuild && target.is_some() {
+        println!("{}", "✨ Menggunakan cargo-zigbuild untuk kompilasi silang...".green().italic());
+        let mut c = Command::new("cargo");
+        c.arg("zigbuild");
+        c
+    } else {
+        if let Some(t) = target {
+            println!("{} {} {}", "📦 Menambahkan target".blue(), t.yellow(), "via rustup...".blue());
+            Command::new("rustup")
+                .args(["target", "add", t])
+                .status()
+                .ok();
+        }
+        let mut c = Command::new("cargo");
+        c.arg("build");
+        c
+    };
+
+    if is_release {
+        cmd.arg("--release");
+    }
+
+    if let Some(t) = target {
+        cmd.arg("--target").arg(t);
+    }
+
+    println!("{} {:?}", "🚀 Menjalankan:".blue().bold(), cmd);
+    let status = cmd.status().expect("Gagal menjalankan perintah build");
+
+    if status.success() {
+        println!("\n{}", "✅ Build berhasil!".green().bold());
+        if is_release {
+            println!("{}", "📂 Output ada di folder target/release atau target/<target>/release".dimmed());
+        }
+    } else {
+        println!("\n{}", "❌ Build gagal.".red().bold());
+        println!("{}", "💡 Penyebab: Linker untuk target tersebut tidak ditemukan di sistem Anda.".yellow());
+        
+        if target_choice == "2" {
+            println!("\n{}", "🔧 Cara memperbaiki untuk Windows:".cyan());
+            println!("   Jalankan: {}", "brew install mingw-w64".white().on_black());
+        } else if target_choice == "3" {
+            println!("\n{}", "🔧 Cara memperbaiki untuk Linux:".cyan());
+            println!("   Jalankan: {}", "brew install messense/macos-cross-toolchains/x86_64-unknown-linux-gnu".white().on_black());
+        }
+        
+        println!("\n{}", "Atau gunakan 'cargo-zigbuild' untuk kompilasi silang yang lebih mudah:".cyan());
+        println!("1. brew install zig");
+        println!("2. cargo install cargo-zigbuild");
+        println!("3. Gunakan '{}'", "cargo zigbuild --target <target>".white().on_black());
+    }
 }
 
 async fn run_manual_migrations() {
     let cfg = Config::load();
-    println!("⏳ Menjalankan migrasi Sea-ORM di {}...", cfg.db_connection);
+    println!("{} {} {}", "⏳ Menjalankan migrasi Sea-ORM di".blue(), cfg.db_connection.yellow(), "...".blue());
     
     let db = connect(&cfg).await;
     run_migrations(&db).await;
     
-    println!("✅ Migrasi selesai!");
+    println!("{}", "✅ Migrasi selesai!".green().bold());
+}
+
+fn list_routes() {
+    let routes_path = "src/routes/web.rs";
+    let content = fs::read_to_string(routes_path).expect("Gagal membaca src/routes/web.rs");
+
+    let re = Regex::new(r#"\.route\(\s*"([^"]+)"\s*,\s*([a-z]+)\(([^)]+)\)\)"#).unwrap();
+
+    println!("\n{}", "+----------------+----------------------+----------------------------------------------------------+".magenta());
+    println!("{}", "| METHOD         | PATH                 | HANDLER                                                  |".magenta().bold());
+    println!("{}", "+----------------+----------------------+----------------------------------------------------------+".magenta());
+
+    for cap in re.captures_iter(&content) {
+        let path = &cap[1];
+        let method = cap[2].to_uppercase();
+        let handler = &cap[3];
+
+        let method_color = match method.as_str() {
+            "GET" => method.green(),
+            "POST" => method.blue(),
+            _ => method.white(),
+        };
+
+        println!("| {:<14} | {:<20} | {:<56} |", method_color, path.cyan(), handler.dimmed());
+    }
+    println!("{}\n", "+----------------+----------------------+----------------------------------------------------------+".magenta());
 }
 
 fn make_controller(name: &str) {
@@ -84,7 +226,7 @@ fn make_controller(name: &str) {
     let file_path = format!("src/app/http/controllers/{}", file_name);
 
     if std::path::Path::new(&file_path).exists() {
-        println!("⚠️  Controller {} sudah ada.", file_path);
+        println!("{} {} {}", "⚠️  Controller".yellow(), file_path.cyan(), "sudah ada.".yellow());
         return;
     }
 
@@ -110,7 +252,7 @@ impl {class_name} {{
 "#, class_name = class_name, file_name = file_name, snake_name = snake_name);
 
     fs::write(&file_path, template).expect("Gagal membuat file controller");
-    println!("✅ Controller dibuat: {}", file_path);
+    println!("{} {}", "✅ Controller dibuat:".green(), file_path.cyan());
 
     update_controller_mod_rs(&file_name.replace(".rs", ""));
 }
@@ -133,7 +275,7 @@ fn update_controller_mod_rs(mod_name: &str) {
         .expect("Gagal membuka controllers/mod.rs");
 
     writeln!(file, "{}", line).ok();
-    println!("📝 controllers/mod.rs diperbarui.");
+    println!("{} {}", "📝".blue(), "controllers/mod.rs diperbarui.".dimmed());
 }
 
 fn make_model(name: &str) {
@@ -142,7 +284,7 @@ fn make_model(name: &str) {
     let file_path = format!("src/app/models/{}.rs", snake_name);
 
     if std::path::Path::new(&file_path).exists() {
-        println!("⚠️  Model {} sudah ada.", file_path);
+        println!("{} {} {}", "⚠️  Model".yellow(), file_path.cyan(), "sudah ada.".yellow());
         return;
     }
 
@@ -166,7 +308,7 @@ impl ActiveModelBehavior for ActiveModel {{}}
 "#, table_name);
 
     fs::write(&file_path, template).expect("Gagal membuat file model");
-    println!("✅ Model dibuat: {}", file_path);
+    println!("{} {}", "✅ Model dibuat:".green(), file_path.cyan());
 
     update_mod_rs(name, &snake_name);
 }
@@ -178,7 +320,7 @@ fn make_rust_migration(name: &str) {
     let file_path = format!("database/migrations/{}.rs", mod_name);
 
     if std::path::Path::new(&file_path).exists() {
-        println!("⚠️  Migration {} sudah ada.", file_path);
+        println!("{} {} {}", "⚠️  Migration".yellow(), file_path.cyan(), "sudah ada.".yellow());
         return;
     }
 
@@ -244,7 +386,7 @@ impl MigrationTrait for Migration {{
 "#, table_iden = table_iden, mod_name = mod_name);
 
     fs::write(&file_path, template).expect("Gagal membuat file migration");
-    println!("✅ Migration Rust dibuat: {}", file_path);
+    println!("{} {}", "✅ Migration Rust dibuat:".green(), file_path.cyan());
 
     update_migration_mod_rs(&mod_name);
 }
@@ -269,7 +411,7 @@ fn update_migration_mod_rs(mod_name: &str) {
     }
 
     fs::write(mod_path, content).expect("Gagal memperbarui database/migrations/mod.rs");
-    println!("📝 database/migrations/mod.rs diperbarui.");
+    println!("{} {}", "📝".blue(), "database/migrations/mod.rs diperbarui.".dimmed());
 }
 
 fn update_mod_rs(class_name: &str, snake_name: &str) {
@@ -292,7 +434,7 @@ fn update_mod_rs(class_name: &str, snake_name: &str) {
     writeln!(file, "{}", mod_line).ok();
     writeln!(file, "pub use {}::Entity as {};", snake_name, class_name).ok();
     
-    println!("📝 models/mod.rs diperbarui.");
+    println!("{} {}", "📝".blue(), "models/mod.rs diperbarui.".dimmed());
 }
 
 fn to_snake_case(s: &str) -> String {

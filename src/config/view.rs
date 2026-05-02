@@ -24,7 +24,7 @@ pub fn render(template: &str, context: minijinja::Value) -> Response {
     render_internal(template, context)
 }
 
-// 3. Fungsi Helper untuk Render dengan Session (Laravel Style)
+// 3. Fungsi Helper untuk Render dengan Session (RustBasic Style)
 pub fn view(req: &AppRequest, template: &str, ctx: minijinja::Value) -> Response {
     // Kita konversi minijinja::Value ke serde_json::Value untuk manipulasi mudah
     let mut ctx_value = serde_json::to_value(&ctx).unwrap_or_else(|_| json!({}));

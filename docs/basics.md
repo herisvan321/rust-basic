@@ -31,9 +31,15 @@ Router::new()
 Controller bertugas menangani logika request dan mengembalikan response. Disimpan di `src/app/http/controllers/`.
 
 ## Membuat Controller
-Gunakan CLI untuk membuat controller:
+Gunakan CLI yang sudah mendukung warna dan tabel:
 ```bash
 cargo rustbasic make:controller Name
+```
+
+## Melihat Daftar Route
+Gunakan perintah berikut untuk melihat seluruh URL yang terdaftar:
+```bash
+cargo rustbasic route:list
 ```
 
 ## Contoh Controller
@@ -53,7 +59,7 @@ impl WelcomeController {
 
 # Views (Template)
 
-RustBasic menggunakan engine **MiniJinja** yang sangat mirip dengan Jinja2 atau Blade Laravel. Template disimpan di `resources/views/`.
+RustBasic menggunakan engine **MiniJinja** yang sangat kuat. Template disimpan di `resources/views/`.
 
 ## Render View
 Gunakan helper `view()`:

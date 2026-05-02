@@ -1,6 +1,6 @@
 # 📘 Catatan Dokumentasi RustBasic
 
-Dokumentasi ini berisi panduan struktur folder, fitur, dan cara penggunaan framework **RustBasic** (Axum bergaya Laravel).
+Dokumentasi ini berisi panduan struktur folder, fitur, dan cara penggunaan framework **RustBasic** (Axum bergaya Monolith).
 
 ---
 
@@ -26,8 +26,8 @@ rustbasic/
 │   │   ├── session.rs    # Setup Session Store
 │   │   ├── server.rs     # Setup Router & Run Server
 │   │   ├── logger.rs     # Setup Logging & Startup Banner
-│   │   ├── requests.rs   # Request Helper (Laravel Style)
-│   │   ├── responses.rs  # Response Helper (Laravel Style)
+│   │   ├── requests.rs   # Request Helper (RustBasic Style)
+│   │   ├── responses.rs  # Response Helper (RustBasic Style)
 │   │   └── mod.rs        # Re-export seluruh konfigurasi
 │   ├── database/         # Koneksi DB & RustBasicSessionStore
 │   └── routes/           # Pengaturan rute (web.rs, mod.rs)
@@ -66,7 +66,7 @@ Desain UI telah ditingkatkan ke level premium tanpa menggunakan kartu (*cardless
 
 ---
 
-## 📥 5. Request & Response (Laravel Style)
+## 📥 5. Request & Response (RustBasic Style)
 
 Kini helper Request & Response berada di dalam folder `config` untuk akses yang lebih terpusat:
 
@@ -108,12 +108,14 @@ Aplikasi dilengkapi dengan fitur otomatis untuk mempermudah pengembangan:
 - **Port Cleaner**: Otomatis mematikan proses lama yang menyangkut di port (misal 4000) saat aplikasi baru dimulai.
 - **Tidy Terminal**: Menggunakan fitur *clear screen* dan *quiet mode* agar log tetap bersih dan fokus pada informasi penting.
 
-### Shortcut Command
-Gunakan perintah singkat (mirip Laravel) untuk alur pengembangan yang cepat:
+### Shortcut Command (Beautiful & Colorful CLI)
+Gunakan perintah singkat dengan tampilan terminal yang indah dan berwarna:
 ```bash
 cargo serve                        # Menjalankan server (Auto-Reload)
 cargo rustbasic make:model Name -m # Membuat model & migration (Sea-ORM)
-cargo rustbasic make:controller Name
+cargo rustbasic make:controller Name # Membuat controller baru
+cargo rustbasic build              # Menu build interaktif (Native/Windows/Linux/Mac)
+cargo rustbasic route:list         # Menampilkan daftar route dalam tabel
 cargo rustbasic migrate            # Menjalankan migrasi manual
 ```
 

@@ -11,12 +11,12 @@ pub async fn index(req: Request) -> impl IntoResponse {
     })
 }
 
-/// Contoh penggunaan Request & Response ala Laravel
+/// Contoh penggunaan Request & Response ala RustBasic
 pub async fn test_request(req: Request) -> impl IntoResponse {
     let name = req.input_as_str("name").unwrap_or("Tamu");
     
     ResponseHelper::json(serde_json::json!({
-        "message": format!("Halo, {}! Ini adalah data dari Request ala Laravel.", name),
+        "message": format!("Halo, {}! Ini adalah data dari Request ala RustBasic.", name),
         "method": req.method.to_string(),
         "all_inputs": req.all()
     }))

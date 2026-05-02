@@ -1,6 +1,6 @@
 # Dokumentasi RustBasic
 
-Selamat datang di panduan resmi framework RustBasic. Framework ini dirancang untuk memberikan pengalaman pengembangan "Laravel-like" di ekosistem Rust yang cepat dan aman.
+Selamat datang di panduan resmi framework RustBasic. Framework ini dirancang untuk memberikan pengalaman pengembangan yang sangat efisien di ekosistem Rust yang cepat dan aman.
 
 ## Daftar Isi
 
