@@ -44,10 +44,6 @@ impl DatabasePool for RustBasicSessionStore {
     }
 
     async fn store(&self, id: &str, session: &str, expires: i64, table_name: &str) -> Result<(), DatabaseError> {
-        // SQL x-driver UPSERT is tricky. We'll use a simpler approach or specific syntax if possible.
-        // For now, let's try to use a DELETE + INSERT or handle based on driver.
-        // Actually, sqlx-any uses $1, $2 for all drivers (it translates them).
-        
         let delete_query = format!("DELETE FROM {} WHERE id = $1", table_name);
         sqlx::query(&delete_query).bind(id).execute(&self.pool).await.ok();
 

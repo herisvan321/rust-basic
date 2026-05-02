@@ -15,6 +15,7 @@ async fn main() {
     // 3. Setup Database & Sea-ORM
     config::database::setup_database(&cfg).await;
     let db = database::connect(&cfg).await;
+    database::run_migrations(&db).await; // <-- Jalankan migrasi otomatis
     
     // 4. Inisialisasi Session Store
     database::init_sessions(&cfg).await;

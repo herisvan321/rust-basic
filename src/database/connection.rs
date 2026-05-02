@@ -1,6 +1,7 @@
 use sea_orm::{Database, DatabaseConnection, ConnectOptions};
 use crate::config::Config;
 use std::time::Duration;
+use colored::Colorize;
 
 pub async fn connect(cfg: &Config) -> DatabaseConnection {
     // 1. Susun URL Koneksi berdasarkan pilihan di .env
@@ -23,8 +24,31 @@ pub async fn connect(cfg: &Config) -> DatabaseConnection {
        .max_lifetime(Duration::from_secs(8))
        .sqlx_logging(true);
 
-    // 3. Hubungkan ke Database
-    Database::connect(opt)
-        .await
-        .expect("Gagal terhubung ke database")
+    // 3. Hubungkan ke Database dengan deteksi otomatis
+    match Database::connect(opt.clone()).await {
+        Ok(conn) => conn,
+        Err(e) => {
+            let err_msg = e.to_string();
+            // Jika error 1049 (Unknown Database) dan ini MySQL
+            if (err_msg.contains("1049") || err_msg.contains("Unknown database")) && cfg.db_connection == "mysql" {
+                println!("{}", "⚠️  Database tidak ditemukan. Mencoba membuat database baru...".yellow());
+                
+                // Koneksi sementara ke server tanpa memilih database
+                let root_url = format!(
+                    "mysql://{}:{}@{}:{}",
+                    cfg.db_username, cfg.db_password, cfg.db_host, cfg.db_port
+                );
+                
+                if let Ok(pool) = sqlx::MySqlPool::connect(&root_url).await {
+                    let create_query = format!("CREATE DATABASE IF NOT EXISTS `{}`", cfg.db_database);
+                    if let Ok(_) = sqlx::query(&create_query).execute(&pool).await {
+                        println!("✅ Database '{}' berhasil dibuat.", cfg.db_database.green());
+                        // Coba hubungkan kembali setelah database dibuat
+                        return Database::connect(opt).await.expect("Gagal terhubung setelah membuat database");
+                    }
+                }
+            }
+            panic!("Gagal terhubung ke database: {:?}", e);
+        }
+    }
 }

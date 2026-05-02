@@ -38,7 +38,23 @@ pub async fn setup_session(cfg: &Config) -> SessionStore<database::session_manag
 
     // 5. Connect and Create Store
     sqlx::any::install_default_drivers();
-    let session_pool = AnyPool::connect(&session_db_url).await.expect("Gagal terhubung ke database session");
+    let session_pool = match AnyPool::connect(&session_db_url).await {
+        Ok(pool) => pool,
+        Err(e) => {
+            let err_msg = e.to_string();
+            if (err_msg.contains("1049") || err_msg.contains("Unknown database")) && cfg.db_connection == "mysql" {
+                let root_url = format!("mysql://{}:{}@{}:{}", cfg.db_username, cfg.db_password, cfg.db_host, cfg.db_port);
+                if let Ok(root_pool) = sqlx::MySqlPool::connect(&root_url).await {
+                    let _ = sqlx::query(&format!("CREATE DATABASE IF NOT EXISTS `{}`", cfg.db_database)).execute(&root_pool).await;
+                    AnyPool::connect(&session_db_url).await.expect("Gagal terhubung setelah membuat DB session")
+                } else {
+                    panic!("Gagal membuat database session otomatis: {:?}", e);
+                }
+            } else {
+                panic!("Gagal terhubung ke database session: {:?}", e);
+            }
+        }
+    };
     
     SessionStore::<database::session_manager::RustBasicSessionStore>::new(
         Some(database::session_manager::RustBasicSessionStore::new(session_pool)), 

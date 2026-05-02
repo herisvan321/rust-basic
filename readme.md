@@ -5,8 +5,9 @@ Aplikasi web modern berbasis Rust dengan arsitektur **Clean Monolith**. Dirancan
 ---
 
 ## 💎 Fitur Unggulan
+
 - **⚡ Performa Axum**: Backend super cepat dengan framework Axum 0.8 dan Tokio.
-- **🎨 Premium Splitscreen UI**: Desain layar terbagi yang modern dan mewah tanpa kartu (*cardless*).
+- **🎨 Premium Splitscreen UI**: Desain layar terbagi yang modern dan mewah tanpa kartu (_cardless_).
 - **📊 Premium Dashboard**: Panel kendali modern dengan statistik real-time dan navigasi sisi kiri yang elegan.
 - **🐞 Smart Error Reporting**: Halaman debug detail saat pengembangan (Stack Trace, Template Info) dan halaman minimalis saat produksi.
 - **🗄️ Multi-Database Support**: Dukungan native untuk **SQLite** dan **MySQL** melalui SQLx & Sea-ORM.
@@ -22,34 +23,44 @@ Aplikasi web modern berbasis Rust dengan arsitektur **Clean Monolith**. Dirancan
 Untuk mempermudah pengembangan, Anda dapat menggunakan fitur **Auto-Reload** (aplikasi otomatis restart saat ada perubahan file) dan **Port Cleaner** (otomatis mematikan proses lama yang menyangkut di port).
 
 ### 1. Instalasi Tool (Sekali saja)
+
 Pastikan Anda memiliki `cargo-watch` terinstal di sistem Anda:
+
 ```bash
 cargo install cargo-watch
 ```
 
 ### 2. Menjalankan Aplikasi dengan Auto-Reload
+
 Kini Anda bisa menggunakan perintah singkat berikut (mirip `php rustbasic serve`):
+
 ```bash
 cargo serve
 ```
 
-*Perintah ini secara otomatis menjalankan `cargo watch -x run -w src -w resources`.*
+_Perintah ini secara otomatis menjalankan `cargo watch -x run -w src -w resources`._
 
 ### 3. Membuat Model, Migration & Controller
+
 Sama seperti framework modern lainnya, Anda dapat membuat komponen baru berbasis Rust (Sea-ORM/Axum) dengan mudah:
+
 ```bash
 cargo rustbasic make:model Product -m
 cargo rustbasic make:controller Product
 ```
 
 ### 4. Menjalankan Migrasi
+
 Migrasi bersifat manual untuk keamanan data:
+
 ```bash
 cargo rustbasic migrate
 ```
 
 ### 5. Fitur CLI Lainnya (Beautiful & Colorful)
+
 Nikmati pengalaman CLI yang indah dan berwarna:
+
 ```bash
 cargo rustbasic route:list   # Menampilkan daftar route (Tabel)
 cargo rustbasic build        # Menu build interaktif (Native/Windows/Linux/Mac)
@@ -60,6 +71,7 @@ cargo rustbasic build        # Menu build interaktif (Native/Windows/Linux/Mac)
 ## 🛠️ Tech Stack
 
 ## 📂 Struktur Proyek Terbaru
+
 ```text
 rustbasic/
 ├── database/             # Lokasi database SQLite & SQL migrasi
@@ -80,18 +92,23 @@ rustbasic/
 ## 🚀 Cara Menjalankan
 
 ### 1. Persiapan Lingkungan
+
 Salin file `.env.example` ke `.env` dan sesuaikan pengaturan Anda:
+
 ```bash
 cp .env.example .env
 ```
 
 ### 2. Jalankan Aplikasi (Mode Pengembangan)
+
 Gunakan perintah singkat berikut untuk fitur Auto-Reload dan Manual Migration dan Port Cleaner:
+
 ```bash
 cargo serve
 ```
 
 Atau perintah standar Rust:
+
 ```bash
 cargo run
 ```
@@ -102,9 +119,11 @@ Akses aplikasi di:
 ---
 
 ## 📝 Tips Pengembangan
+
 - **Tidy Terminal**: Log query database telah difilter agar terminal tetap bersih dan fokus pada log aplikasi.
 - **Debug Mode**: Aktifkan `APP_DEBUG=true` di `.env` untuk mendapatkan visualisasi error yang mendetail selama pengembangan.
 - **Splitscreen UI**: Gunakan utility class di `style.css` untuk membangun halaman baru dengan tema splitscreen yang konsisten.
 
 ---
-*Dibuat dengan ❤️ untuk ekosistem Rust. Arsitektur Bersih, Desain Premium, Kecepatan Cahaya.*
+
+_Dibuat dengan ❤️ untuk ekosistem Rust. Arsitektur Bersih, Desain Premium, Kecepatan Cahaya._

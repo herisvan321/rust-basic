@@ -1,4 +1,5 @@
 use crate::config::Config;
+use sqlx::AnyPool;
 
 pub async fn init_sessions(cfg: &Config) {
     let db_url = if cfg.session_driver == "file" {
@@ -13,8 +14,25 @@ pub async fn init_sessions(cfg: &Config) {
     };
 
     sqlx::any::install_default_drivers();
-    let _pool = sqlx::AnyPool::connect(&db_url).await.expect("Gagal terhubung ke database session");
+    let pool = AnyPool::connect(&db_url).await.expect("Gagal terhubung ke database session");
 
-    // Jalankan migrasi secara manual: cargo rustbasic migrate
-    // migrations::run_migrations_any(&pool).await;
+    // 2. Auto-Create Table Sessions jika belum ada
+    let create_table_query = if db_url.contains("mysql") {
+        "CREATE TABLE IF NOT EXISTS sessions (
+            id VARCHAR(255) PRIMARY KEY,
+            payload LONGTEXT NOT NULL,
+            last_activity BIGINT NOT NULL
+        )"
+    } else {
+        "CREATE TABLE IF NOT EXISTS sessions (
+            id TEXT PRIMARY KEY,
+            payload TEXT NOT NULL,
+            last_activity INTEGER NOT NULL
+        )"
+    };
+
+    sqlx::query(create_table_query)
+        .execute(&pool)
+        .await
+        .expect("Gagal membuat tabel session otomatis");
 }

@@ -11,7 +11,7 @@ use axum::{
 };
 use axum_session::Session;
 use crate::database::session_manager::RustBasicSessionStore;
-use rand::{distributions::Alphanumeric, Rng};
+use rand::{distr::Alphanumeric, Rng};
 
 pub async fn csrf_middleware(
     session: Session<RustBasicSessionStore>,
@@ -22,7 +22,7 @@ pub async fn csrf_middleware(
     let token = match session.get::<String>("_token") {
         Some(t) => t,
         None => {
-            let new_token: String = rand::thread_rng()
+            let new_token: String = rand::rng()
                 .sample_iter(&Alphanumeric)
                 .take(40)
                 .map(char::from)

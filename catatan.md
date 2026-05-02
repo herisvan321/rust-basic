@@ -39,6 +39,7 @@ rustbasic/
 ## ⚙️ 2. Konfigurasi (.env)
 
 Gunakann file `.env` untuk mengatur perilaku aplikasi:
+
 - `APP_NAME`: Nama aplikasi Anda.
 - `APP_KEY`: Kunci enkripsi (wajib diawali `base64:`).
 - `DB_CONNECTION`: `sqlite` atau `mysql`.
@@ -50,16 +51,19 @@ Gunakann file `.env` untuk mengatur perilaku aplikasi:
 ## 🗄️ 3. Database Multi-Driver & Session
 
 ### Multi-Database Support
+
 Aplikasi kini mendukung **SQLite** dan **MySQL** secara native melalui `sqlx::AnyPool`. Konfigurasi otomatis berubah hanya dengan mengganti variabel di `.env`.
 
 ### RustBasicSessionStore
+
 Session manager khusus yang menyimpan data secara terenkripsi di database. Nama modul telah diperbarui menjadi `RustBasicSessionStore` untuk mencerminkan identitas framework.
 
 ---
 
 ## 🎨 4. Frontend & UI (Premium Splitscreen)
 
-Desain UI telah ditingkatkan ke level premium tanpa menggunakan kartu (*cardless*):
+Desain UI telah ditingkatkan ke level premium tanpa menggunakan kartu (_cardless_):
+
 - **Splitscreen Layout**: Tampilan layar terbagi yang modern untuk halaman login, daftar, dan dashboard.
 - **Visual Excellence**: Menggunakan gradasi jernih, tipografi modern (Inter), dan mikro-animasi.
 - **SPA Experience**: Navigasi instan tanpa reload halaman menggunakan **HTMX** dan **Alpine.js**.
@@ -71,6 +75,7 @@ Desain UI telah ditingkatkan ke level premium tanpa menggunakan kartu (*cardless
 Kini helper Request & Response berada di dalam folder `config` untuk akses yang lebih terpusat:
 
 ### Menggunakan Request
+
 ```rust
 pub async fn controller(req: Request) -> impl IntoResponse {
     let name = req.input_as_str("name").unwrap_or("Tamu");
@@ -79,6 +84,7 @@ pub async fn controller(req: Request) -> impl IntoResponse {
 ```
 
 ### Menggunakan Response
+
 ```rust
 ResponseHelper::json(data);
 ResponseHelper::view(html);
@@ -90,10 +96,12 @@ ResponseHelper::redirect_with_success("/home", "Berhasil!", req.session);
 ## 🛡️ 6. Keamanan & Performa Terminal
 
 ### Keamanan Terintegrasi
+
 - **CSRF Protection**: Otomatis memvalidasi token pada request mutasi.
 - **CSP & Security Headers**: Terkonfigurasi untuk memblokir script inline berbahaya dan clickjacking.
 
 ### Terminal Output (Tidy Logs)
+
 Terminal telah dibersihkan dari log query SQL yang berulang-ulang. Hanya log penting (Error, Warn, App Debug) yang ditampilkan. Dilengkapi dengan **Startup Banner** ASCII saat aplikasi dijalankan.
 
 ---
@@ -103,13 +111,17 @@ Terminal telah dibersihkan dari log query SQL yang berulang-ulang. Hanya log pen
 ## 🚀 7. Alat Pengembangan (Dev Tools)
 
 ### Auto-Reload & Port Cleaning
+
 Aplikasi dilengkapi dengan fitur otomatis untuk mempermudah pengembangan:
+
 - **Auto-Reload**: Mendeteksi perubahan file (`.rs`, `.html`, `.css`) dan melakukan restart otomatis.
 - **Port Cleaner**: Otomatis mematikan proses lama yang menyangkut di port (misal 4000) saat aplikasi baru dimulai.
-- **Tidy Terminal**: Menggunakan fitur *clear screen* dan *quiet mode* agar log tetap bersih dan fokus pada informasi penting.
+- **Tidy Terminal**: Menggunakan fitur _clear screen_ dan _quiet mode_ agar log tetap bersih dan fokus pada informasi penting.
 
 ### Shortcut Command (Beautiful & Colorful CLI)
+
 Gunakan perintah singkat dengan tampilan terminal yang indah dan berwarna:
+
 ```bash
 cargo serve                        # Menjalankan server (Auto-Reload)
 cargo rustbasic make:model Name -m # Membuat model & migration (Sea-ORM)
@@ -121,4 +133,4 @@ cargo rustbasic migrate            # Menjalankan migrasi manual
 
 ---
 
-*Dokumentasi ini diperbarui Mei 2026 mencerminkan arsitektur Modular, Dukungan MySQL, Desain Premium Splitscreen, Fitur Auto-Reload, dan Sea-ORM Migration.*
+_Dokumentasi ini diperbarui Mei 2026 mencerminkan arsitektur Modular, Dukungan MySQL, Desain Premium Splitscreen, Fitur Auto-Reload, dan Sea-ORM Migration._
