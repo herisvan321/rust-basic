@@ -56,6 +56,18 @@ Gunakan untuk indikator status sistem.
 
 ---
 
+## 📅 Filter Waktu & Tanggal (Carbon-like)
+Anda dapat memanipulasi tampilan waktu langsung di template menggunakan filter berikut:
+
+1. **`diff_for_humans`**: Mengubah tanggal menjadi teks relatif.
+   - Contoh: `{{ user.created_at | diff_for_humans }}` -> *"2 hours ago"*
+2. **`format_date`**: Memformat tanggal sesuai pola (Otomatis konversi ke `APP_TIMEZONE`).
+   - Contoh: `{{ now() | format_date("%d %B %Y") }}` -> *"02 May 2026"*
+3. **`now()`**: Fungsi global untuk mendapatkan waktu saat ini.
+   - Contoh: `{{ now() }}`
+
+---
+
 ## ⚡ Filosofi Zero-JS
 Semua komponen dirancang agar browser tidak perlu memuat file `.js` tambahan (selain library HTMX). Interaksi seperti menutup Alert atau membuka Modal dilakukan menggunakan:
 1. **Teknik CSS Checkbox Hack** (untuk Modal/Popups).

@@ -8,14 +8,52 @@ use axum::{
     response::{Html, IntoResponse, Response},
 };
 use minijinja::{Environment, path_loader, context};
+use chrono::DateTime;
+use chrono_humanize::HumanTime;
+use chrono_tz::Tz;
 use std::sync::LazyLock;
 use crate::config::requests::Request as AppRequest;
+use crate::config::Config;
 use serde_json::{json, Value};
 
 // 1. Setup Engine Template (Minijinja)
 pub static JINJA: LazyLock<Environment<'static>> = LazyLock::new(|| {
     let mut env = Environment::new();
     env.set_loader(path_loader("resources/views"));
+
+    // --- REGISTER CARBON-LIKE FILTERS ---
+
+    // Filter: {{ date | diff_for_humans }}
+    env.add_filter("diff_for_humans", |value: String| -> String {
+        if let Ok(dt) = DateTime::parse_from_rfc3339(&value) {
+             let ht = HumanTime::from(dt);
+             return ht.to_string();
+        }
+        value
+    });
+
+    // Filter: {{ date | format_date("%d %b %Y") }}
+    env.add_filter("format_date", |value: String, fmt: String| -> String {
+        let cfg = Config::load();
+        // Trim spasi untuk mencegah gagal parsing
+        let tz_str = cfg.app_timezone.trim();
+        let tz: Tz = tz_str.parse().unwrap_or(chrono_tz::UTC);
+        
+        if let Ok(dt) = DateTime::parse_from_rfc3339(&value) {
+             return dt.with_timezone(&tz).format(&fmt).to_string();
+        }
+        value
+    });
+
+    // Global Function: {{ now() }}
+    env.add_function("now", || -> String {
+        let cfg = Config::load();
+        let tz_str = cfg.app_timezone.trim();
+        let tz: Tz = tz_str.parse().unwrap_or(chrono_tz::UTC);
+        
+        chrono::Utc::now().with_timezone(&tz).to_rfc3339()
+    });
+
     env
 });
 

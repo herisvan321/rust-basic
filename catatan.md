@@ -55,10 +55,11 @@ RustBasic meninggalkan library JavaScript berat (seperti Alpine.js) dan beralih 
 
 ---
 
-## 🗄️ 4. Database & Session Store
+## 🗄️ 4. Database & Time Management
 
 - **Multi-Database**: Mendukung SQLite dan MySQL via `sqlx::AnyPool`.
 - **RustBasicSessionStore**: Menyimpan IP Address untuk setiap sesi guna keamanan ekstra.
+- **Timezone Aware**: Semua fungsi waktu merujuk pada `APP_TIMEZONE` di `.env`. Menggunakan `chrono-tz` untuk konversi zona waktu yang akurat (WIB, UTC, dll).
 
 ---
 

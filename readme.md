@@ -9,6 +9,7 @@ Aplikasi web modern berbasis Rust dengan arsitektur **Clean Monolith**. Dirancan
 - **⚡ Performa Axum**: Backend super cepat dengan framework Axum 0.8 dan Tokio.
 - **🎨 Zero-JS UI Architecture**: Pengalaman Single Page Application (SPA) yang sangat ringan menggunakan **HTMX** dan **Pure CSS**. Tidak ada library JavaScript berat (Hapus Alpine.js & Vanilla JS).
 - **🧩 Modular Minijinja Macros**: UI yang dibangun dengan komponen reusable yang terbagi secara logis (`forms`, `buttons`, `display`, `overlays`, `feedback`).
+- **📅 Carbon-like Time Management**: Penanganan waktu yang mudah dan kuat menggunakan `chrono` & `chrono-humanize`. Mendukung `.diff_for_humans()` dan zona waktu dinamis via `.env`.
 - **🔐 Hardened Security**: 
     - **Session-IP Binding**: Sesi dikunci berdasarkan IP Address untuk mencegah hijacking.
     - **Strict Env Enforcement**: Aplikasi tidak akan berjalan tanpa file `.env` yang valid.

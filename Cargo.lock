@@ -333,6 +333,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "chrono-humanize"
+version = "0.2.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "799627e6b4d27827a814e837b9d8a504832086081806d45b1afa34dc982b023b"
+dependencies = [
+ "chrono",
+]
+
+[[package]]
 name = "chrono-tz"
 version = "0.10.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2073,6 +2082,7 @@ dependencies = [
  "base64",
  "bcrypt",
  "chrono",
+ "chrono-humanize",
  "chrono-tz",
  "colored",
  "dashmap",
