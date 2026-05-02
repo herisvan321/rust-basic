@@ -106,32 +106,32 @@ fn check_security() {
     // 1. Cek CSRF
     println!("\n{}", "1. Proteksi CSRF:".bold());
     if fs::read_to_string("src/app/http/middleware/csrf.rs").is_ok() {
-        println!("   {} {}", "✅ Aktif:".green(), "Middleware CSRF terdeteksi.");
+        println!("   {} Middleware CSRF terdeteksi.", "✅ Aktif:".green());
     } else {
-        println!("   {} {}", "❌ Peringatan:".red(), "Middleware CSRF tidak ditemukan.");
+        println!("   {} Middleware CSRF tidak ditemukan.", "❌ Peringatan:".red());
     }
 
     // 2. Cek Password Hashing
     println!("\n{}", "2. Keamanan Password:".bold());
     let cargo_toml = fs::read_to_string("Cargo.toml").unwrap_or_default();
     if cargo_toml.contains("bcrypt") {
-        println!("   {} {}", "✅ Aman:".green(), "Menggunakan library bcrypt untuk hashing.");
+        println!("   {} Menggunakan library bcrypt untuk hashing.", "✅ Aman:".green());
     } else {
-        println!("   {} {}", "⚠️  Saran:".yellow(), "Gunakan bcrypt atau argon2 untuk hashing password.");
+        println!("   {} Gunakan bcrypt atau argon2 untuk hashing password.", "⚠️  Saran:".yellow());
     }
 
     // 3. Cek SQL Injection
     println!("\n{}", "3. Proteksi SQL Injection:".bold());
     if cargo_toml.contains("sea-orm") || cargo_toml.contains("sqlx") {
-        println!("   {} {}", "✅ Aman:".green(), "Menggunakan Query Builder/Prepared Statements.");
+        println!("   {} Menggunakan Query Builder/Prepared Statements.", "✅ Aman:".green());
     } else {
-        println!("   {} {}", "⚠️  Saran:".yellow(), "Pastikan tidak menggunakan string formatting untuk query SQL.");
+        println!("   {} Pastikan tidak menggunakan string formatting untuk query SQL.", "⚠️  Saran:".yellow());
     }
 
     // 4. Cek XSS Protection (Template Engine)
     println!("\n{}", "4. Proteksi XSS:".bold());
     if cargo_toml.contains("minijinja") {
-        println!("   {} {}", "✅ Aman:".green(), "MiniJinja melakukan auto-escaping secara default.");
+        println!("   {} MiniJinja melakukan auto-escaping secara default.", "✅ Aman:".green());
     }
 
     // 5. Audit Dependency (External Tool)
@@ -150,32 +150,32 @@ fn check_security() {
             .expect("Gagal menjalankan cargo audit");
         
         if audit_output.status.success() {
-            println!("   {} {}", "✅ Bersih:".green(), "Tidak ada kerentanan yang ditemukan pada dependency.");
+            println!("   {} Tidak ada kerentanan yang ditemukan pada dependency.", "✅ Bersih:".green());
         } else {
             let out = String::from_utf8_lossy(&audit_output.stdout);
             let err = String::from_utf8_lossy(&audit_output.stderr);
 
             // Cek jika hanya kerentanan RSA/Rand yang diketahui
             if out.contains("RUSTSEC-2023-0071") || out.contains("RUSTSEC-2026-0097") {
-                println!("   {} {}", "⚠️  Peringatan Keamanan Terdeteksi:".yellow(), "Ditemukan isu pada library pihak ketiga.");
+                println!("   {} Ditemukan isu pada library pihak ketiga.", "⚠️  Peringatan Keamanan Terdeteksi:".yellow());
                 println!("\n{}", "--- Detail Analisis ---".bold());
                 
                 if out.contains("RUSTSEC-2023-0071") {
-                    println!("{} {}", "• RSA (Marvin Attack):".cyan(), "Isu pada driver MySQL (sqlx). Belum ada perbaikan resmi dari pembuat library untuk versi ini.");
+                    println!("{} Isu pada driver MySQL (sqlx). Belum ada perbaikan resmi dari pembuat library untuk versi ini.", "• RSA (Marvin Attack):".cyan());
                 }
                 if out.contains("RUSTSEC-2026-0097") {
-                    println!("{} {}", "• Rand (Unsoundness):".cyan(), "Isu pada library session. Tidak berbahaya karena kita tidak menggunakan custom logger.");
+                    println!("{} Isu pada library session. Tidak berbahaya karena kita tidak menggunakan custom logger.", "• Rand (Unsoundness):".cyan());
                 }
                 
                 println!("\n{}", "💡 Kesimpulan: Aplikasi Anda aman untuk dijalankan. Isu di atas adalah keterbatasan library eksternal saat ini.".green());
             } else {
-                println!("   {} {}", "❌ Bahaya:".red(), "Ditemukan kerentanan kritis baru!");
+                println!("   {} Ditemukan kerentanan kritis baru!", "❌ Bahaya:".red());
                 if !out.is_empty() { println!("{}", out.dimmed()); }
                 if !err.is_empty() { println!("{}", err.red().dimmed()); }
             }
         }
     } else {
-        println!("   {} {}", "💡 Info:".cyan(), "Instal 'cargo-audit' untuk audit otomatis (cargo install cargo-audit).");
+        println!("   {} Instal 'cargo-audit' untuk audit otomatis (cargo install cargo-audit).", "💡 Info:".cyan());
     }
 
     println!("\n{}", "Kesimpulan:".bold());
@@ -201,9 +201,9 @@ async fn clear_cache() {
                 count += 1;
             }
         }
-        println!("   {} {} ({} file dibersihkan)", "✅ Logs:".green(), "Folder storage/logs telah dikosongkan.", count);
+        println!("   {} Folder storage/logs telah dikosongkan. ({} file dibersihkan)", "✅ Logs:".green(), count);
     } else {
-        println!("   {} {}", "⚠️  Logs:".yellow(), "Folder storage/logs tidak ditemukan.");
+        println!("   {} Folder storage/logs tidak ditemukan.", "⚠️  Logs:".yellow());
     }
 
     // 2. Clear Sessions in DB
@@ -219,8 +219,8 @@ async fn clear_cache() {
 
     use sea_orm::ConnectionTrait;
     match db.execute(sea_orm::Statement::from_string(cfg.db_backend(), truncate_sql.to_string())).await {
-        Ok(_) => println!("   {} {}", "✅ Sessions:".green(), "Tabel sessions telah dikosongkan."),
-        Err(e) => println!("   {} {} ({})", "❌ Error:".red(), "Gagal membersihkan tabel sessions.", e),
+        Ok(_) => println!("   {} Tabel sessions telah dikosongkan.", "✅ Sessions:".green()),
+        Err(e) => println!("   {} Gagal membersihkan tabel sessions. ({})", "❌ Error:".red(), e),
     }
 
     println!("\n{}", "✨ Cache berhasil dibersihkan!".green().bold());

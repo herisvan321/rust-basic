@@ -31,18 +31,18 @@ impl Request {
         &self.inputs
     }
 
-    pub fn validate<T: Validate + serde::de::DeserializeOwned>(&self) -> Result<T, (axum::http::StatusCode, Response)> {
+    pub fn validate<T: Validate + serde::de::DeserializeOwned>(&self) -> Result<T, Box<(axum::http::StatusCode, Response)>> {
         let data: T = serde_json::from_value(self.inputs.clone()).map_err(|e| {
-            (axum::http::StatusCode::UNPROCESSABLE_ENTITY, 
-             axum::response::Json(json!({ "error": "Invalid format", "detail": e.to_string() })).into_response())
+            Box::new((axum::http::StatusCode::UNPROCESSABLE_ENTITY, 
+             axum::response::Json(json!({ "error": "Invalid format", "detail": e.to_string() })).into_response()))
         })?;
 
         data.validate().map_err(|e| {
             // Simpan input lama ke session untuk repopulasi form (Flash Input)
             self.session.set("old", self.inputs.clone());
             
-            (axum::http::StatusCode::UNPROCESSABLE_ENTITY, 
-             axum::response::Json(json!({ "errors": e })).into_response())
+            Box::new((axum::http::StatusCode::UNPROCESSABLE_ENTITY, 
+             axum::response::Json(json!({ "errors": e })).into_response()))
         })?;
 
         Ok(data)
@@ -69,13 +69,12 @@ where
 
         // 2. Ambil Form Data (POST)
         let parts_copy = parts.clone();
-        if method == Method::POST {
-            if let Ok(Form(form_data)) = Form::<HashMap<String, String>>::from_request(axum::http::Request::from_parts(parts_copy, body), state).await {
+        if method == Method::POST
+            && let Ok(Form(form_data)) = Form::<HashMap<String, String>>::from_request(axum::http::Request::from_parts(parts_copy, body), state).await {
                 for (k, v) in form_data {
                     inputs[k] = json!(v);
                 }
             }
-        }
         
         // Ambil Session dari extensions
         let session = parts.extensions

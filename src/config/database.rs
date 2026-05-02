@@ -77,7 +77,7 @@ pub async fn connect(cfg: &Config) -> DatabaseConnection {
                 
                 if let Ok(pool) = sqlx::MySqlPool::connect(&root_url).await {
                     let create_query = format!("CREATE DATABASE IF NOT EXISTS `{}`", cfg.db_database);
-                    if let Ok(_) = sqlx::query(&create_query).execute(&pool).await {
+                    if sqlx::query(&create_query).execute(&pool).await.is_ok() {
                         println!("✅ Database '{}' berhasil dibuat.", cfg.db_database.green());
                         // Coba hubungkan kembali setelah database dibuat
                         return Database::connect(opt).await.expect("Gagal terhubung setelah membuat database");
