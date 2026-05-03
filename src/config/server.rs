@@ -13,6 +13,7 @@ use sea_orm::DatabaseConnection;
 use std::sync::Arc;
 use std::process::Command;
 use std::time::Duration;
+use tower_livereload::LiveReloadLayer;
 
 #[derive(Clone)]
 #[allow(dead_code)]
@@ -65,6 +66,14 @@ pub async fn start_server(
         .layer(SessionLayer::new(session_store))
         .fallback(app::http::controllers::error_controller::ErrorController::not_found)
         .with_state(state);
+
+    // 2.5 Live Reload (Hanya aktif jika APP_DEBUG=true)
+    let app = if cfg.app_debug {
+        tracing::info!("🔄 Fitur Live Reload (Auto-refresh) diaktifkan.");
+        app.layer(LiveReloadLayer::new())
+    } else {
+        app
+    };
 
     // 3. Tentukan Alamat
     let addr_str = format!("{}:{}", cfg.app_host, cfg.app_port);

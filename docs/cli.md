@@ -11,6 +11,19 @@ cargo rustbasic <perintah> [argumen]
 
 ---
 
+## ⚡ Pengembangan (Shortcuts)
+
+Untuk mempermudah alur kerja harian, gunakan alias berikut:
+
+### `cargo serve`
+Menjalankan server dalam mode pengembangan:
+- **Auto-Watch**: Memantau perubahan pada `src/`, `resources/` (template), dan file `.env`.
+- **Live Reload**: Otomatis merestart server dan me-refresh browser (via `tower-livereload`).
+- **Opsi**: Menggunakan `-c` (clear screen) agar log tetap bersih.
+- **Contoh**: `cargo serve`
+
+---
+
 ## 📂 1. Generator Komponen (Scaffolding)
 
 ### `make:model`

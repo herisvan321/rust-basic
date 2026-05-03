@@ -76,3 +76,15 @@ Semua komponen dirancang agar browser tidak perlu memuat file `.js` tambahan (se
 
 ## 🔗 HTMX Integration
 Pastikan elemen form atau tombol menggunakan `hx-indicator="#indicator"` agar overlay loading muncul secara otomatis saat data dikirim ke server.
+
+---
+
+## 🔄 Hot Reload & Pengembangan
+Untuk mempercepat proses desain, gunakan fitur **Auto-Refresh Browser**:
+
+1. Pastikan `APP_DEBUG=true` di file `.env`.
+2. Jalankan server dengan perintah:
+   ```bash
+   cargo serve
+   ```
+3. Setiap kali Anda menyimpan file di `resources/views/`, server akan restart dan browser akan otomatis melakukan refresh. Ini sangat berguna saat menyesuaikan layout CSS atau macro Minijinja.

@@ -19,6 +19,7 @@ Aplikasi web modern berbasis Rust dengan arsitektur **Clean Monolith**. Dirancan
 - **🚀 Premium Splitscreen UI**: Desain layar terbagi yang modern dan mewah tanpa kartu (_cardless_).
 - **📊 Premium Dashboard**: Panel kendali modern dengan statistik real-time dan navigasi sisi kiri yang elegan.
 - **📦 Hidden Assets & Binary Embedding**: File CSS dan JS (HTMX) disembunyikan dari folder publik dan ditanam langsung ke dalam binary aplikasi menggunakan `include_str!` untuk performa maksimal dan keamanan ekstra.
+- **🔄 Live Reload**: Browser otomatis refresh saat Anda mengubah file `.rs` atau `.html` (hanya aktif saat `APP_DEBUG=true`).
 
 ---
 
@@ -34,7 +35,7 @@ Pastikan Anda memiliki `cargo-watch` terinstal di sistem Anda:
 cargo install cargo-watch
 ```
 
-### 2. Menjalankan Aplikasi dengan Auto-Reload
+### 2. Menjalankan Aplikasi dengan Auto-Reload & Live Refresh
 
 Kini Anda bisa menggunakan perintah singkat berikut (mirip `php rustbasic serve`):
 
@@ -42,7 +43,12 @@ Kini Anda bisa menggunakan perintah singkat berikut (mirip `php rustbasic serve`
 cargo serve
 ```
 
-_Perintah ini secara otomatis menjalankan `cargo watch` yang juga memantau perubahan pada file `.env`._
+_Perintah ini secara otomatis menjalankan `cargo watch` yang memantau file kode (`src`), template (`resources`), dan file `.env`. Berkat `tower-livereload`, browser Anda juga akan refresh otomatis._
+
+Untuk kontrol manual yang lebih detail, gunakan:
+```bash
+cargo watch -w src -w resources -x run
+```
 
 ---
 

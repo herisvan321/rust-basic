@@ -38,6 +38,7 @@ Aplikasi menerapkan standar keamanan produksi:
     - File: Log bersih (tanpa kode warna ANSI) di `storage/logs/` untuk audit.
 - **Cache:Clear**: Perintah `cargo rustbasic cache:clear` sekarang memotong (truncate) file log tanpa menghapusnya, menjaga kompatibilitas dengan server yang sedang berjalan.
 - **Hidden Assets & Binary Embedding**: Library HTMX dan File CSS utama kini tidak lagi berada di folder `public`. Keduanya dipindahkan ke `resources/` dan ditanam ke dalam file eksekusi (binary) aplikasi. Hal ini mencegah akses langsung ke source code asset dan mempercepat loading karena tidak ada I/O disk saat request asset tersebut.
+- **Browser Live Reload**: Menggunakan `tower-livereload` yang hanya aktif jika `APP_DEBUG=true`. Fitur ini memungkinkan browser melakukan refresh otomatis setiap kali server melakukan restart atau ada perubahan pada file template/aset.
 
 ---
 
@@ -67,7 +68,8 @@ RustBasic meninggalkan library JavaScript berat (seperti Alpine.js) dan beralih 
 ## 🚀 5. Perintah Pengembangan (CLI)
 
 ```bash
-cargo serve                        # Menjalankan server (Auto-Reload + Watch .env)
+cargo serve                        # Menjalankan server (Auto-Reload + Live Browser Refresh)
+cargo watch -w src -w resources -x run # Manual Watch (Rust + Templates)
 cargo rustbasic key:generate      # Membuat APP_KEY baru di file .env
 cargo rustbasic cache:clear       # Truncate logs & clear sessions
 cargo rustbasic route:list         # Menampilkan daftar route dalam tabel
