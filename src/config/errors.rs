@@ -1,9 +1,9 @@
 /* ---------------------------------------------------------
- * 📑 LABEL: ERROR CONTROLLER (error_controller.rs)
+ * 📑 LABEL: ERRORS (config/errors.rs)
  * Menangani berbagai kode error HTTP dengan tampilan premium.
  * --------------------------------------------------------- */
 
-use crate::app::render;
+use crate::config::view::render;
 use axum::{
     http::StatusCode,
     response::IntoResponse,

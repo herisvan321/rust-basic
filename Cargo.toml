@@ -16,7 +16,7 @@ default-run = "rustbasic" #ganti ini jika ingin merubah nama file utama
 
 [[bin]]
 name = "cli"
-path = "src/config/cli.rs"
+path = "src/config/cli/mod.rs"
 
 [dependencies]
 # 1. Framework Web & Server

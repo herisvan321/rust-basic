@@ -5,7 +5,7 @@ use axum_session::{SessionLayer, SessionStore};
 use crate::{routes, app};
 use crate::config::Config;
 use crate::config::session_manager::RustBasicSessionStore;
-use crate::app::http::controllers::error_controller::ErrorController;
+use crate::config::errors::ErrorController;
 use tower_governor::GovernorError;
 use axum::response::IntoResponse;
 use std::net::SocketAddr;
@@ -64,7 +64,7 @@ pub async fn start_server(
         .layer(middleware::from_fn(app::http::middleware::security_headers::security_headers_middleware))
         .layer(middleware::from_fn(app::http::middleware::logging::logging_middleware))
         .layer(SessionLayer::new(session_store))
-        .fallback(app::http::controllers::error_controller::ErrorController::not_found)
+        .fallback(crate::config::errors::ErrorController::not_found)
         .with_state(state);
 
     // 2.5 Live Reload (Hanya aktif jika APP_DEBUG=true)
