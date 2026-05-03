@@ -38,5 +38,10 @@ Selamat datang di panduan resmi framework RustBasic. Framework ini dirancang unt
 - [Security Audit](cli.md#-3-monitoring--security)
 - [Build Manager](cli.md#-4-build-manager)
 
+### [7. Deployment (Produksi)](deployment.md)
+- [Persiapan Lingkungan](deployment.md#-1-persiapan-lingkungan-produksi)
+- [Build Release](deployment.md#-2-kompilasi-build)
+- [Systemd & Nginx](deployment.md#-4-menjalankan-aplikasi-systemd)
+
 ---
-*Dibuat dengan ❤️ untuk RustMyAdmin Project.*
+*Dibuat dengan ❤️ untuk ekosistem RustBasic.*

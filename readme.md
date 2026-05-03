@@ -89,6 +89,27 @@ rustbasic/
 
 ---
 
+## 📚 Pusat Dokumentasi
+
+Akses panduan lengkap untuk setiap aspek framework RustBasic:
+
+### 🛠️ Core & Development
+- **[`catatan.md`](catatan.md)**: Ringkasan fitur, keamanan, dan perubahan arsitektur terbaru.
+- **[`agents.md`](agents.md)**: Manual prosedur standar (Standard Operating Procedure) untuk pengembang.
+- **[`AI_PROMPT.md`](AI_PROMPT.md)**: Instruksi sistem khusus jika Anda bekerja dengan asisten AI (seperti ChatGPT/Claude).
+
+### 🎨 Frontend & Interaksi
+- **[`htmx.md`](htmx.md)**: **"The Complete HTMX Bible"** - Panduan lengkap interaksi Zero-JS.
+- **[`docs/views.md`](docs/views.md)**: Panduan pembuatan template MiniJinja dan penggunaan UI Macro.
+
+### ⚙️ Backend & Operasional
+- **[`docs/deployment.md`](docs/deployment.md)**: Panduan lengkap deployment ke server produksi (Systemd, Nginx, Perms).
+- **[`docs/cli.md`](docs/cli.md)**: Daftar perintah baris perintah (`cargo rustbasic`) untuk scaffolding.
+- **[`docs/database.md`](docs/database.md)**: Dokumentasi manajemen database dan migrasi Sea-ORM.
+- **[`docs/http.md`](docs/http.md)**: Detail mengenai penanganan Request, Response, dan Middleware.
+
+---
+
 ## 🚀 Cara Menjalankan
 
 ### 1. Persiapan Lingkungan

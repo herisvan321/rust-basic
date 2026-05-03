@@ -10,7 +10,7 @@ Sebelum melakukan tindakan apapun, Anda WAJIB merujuk pada file-file berikut seb
 1.  **[`agents.md`](agents.md)**: Gunakan file ini untuk memahami alur kerja teknis (Routing -> Controller -> Model -> View) dan pembagian folder. Ikuti **Golden Rules** yang ada di sana tanpa pengecualian.
 2.  **[`htmx.md`](htmx.md)**: Gunakan file ini sebagai referensi utama untuk semua interaksi frontend. Pilih pola desain (Patterns) dari file ini (seperti *Live Search* atau *OOB Swap*) sebelum mencoba membuat solusi sendiri.
 3.  **[`catatan.md`](catatan.md)**: Gunakan untuk memahami riwayat perubahan dan fitur keamanan yang sudah diimplementasikan.
-4.  **[`docs/`](docs/)**: Jelajahi folder ini untuk dokumentasi mendalam tentang `views.md`, `cli.md`, `database.md`, dan `http.md`.
+4.  **[`docs/`](docs/)**: Jelajahi folder ini untuk dokumentasi mendalam tentang `views.md`, `cli.md`, `database.md`, `http.md`, dan **`deployment.md`**.
 
 ---
 
