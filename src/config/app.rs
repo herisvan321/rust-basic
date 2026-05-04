@@ -36,7 +36,16 @@ impl Config {
                 .parse()
                 .expect("APP_PORT harus berupa angka"),
             app_host: env::var("APP_HOST").unwrap_or_else(|_| "0.0.0.0".to_string()),
-            app_key: env::var("APP_KEY").unwrap_or_else(|_| "default_secret_key".to_string()),
+            app_key: {
+                let key = env::var("APP_KEY").unwrap_or_default();
+                if key.is_empty() {
+                    eprintln!("\n❌ Error: APP_KEY belum dikonfigurasi di file .env!");
+                    eprintln!("💡 Silakan jalankan perintah berikut untuk membuat key baru:");
+                    eprintln!("   cargo rustbasic key:generate\n");
+                    std::process::exit(1);
+                }
+                key
+            },
             app_debug: env::var("APP_DEBUG").unwrap_or_else(|_| "false".to_string()) == "true",
             app_timezone: env::var("APP_TIMEZONE").unwrap_or_else(|_| "UTC".to_string()),
             app_limit_request: env::var("APP_LIMIT_REQUEST")
