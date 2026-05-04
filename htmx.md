@@ -27,7 +27,7 @@ HTMX berpegang pada prinsip **HATEOAS** (Hypermedia as the Engine of Application
 ### Mengapa HTMX di RustBasic?
 - **Kecepatan**: Mengurangi overhead parsing JSON di klien.
 - **Kesederhanaan**: Logika aplikasi tetap berada di server (Single Source of Truth).
-- **Zero-JS**: Anda tidak perlu mengelola state di frontend menggunakan library seperti React atau Vue.
+- **No Frontend Frameworks**: Anda tidak perlu mengelola state di frontend menggunakan library seperti React atau Vue.
 
 ---
 

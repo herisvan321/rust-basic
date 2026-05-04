@@ -5,7 +5,7 @@ Dokumen ini mendefinisikan standar kerja bagi AI Agent (seperti Antigravity, Cur
 ---
 
 ## 🏗️ 0. GOLDEN RULES (Prinsip Utama)
-1. **Zero-JS Philosophy**: Dilarang menambahkan library JS baru. Semua interaksi dinamis menggunakan **HTMX** dan UI menggunakan **Pure CSS**.
+1. **HTMX & Pure CSS Philosophy**: DILARANG menambahkan library JS baru. Semua interaksi dinamis menggunakan **HTMX** dan UI menggunakan **Pure CSS**.
 2. **Type Safety**: Manfaatkan struct dan enum Rust semaksimal mungkin. Hindari `unwrap()` tanpa pesan error yang jelas.
 3. **Consistency**: Ikuti pola penamaan (snake_case untuk file, CamelCase untuk struct) dan lokasi folder yang sudah ada.
 4. **Offline First**: Aset utama (HTMX & CSS) di-embed ke binary via `include_str!`, jangan gunakan CDN eksternal.

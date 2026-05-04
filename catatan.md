@@ -1,17 +1,17 @@
-# 📘 Catatan Dokumentasi RustBasic (Zero-JS Edition)
+# 📘 Catatan Dokumentasi RustBasic (HTMX Edition)
 
-Dokumentasi ini berisi panduan struktur folder, fitur, dan cara penggunaan framework **RustBasic** (Axum bergaya Monolith dengan filosofi Zero-JS).
+Dokumentasi ini berisi panduan struktur folder, fitur, dan cara penggunaan framework **RustBasic** (Axum bergaya Monolith dengan filosofi HTMX & Pure CSS).
 
 ---
 
-## 📂 1. Struktur Folder (Modular & Zero-JS)
+## 📂 1. Struktur Folder (Modular & Clean)
 
 Aplikasi telah dipisahkan menjadi modul-modul kecil untuk skalabilitas tinggi:
 
 ```text
 rustbasic/
 ├── database/             # Lokasi database SQLite & SQL migrasi
-├── public/               # File statis (CSS, Gambar) - ZERO JS (No JS Libs)
+├── public/               # File statis (CSS, Gambar)
 ├── resources/
 │   └── views/            # Template HTML (Minijinja)
 │       ├── components/   # Modular UI Library (Split by logic)
@@ -42,7 +42,7 @@ Aplikasi menerapkan standar keamanan produksi:
 
 ---
 
-## 🎨 3. Frontend & UI (Zero-JS Philosophy)
+## 🎨 3. Frontend & UI (HTMX & Pure CSS Philosophy)
 
 RustBasic meninggalkan library JavaScript berat (seperti Alpine.js) dan beralih ke **Murni HTMX + CSS**:
 
@@ -78,4 +78,4 @@ cargo rustbasic build              # Menu build interaktif
 
 ---
 
-_Dokumentasi ini diperbarui Mei 2026 mencerminkan Arsitektur Zero-JS, Modular Components, Hardened Session Security, dan Dual Logging._
+_Dokumentasi ini diperbarui Mei 2026 mencerminkan Arsitektur HTMX, Modular Components, Hardened Session Security, dan Dual Logging._

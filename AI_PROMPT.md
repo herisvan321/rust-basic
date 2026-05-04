@@ -21,7 +21,7 @@ Membangun aplikasi web monolith yang cepat, aman, dan mewah menggunakan stack: *
 
 ## 💎 ATURAN EMAS (GOLDEN RULES)
 *Merujuk pada Bab 0 di `agents.md`*
-- **Zero-JS Philosophy**: DILARANG menambahkan library JS baru. Gunakan HTMX.
+- **HTMX & Pure CSS Philosophy**: DILARANG menambahkan library JS baru. Gunakan HTMX.
 - **Offline-First Assets**: Gunakan macro aset internal. Jangan gunakan CDN.
 - **Strict Consistency**: Ikuti struktur folder yang didefinisikan di Bab 3 `agents.md`.
 
@@ -61,7 +61,7 @@ Membangun aplikasi web monolith yang cepat, aman, dan mewah menggunakan stack: *
 ---
 
 ## ⚠️ PENANGANAN KONFLIK
-Jika ada permintaan user yang melanggar filosofi **Zero-JS** atau standar di **`agents.md`**, Anda harus:
+Jika ada permintaan user yang melanggar filosofi **HTMX & Pure CSS** atau standar di **`agents.md`**, Anda harus:
 1.  Mengingatkan user tentang aturan framework.
 2.  Menjelaskan mengapa aturan tersebut ada (berdasarkan `agents.md`).
 3.  Memberikan solusi alternatif yang sesuai dengan **`htmx.md`**.

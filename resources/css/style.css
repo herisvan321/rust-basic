@@ -323,7 +323,7 @@ body::before {
 .gap-4 { gap: 1.5rem; }
 
 /* ---------------------------------------------------------
- * 📦 NEW COMPONENTS (Zero-JS UI)
+ * 📦 NEW COMPONENTS (Pure CSS UI)
  * --------------------------------------------------------- */
 
 /* Premium Alert Upgrade - FLOATING VERSION */
@@ -513,31 +513,31 @@ body::before {
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
 /* ---------------------------------------------------------
- * 🔗 ZERO-JS MODAL LOGIC (Checkbox Hack)
+ * 🔗 MODAL LOGIC (Checkbox Hack)
  * --------------------------------------------------------- */
-.modal-state-checkbox:not(:checked) ~ .zero-js-modal {
+.modal-state-checkbox:not(:checked) ~ .rustbasic-modal {
   display: none;
 }
 
-.modal-state-checkbox:checked ~ .zero-js-modal {
+.modal-state-checkbox:checked ~ .rustbasic-modal {
   display: flex;
   opacity: 1;
 }
 
 /* Transisi halus saat muncul */
-.zero-js-modal {
+.rustbasic-modal {
   transition: all 0.3s ease;
 }
 
 /* ---------------------------------------------------------
- * 🎯 FIXED ZERO-JS MODAL OVERLAY
+ * 🎯 FIXED MODAL OVERLAY
  * --------------------------------------------------------- */
 .logout-wrapper {
   position: static;
 }
 
 /* Pastikan modal menutupi seluruh layar walaupun di dalam sidebar */
-.zero-js-modal {
+.rustbasic-modal {
   position: fixed !important;
   top: 0; left: 0;
   width: 100vw; height: 100vh;

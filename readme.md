@@ -1,13 +1,13 @@
-# 🚀 RustBasic (Axum SPA - Zero-JS Edition 2026)
+# 🚀 RustBasic (Axum SPA Edition 2026)
 
-Aplikasi web modern berbasis Rust dengan arsitektur **Clean Monolith**. Dirancang untuk performa maksimal, keamanan tinggi, dan pengalaman pengembang yang luar biasa dengan filosofi **Zero-JS**.
+Aplikasi web modern berbasis Rust dengan arsitektur **Clean Monolith**. Dirancang untuk performa maksimal, keamanan tinggi, dan pengalaman pengembang yang luar biasa.
 
 ---
 
 ## 💎 Fitur Unggulan
 
 - **⚡ Performa Axum**: Backend super cepat dengan framework Axum 0.8 dan Tokio.
-- **🎨 Zero-JS UI Architecture**: Pengalaman Single Page Application (SPA) yang sangat ringan menggunakan **HTMX** dan **Pure CSS**. Tidak ada library JavaScript berat (Hapus Alpine.js & Vanilla JS).
+- **🎨 Modern UI Architecture**: Pengalaman Single Page Application (SPA) yang sangat ringan menggunakan **HTMX** dan **Pure CSS**. Tidak ada library JavaScript berat (Hapus Alpine.js & Vanilla JS).
 - **🧩 Modular Minijinja Macros**: UI yang dibangun dengan komponen reusable yang terbagi secara logis (`forms`, `buttons`, `display`, `overlays`, `feedback`).
 - **📅 Carbon-like Time Management**: Penanganan waktu yang mudah dan kuat menggunakan `chrono` & `chrono-humanize`. Mendukung `.diff_for_humans()` dan zona waktu dinamis via `.env`.
 - **🔐 Hardened Security**: 
@@ -15,7 +15,7 @@ Aplikasi web modern berbasis Rust dengan arsitektur **Clean Monolith**. Dirancan
     - **Strict Env Enforcement**: Aplikasi tidak akan berjalan tanpa file `.env` yang valid.
     - **CSRF Protection**: Proteksi otomatis pada semua request HTMX.
 - **📝 Production-Grade Logging**: Dual-output logging (Terminal berwarna & File bersih di `storage/logs/`).
-- **🔘 Smart Overlays**: Modal konfirmasi (seperti Logout) menggunakan teknik **CSS Checkbox Hack** (Zero-JS).
+- **🔘 Smart Overlays**: Modal konfirmasi (seperti Logout) menggunakan teknik **CSS Checkbox Hack**.
 - **🚀 Premium Splitscreen UI**: Desain layar terbagi yang modern dan mewah tanpa kartu (_cardless_).
 - **📊 Premium Dashboard**: Panel kendali modern dengan statistik real-time dan navigasi sisi kiri yang elegan.
 - **📦 Hidden Assets & Binary Embedding**: File CSS dan JS (HTMX) disembunyikan dari folder publik dan ditanam langsung ke dalam binary aplikasi menggunakan `include_str!` untuk performa maksimal dan keamanan ekstra.
@@ -59,7 +59,7 @@ Terletak di `resources/views/components/`:
 - **`forms.html`**: Input field, checkbox, dll.
 - **`buttons.html`**: Tombol aksi, link button, tombol kembali.
 - **`display.html`**: Card, Premium Alerts (Floating), Stat Cards.
-- **`overlays.html`**: Modal dinamis dan Konfirmasi Logout (Zero-JS).
+- **`overlays.html`**: Modal dinamis dan Konfirmasi Logout.
 - **`feedback.html`**: Loading Spinners dan HTMX Indicators.
 
 ---
@@ -69,7 +69,7 @@ Terletak di `resources/views/components/`:
 ```text
 rustbasic/
 ├── database/             # Lokasi database SQLite & SQL migrasi
-├── public/               # File statis (CSS, Gambar) - ZERO JS
+├── public/               # File statis (CSS, Gambar)
 ├── resources/
 │   ├── css/              # Asset CSS (Hidden/Embedded)
 │   ├── js/               # Asset JS (Hidden/Embedded)
@@ -99,7 +99,7 @@ Akses panduan lengkap untuk setiap aspek framework RustBasic:
 - **[`AI_PROMPT.md`](AI_PROMPT.md)**: Instruksi sistem khusus jika Anda bekerja dengan asisten AI (seperti ChatGPT/Claude).
 
 ### 🎨 Frontend & Interaksi
-- **[`htmx.md`](htmx.md)**: **"The Complete HTMX Bible"** - Panduan lengkap interaksi Zero-JS.
+- **[`htmx.md`](htmx.md)**: **"The Complete HTMX Bible"** - Panduan lengkap interaksi HTMX.
 - **[`docs/views.md`](docs/views.md)**: Panduan pembuatan template MiniJinja dan penggunaan UI Macro.
 
 ### ⚙️ Backend & Operasional
@@ -139,4 +139,4 @@ Akses aplikasi di:
 
 ---
 
-_Dibuat dengan ❤️ untuk ekosistem Rust. Arsitektur Bersih, Zero-JS, Desain Premium, Kecepatan Cahaya._
+_Dibuat dengan ❤️ untuk ekosistem Rust. Arsitektur Bersih, Desain Premium, Kecepatan Cahaya._

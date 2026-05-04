@@ -1,6 +1,6 @@
-# 🎨 Panduan View & Komponen (Zero-JS)
+# 🎨 Panduan View & Komponen (HTMX)
 
-RustBasic menggunakan **Minijinja Macros** dan **HTMX** untuk membangun UI yang modular, cepat, dan murni tanpa JavaScript (Zero-JS).
+RustBasic menggunakan **Minijinja Macros** dan **HTMX** untuk membangun UI yang modular, cepat, dan murni tanpa library JavaScript eksternal.
 
 ## 🧩 Struktur Komponen
 Komponen terletak di `resources/views/components/` dan dibagi berdasarkan fungsinya:
@@ -38,7 +38,7 @@ Gunakan untuk elemen presentasi data.
 ### 4. Overlays (`overlays.html`)
 Gunakan untuk modal dan dialog konfirmasi.
 - **`modal(id, title, size)`**: Kontainer modal standar.
-- **`logout_confirm_button(id, label, variant)`**: Tombol logout dengan konfirmasi popup (Zero-JS/Checkbox Hack).
+- **`logout_confirm_button(id, label, variant)`**: Tombol logout dengan konfirmasi popup (Pure CSS/Checkbox Hack).
   ```html
   {% from "components/overlays.html" import logout_confirm_button %}
   {{ logout_confirm_button(id="confirm-out", label="KELUAR") }}
@@ -68,7 +68,7 @@ Anda dapat memanipulasi tampilan waktu langsung di template menggunakan filter b
 
 ---
 
-## ⚡ Filosofi Zero-JS
+## ⚡ Filosofi HTMX & Pure CSS
 Semua komponen dirancang agar browser tidak perlu memuat file `.js` tambahan (selain library HTMX). Interaksi seperti menutup Alert atau membuka Modal dilakukan menggunakan:
 1. **Teknik CSS Checkbox Hack** (untuk Modal/Popups).
 2. **HTMX Attributes** (`hx-on`, `hx-swap="delete"`, dll).
