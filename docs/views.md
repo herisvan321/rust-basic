@@ -69,7 +69,7 @@ Anda dapat memanipulasi tampilan waktu langsung di template menggunakan filter b
 ---
 
 ## ⚡ Filosofi HTMX & Pure CSS
-Semua komponen dirancang agar browser tidak perlu memuat file `.js` tambahan (selain library HTMX). Interaksi seperti menutup Alert atau membuka Modal dilakukan menggunakan:
+Semua komponen dirancang agar browser tidak perlu memuat file `.js` tambahan (selain library HTMX). Namun, framework kini mendukung penggunaan aset eksternal (CSS/JS via CDN) jika Anda ingin mengintegrasikan library pihak ketiga. Interaksi bawaan tetap menggunakan:
 1. **Teknik CSS Checkbox Hack** (untuk Modal/Popups).
 2. **HTMX Attributes** (`hx-on`, `hx-swap="delete"`, dll).
 3. **CSS Fixed Positioning** (untuk Floating elements).

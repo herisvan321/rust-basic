@@ -68,7 +68,7 @@ resources/
 - **Source Protection**: Jangan pernah menghapus atau memodifikasi file `template.html`.
 - **No Overwrite**: Dilarang merubah layout lama atau file yang sudah ada di folder lain. Semua perubahan harus terisolasi di dalam folder `<template_name>`.
 - **No Inline**: Dilarang membiarkan inline CSS atau inline JS di dalam file HTML view.
-- **No CDN**: Semua aset harus bersifat lokal (Offline First).
+- **Allow CDN**: Aset eksternal via CDN diperbolehkan jika diperlukan, namun prioritaskan penyimpanan lokal untuk aset inti.
 - **HTMX First**: Jika ada interaksi JS yang bisa digantikan dengan HTMX, AI wajib menyarankannya.
 
 ---

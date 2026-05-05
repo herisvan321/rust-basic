@@ -8,7 +8,7 @@ Dokumen ini mendefinisikan standar kerja bagi AI Agent (seperti Antigravity, Cur
 1. **HTMX & Pure CSS Philosophy**: DILARANG menambahkan library JS baru. Semua interaksi dinamis menggunakan **HTMX** dan UI menggunakan **Pure CSS**.
 2. **Type Safety**: Manfaatkan struct dan enum Rust semaksimal mungkin. Hindari `unwrap()` tanpa pesan error yang jelas.
 3. **Consistency**: Ikuti pola penamaan (snake_case untuk file, CamelCase untuk struct) dan lokasi folder yang sudah ada.
-4. **Offline First**: Aset utama (HTMX & CSS) di-embed ke binary via `include_str!`, jangan gunakan CDN eksternal.
+4. **Flexible Assets**: Aset utama (HTMX & CSS) bisa di-embed ke binary via `include_str!` atau menggunakan CDN eksternal jika diperlukan.
 
 ---
 
@@ -64,7 +64,7 @@ pub async fn name(req: Request) -> impl IntoResponse {
 
 ## ⚠️ 4. LIMIT & RESTRICTIONS (Batasan Ketat)
 AI Agent **DILARANG** melakukan:
-- **No CDN**: Jangan masukkan link `<script src="https://cdn...">`. Gunakan `{{ htmx_js() | safe }}`.
+- **Allow CDN**: Diperbolehkan menggunakan link `<script src="https://cdn...">` atau CSS eksternal jika diperlukan.
 - **No Inline Styles**: Masukkan CSS baru ke `resources/css/style.css` (bukan ad-hoc di tag HTML).
 - **Session Protection**: Jangan pernah menonaktifkan `csrf_middleware` atau `guest_middleware` pada rute sensitif.
 - **Logging**: Jangan menghapus `tracing::debug!` atau `tracing::info!` yang sudah ada.

@@ -22,7 +22,7 @@ Membangun aplikasi web monolith yang cepat, aman, dan mewah menggunakan stack: *
 ## 💎 ATURAN EMAS (GOLDEN RULES)
 *Merujuk pada Bab 0 di `agents.md`*
 - **HTMX & Pure CSS Philosophy**: DILARANG menambahkan library JS baru. Gunakan HTMX.
-- **Offline-First Assets**: Gunakan macro aset internal. Jangan gunakan CDN.
+- **Flexible Assets**: Utamakan macro aset internal, namun penggunaan CDN eksternal diperbolehkan jika diperlukan.
 - **Strict Consistency**: Ikuti struktur folder yang didefinisikan di Bab 3 `agents.md`.
 
 ---
