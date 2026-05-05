@@ -1,6 +1,6 @@
 # 🎨 RustBasic AI Template Workflow
 
-Dokumen ini mendefinisikan standar kerja bagi AI Agent saat melakukan porting atau implementasi template HTML ke dalam framework **RustBasic**.
+Dokumen ini mendefinisikan standar kerja bagi AI Agent saat melakukan porting atau implementasi template.html ke dalam framework **RustBasic**.
 
 ---
 
