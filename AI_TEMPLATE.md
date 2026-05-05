@@ -48,17 +48,18 @@ Hasil akhir harus mengikuti pola folder berikut:
 ```text
 resources/
 ├── css/
-│   └── <template_name>/
+│   └── admin/
 │       └── style.css
 ├── js/
-│   └── <template_name>/
+│   └── admin/
 │       └── script.js
 └── views/
     ├── components/
-    │   └── <template_name>.html (Berisi Macros)
-    └── <template_name>/
-        ├── layout.html
-        └── index.html
+    │   └── admin.html (Berisi Macros)
+    ├── admin/
+    |    └── index.html
+    └── layouts/
+         └── admin.html
 ```
 
 ---
