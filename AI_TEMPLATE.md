@@ -23,7 +23,7 @@ Lakukan pemisahan kode secara sistematis berdasarkan folder mapping:
 ### B. Ekstraksi HTML & Layout
 - Buat folder: `resources/views/<template_name>/`.
 - **Layout Baru**: Buat file `resources/views/layouts/<template_name>.html` untuk menyimpan struktur dasar (head, nav, sidebar, footer).
-- **Index View**: Buat file `resources/views/<template_name>/index.html` yang melakukan `{% extends "<template_name>/layout.html" %}`.
+- **Index View**: pisahkan file `template.html` menjadi `resources/views/<template_name>/` yang melakukan `{% extends "layouts/<template_name>.html" %}`.
 - **PENTING**: Dilarang mengubah file di folder `resources/views/layouts/` yang sudah ada.
 
 ### C. Ekstraksi Komponen
