@@ -12,6 +12,7 @@ pub struct Config {
     pub app_host: String,
     pub app_key: String,
     pub app_debug: bool,
+    pub app_url: String,
     pub app_timezone: String,
     pub app_limit_request: u64,
     
@@ -25,6 +26,14 @@ pub struct Config {
     
     // 🔑 Session
     pub session_driver: String,
+    
+    // 📧 Mail
+    pub mail_host: String,
+    pub mail_port: u16,
+    pub mail_username: String,
+    pub mail_password: String,
+    pub mail_from_address: String,
+    pub mail_from_name: String,
 }
 
 impl Config {
@@ -46,7 +55,8 @@ impl Config {
                 }
                 key
             },
-            app_debug: env::var("APP_DEBUG").unwrap_or_else(|_| "false".to_string()) == "true",
+            app_debug: env::var("APP_DEBUG").unwrap_or_else(|_| "false".to_string()).parse().unwrap_or(false),
+            app_url: env::var("APP_URL").unwrap_or_else(|_| "http://localhost:4000".to_string()),
             app_timezone: env::var("APP_TIMEZONE").unwrap_or_else(|_| "UTC".to_string()),
             app_limit_request: env::var("APP_LIMIT_REQUEST")
                 .unwrap_or_else(|_| "20".to_string())
@@ -66,6 +76,17 @@ impl Config {
             
             // Session
             session_driver: env::var("SESSION_DRIVER").unwrap_or_else(|_| "database".to_string()),
+            
+            // Mail
+            mail_host: env::var("MAIL_HOST").unwrap_or_else(|_| "smtp.mailtrap.io".to_string()),
+            mail_port: env::var("MAIL_PORT")
+                .unwrap_or_else(|_| "2525".to_string())
+                .parse()
+                .expect("MAIL_PORT harus berupa angka"),
+            mail_username: env::var("MAIL_USERNAME").unwrap_or_else(|_| "null".to_string()),
+            mail_password: env::var("MAIL_PASSWORD").unwrap_or_else(|_| "null".to_string()),
+            mail_from_address: env::var("MAIL_FROM_ADDRESS").unwrap_or_else(|_| "hello@example.com".to_string()),
+            mail_from_name: env::var("MAIL_FROM_NAME").unwrap_or_else(|_| "RustBasic".to_string()),
         }
     }
 

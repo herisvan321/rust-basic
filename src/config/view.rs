@@ -83,6 +83,14 @@ pub fn render(template: &str, context: minijinja::Value) -> Response {
     render_internal(template, context)
 }
 
+/// Fungsi Helper untuk render template menjadi String (berguna untuk email)
+pub fn render_to_string(template: &str, context: minijinja::Value) -> String {
+    match JINJA.get_template(template) {
+        Ok(tmpl) => tmpl.render(context).unwrap_or_else(|e| format!("Render error: {}", e)),
+        Err(e) => format!("Template error: {}", e),
+    }
+}
+
 // 3. Fungsi Helper untuk Render dengan Session (RustBasic Style)
 pub fn view(req: &AppRequest, template: &str, ctx: minijinja::Value) -> Response {
     // Kita konversi minijinja::Value ke serde_json::Value untuk manipulasi mudah

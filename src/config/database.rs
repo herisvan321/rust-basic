@@ -57,3 +57,7 @@ pub async fn connect(cfg: &Config) -> DatabaseConnection {
 pub async fn run_migrations(db: &DatabaseConnection) {
     Migrator::up(db, None).await.expect("Gagal menjalankan migrasi Sea-ORM");
 }
+
+pub async fn rollback_migrations(db: &DatabaseConnection) {
+    Migrator::down(db, Some(1)).await.expect("Gagal melakukan rollback migrasi");
+}

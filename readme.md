@@ -20,6 +20,8 @@ Aplikasi web modern berbasis Rust dengan arsitektur **Clean Monolith**. Dirancan
 - **📊 Premium Dashboard**: Panel kendali modern dengan statistik real-time dan navigasi sisi kiri yang elegan.
 - **📦 Flexible Assets & Binary Embedding**: File CSS dan JS inti (HTMX) dapat ditanam langsung ke dalam binary aplikasi menggunakan `include_str!` untuk performa maksimal, namun sistem kini juga mendukung penggunaan **CDN eksternal** secara fleksibel jika diperlukan.
 - **🔄 Live Reload**: Browser otomatis refresh saat Anda mengubah file `.rs` atau `.html` (hanya aktif saat `APP_DEBUG=true`).
+- **📧 SMTP Mail Service**: Integrasi `lettre` untuk pengiriman email asinkron (misal: Gmail).
+- **🔑 Password Recovery**: Sistem reset password lengkap dengan token aman dan template email HTML premium.
 
 ---
 

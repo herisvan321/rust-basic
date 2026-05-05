@@ -62,6 +62,8 @@ RustBasic meninggalkan library JavaScript berat (seperti Alpine.js) dan beralih 
 - **Multi-Database**: Mendukung SQLite dan MySQL via `sqlx::AnyPool`.
 - **RustBasicSessionStore**: Menyimpan IP Address untuk setiap sesi guna keamanan ekstra.
 - **Timezone Aware**: Semua fungsi waktu merujuk pada `APP_TIMEZONE` di `.env`. Menggunakan `chrono-tz` untuk konversi zona waktu yang akurat (WIB, UTC, dll).
+- **📧 Mail Service (Lettre)**: Integrasi sistem pengiriman email asinkron (SMTP) untuk notifikasi dan pemulihan akun.
+- **🔑 Password Recovery**: Sistem reset password otomatis dengan token aman (UUID) dan masa berlaku 60 menit.
 
 ---
 
@@ -71,9 +73,20 @@ RustBasic meninggalkan library JavaScript berat (seperti Alpine.js) dan beralih 
 cargo serve                        # Menjalankan server (Auto-Reload + Live Browser Refresh)
 cargo watch -w src -w resources -x run # Manual Watch (Rust + Templates)
 cargo rustbasic key:generate      # Membuat APP_KEY baru di file .env
-cargo rustbasic cache:clear       # Truncate logs & clear sessions
+cargo rustbasic cache:clear       # Truncate logs & sessions
+
+## Menjalankan Migrasi
+cargo rustbasic migrate
+
+## Rollback Migrasi
+cargo rustbasic migrate:back
+# atau
+cargo rustbasic migrate:rollback
+
 cargo rustbasic route:list         # Menampilkan daftar route dalam tabel
 cargo rustbasic build              # Menu build interaktif
+cargo rustbasic auth               # Scaffold autentikasi (Login/Register/Reset)
+cargo rustbasic auth back          # Menghapus scaffold autentikasi secara bersih
 ```
 
 ---

@@ -46,6 +46,14 @@ cargo rustbasic make:migration Name
 cargo rustbasic migrate
 ```
 
+## Rollback Migrasi
+Gunakan perintah ini untuk membatalkan satu langkah migrasi terakhir:
+```bash
+cargo rustbasic migrate:back
+# atau
+cargo rustbasic migrate:rollback
+```
+
 ## Contoh File Migrasi (Rust)
 ```rust
 async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {

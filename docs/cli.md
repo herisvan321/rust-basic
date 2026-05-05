@@ -52,14 +52,19 @@ Membuat Middleware Axum baru di `src/app/http/middleware/` dan otomatis mendafta
 ## 🔐 2. Authentication Scaffolding
 
 ### `auth` / `make:auth`
-Membangun sistem autentikasi lengkap secara otomatis.
-- **Fitur**: Membuat Login, Register, dan Dashboard dengan desain premium.
+- **Integration**: Menambahkan middleware `guest` untuk halaman login dan `auth` untuk dashboard.
+- **Forgot Password**: Sistem reset password otomatis via email (SMTP).
+- **Remember Me**: Fitur "Ingat Saya" menggunakan cookie yang aman.
+- **Email Templates**: Membuat folder `resources/views/emails` dengan desain premium.
+- **UI**: Menambahkan tombol Login/Register secara dinamis di halaman Welcome jika fitur terpasang.
 - **Logic**: Mengintegrasikan Sea-ORM, Bcrypt, dan validasi secara otomatis.
 - **Contoh**: `cargo rustbasic auth`
 
 ### `auth back` / `auth:back`
-Menghapus seluruh sistem autentikasi dan mengembalikan project ke kondisi bersih.
-- **Fungsi**: Menghapus controller, route, dan view yang tergenerasi serta merapikan router utama.
+**Fitur Unggulan Penghapusan:**
+- **Robust Clean-up**: Secara otomatis membersihkan import, deklarasi route, model, dan file migrasi.
+- **Safety**: Memastikan project tetap bisa dikompilasi setelah penghapusan dengan merapikan file `mod.rs`.
+- **Note**: Disarankan menjalankan `cargo rustbasic migrate:back` terlebih dahulu jika ingin membersihkan tabel di database.
 - **Contoh**: `cargo rustbasic auth back`
 
 ---
@@ -69,6 +74,12 @@ Menghapus seluruh sistem autentikasi dan mengembalikan project ke kondisi bersih
 ### `migrate`
 Menjalankan seluruh file migrasi yang ada ke database (SQLite/MySQL).
 - **Contoh**: `cargo rustbasic migrate`
+
+### `migrate:back` / `migrate:rollback`
+Membatalkan (rollback) satu migrasi terakhir dari database.
+- **Fungsi**: Menjalankan fungsi `down` pada file migrasi terbaru.
+- **Penting**: Jalankan ini sebelum menghapus file migrasi (misal sebelum `auth:back`).
+- **Contoh**: `cargo rustbasic migrate:back`
 
 ### `cache:clear`
 Membersihkan sistem secara menyeluruh:

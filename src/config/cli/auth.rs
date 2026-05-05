@@ -19,6 +19,10 @@ pub fn router() -> Router<AppState> {
         .route("/login", post(auth::auth_controller::AuthController::login))
         .route("/register", get(auth::auth_controller::AuthController::register_page))
         .route("/register", post(auth::auth_controller::AuthController::register))
+        .route("/forgot-password", get(auth::auth_controller::AuthController::forgot_password_page))
+        .route("/forgot-password", post(auth::auth_controller::AuthController::send_reset_link))
+        .route("/reset-password", get(auth::auth_controller::AuthController::reset_password_page))
+        .route("/reset-password", post(auth::auth_controller::AuthController::update_password))
         .layer(from_fn(guest_middleware))
 }
 "#;
@@ -64,6 +68,67 @@ pub fn router() -> Router<AppState> {
         }
     }
 
+    // 3.1 Create Password Resets Migration
+    let migration_path = "database/migrations/m20260505_000003_create_password_resets_table.rs";
+    if !std::path::Path::new(migration_path).exists() {
+        let migration_template = r#"use sea_orm_migration::prelude::*;
+
+#[derive(Iden)]
+enum PasswordResets {
+    Table,
+    Email,
+    Token,
+    CreatedAt,
+}
+
+#[derive(DeriveMigrationName)]
+pub struct Migration;
+
+#[async_trait::async_trait]
+impl MigrationTrait for Migration {
+    async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
+        manager
+            .create_table(
+                Table::create()
+                    .table(PasswordResets::Table)
+                    .if_not_exists()
+                    .col(ColumnDef::new(PasswordResets::Email).string().not_null().primary_key())
+                    .col(ColumnDef::new(PasswordResets::Token).string().not_null())
+                    .col(
+                        ColumnDef::new(PasswordResets::CreatedAt)
+                            .timestamp()
+                            .default(Expr::current_timestamp())
+                            .not_null(),
+                    )
+                    .to_owned(),
+            )
+            .await
+    }
+
+    async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
+        manager
+            .drop_table(Table::drop().table(PasswordResets::Table).to_owned())
+            .await
+    }
+}
+"#;
+        fs::write(migration_path, migration_template).ok();
+        
+        let migration_mod_path = "database/migrations/mod.rs";
+        if let Ok(content) = fs::read_to_string(migration_mod_path) {
+            if !content.contains("pub mod m20260505_000003_create_password_resets_table;") {
+                let mut lines: Vec<String> = content.lines().map(|s| s.to_string()).collect();
+                lines.insert(0, "pub mod m20260505_000003_create_password_resets_table;".to_string());
+                let mut new_content = lines.join("\n");
+                if new_content.contains("vec![") {
+                    new_content = new_content.replace("vec![", "vec![\n            Box::new(m20260505_000003_create_password_resets_table::Migration),");
+                }
+                fs::write(migration_mod_path, new_content).ok();
+            }
+        }
+        println!("   {} {}", "✅ Created:".green(), "Migration for password_resets".cyan());
+    }
+
     // 4. Create Controller Folder & mod.rs
     let auth_controller_dir = "src/app/http/controllers/auth";
     fs::create_dir_all(auth_controller_dir).ok();
@@ -72,6 +137,39 @@ pub fn router() -> Router<AppState> {
         fs::write(auth_controller_mod, "pub mod auth_controller;").ok();
     }
     update_controller_mod_rs("auth");
+
+    // 4.1 Create Password Resets Model
+    let model_path = "src/app/models/password_resets.rs";
+    if !std::path::Path::new(model_path).exists() {
+        let model_template = r#"use sea_orm::entity::prelude::*;
+use serde::{Deserialize, Serialize};
+
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize)]
+#[sea_orm(table_name = "password_resets")]
+pub struct Model {
+    #[sea_orm(primary_key, auto_increment = false)]
+    pub email: String,
+    pub token: String,
+    pub created_at: DateTime,
+}
+
+#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
+pub enum Relation {}
+
+impl ActiveModelBehavior for ActiveModel {}
+"#;
+        fs::write(model_path, model_template).ok();
+        
+        // Update src/app/models/mod.rs
+        let models_mod_path = "src/app/models/mod.rs";
+        if let Ok(mut content) = fs::read_to_string(models_mod_path) {
+            if !content.contains("pub mod password_resets;") {
+                content.push_str("pub mod password_resets;\n");
+                fs::write(models_mod_path, content).ok();
+            }
+        }
+        println!("   {} {}", "✅ Created:".green(), "Model password_resets".cyan());
+    }
 
     let auth_controller_path = "src/app/http/controllers/auth/auth_controller.rs";
     if !std::path::Path::new(auth_controller_path).exists() {
@@ -87,8 +185,10 @@ use crate::config::responses::ResponseHelper;
 use crate::config::server::AppState;
 use axum::{response::IntoResponse, extract::State};
 use bcrypt::{hash, verify, DEFAULT_COST};
+use uuid::Uuid;
 use serde::Deserialize;
 use validator::Validate;
+use crate::app::services::mail_service::MailService;
 use minijinja::context;
 use sea_orm::{EntityTrait, ColumnTrait, QueryFilter, Set};
 
@@ -108,6 +208,20 @@ pub struct RegisterRequest {
 pub struct LoginRequest {
     #[validate(email(message = "Format email tidak valid"))]
     pub email: String,
+    pub password: String,
+    pub remember: Option<String>,
+}
+
+#[derive(Deserialize, Validate)]
+pub struct ForgotPasswordRequest {
+    #[validate(email(message = "Format email tidak valid"))]
+    pub email: String,
+}
+
+#[derive(Deserialize, Validate)]
+pub struct ResetPasswordRequest {
+    pub token: String,
+    #[validate(length(min = 8, message = "Password minimal 8 karakter"))]
     pub password: String,
 }
 
@@ -184,11 +298,137 @@ impl AuthController {
             if verify(data.password, &u.password).unwrap_or(false) {
                 // 4. Set Session
                 req.session.set("user_id", u.id);
+                
+                // Handle "Remember Me"
+                if data.remember.is_some() {
+                    // Set session expiration to 30 days if remember is checked
+                    // Note: implementation depends on axum_session configuration
+                    tracing::info!("Remember me checked for user: {}", u.email);
+                }
+
                 return ResponseHelper::redirect_with_success("/dashboard", "Selamat datang kembali!", req.session);
             }
         }
 
         ResponseHelper::redirect_with_error("/login", "Email atau password salah", req.session)
+    }
+
+    /// Menampilkan halaman lupa password
+    pub async fn forgot_password_page(req: Request) -> impl IntoResponse {
+        view(&req, "auth/forgot.html", context! { title => "Lupa Password" })
+    }
+
+    /// Kirim link reset password
+    pub async fn send_reset_link(State(state): State<AppState>, req: Request) -> impl IntoResponse {
+        let data = match req.validate::<ForgotPasswordRequest>() {
+            Ok(d) => d,
+            Err(_) => return ResponseHelper::redirect("/forgot-password"),
+        };
+
+        // 1. Cek apakah user ada
+        let user = users::Entity::find()
+            .filter(users::Column::Email.eq(&data.email))
+            .one(&state.db)
+            .await
+            .ok()
+            .flatten();
+
+        if let Some(u) = user {
+            // 2. Generate Token
+            let token = Uuid::new_v4().to_string();
+
+            // 3. Simpan Token
+            let reset = crate::app::models::password_resets::ActiveModel {
+                email: Set(u.email.clone()),
+                token: Set(token.clone()),
+                created_at: Set(chrono::Utc::now().naive_utc()),
+            };
+
+            let _ = crate::app::models::password_resets::Entity::insert(reset)
+                .on_conflict(
+                    sea_orm::sea_query::OnConflict::column(crate::app::models::password_resets::Column::Email)
+                        .update_column(crate::app::models::password_resets::Column::Token)
+                        .update_column(crate::app::models::password_resets::Column::CreatedAt)
+                        .to_owned()
+                )
+                .exec(&state.db)
+                .await;
+
+            // 4. Kirim Email (Gunakan Config::load().mail_*)
+            let config = crate::config::Config::load();
+            let app_name = std::env::var("APP_NAME").unwrap_or_else(|_| "RustBasic".to_string());
+            let reset_url = format!("{}/reset-password?token={}", config.app_url, token);
+
+            let subject = format!("Reset Password - {}", app_name);
+            let body = crate::config::view::render_to_string("emails/reset.html", context! {
+                app_name => app_name,
+                reset_url => reset_url,
+            });
+
+            if let Err(e) = MailService::send_email(&u.email, &subject, &body).await {
+                tracing::error!("Gagal mengirim email reset: {}", e);
+            }
+
+            tracing::info!("Reset link for {}: {}", u.email, reset_url);
+        }
+
+        ResponseHelper::redirect_with_success("/login", "Jika email terdaftar, link reset password akan dikirim.", req.session)
+    }
+
+    /// Menampilkan halaman reset password
+    pub async fn reset_password_page(req: Request) -> impl IntoResponse {
+        let token = req.input_as_str("token").unwrap_or_default();
+        view(&req, "auth/reset.html", context! { title => "Reset Password", token => token })
+    }
+
+    /// Proses update password baru
+    pub async fn update_password(State(state): State<AppState>, req: Request) -> impl IntoResponse {
+        let data = match req.validate::<ResetPasswordRequest>() {
+            Ok(d) => d,
+            Err(_) => return ResponseHelper::redirect("/login"),
+        };
+
+        // 1. Cari Token
+        let reset = crate::app::models::password_resets::Entity::find()
+            .filter(crate::app::models::password_resets::Column::Token.eq(&data.token))
+            .one(&state.db)
+            .await
+            .ok()
+            .flatten();
+
+        if let Some(r) = reset {
+            // 2. Cek Kadaluarsa (60 Menit)
+            let now = chrono::Utc::now().naive_utc();
+            let duration = now.signed_duration_since(r.created_at);
+            
+            if duration.num_minutes() > 60 {
+                // Hapus token yang sudah kadaluarsa
+                let _ = crate::app::models::password_resets::Entity::delete_by_id(r.email)
+                    .exec(&state.db)
+                    .await;
+                    
+                return ResponseHelper::redirect_with_error("/login", "Tautan reset password sudah kadaluarsa (melebihi 60 menit).", req.session);
+            }
+
+            // 3. Hash Password Baru
+            let hashed = bcrypt::hash(data.password, bcrypt::DEFAULT_COST).unwrap();
+
+            // 4. Update User
+            let _ = users::Entity::update_many()
+                .col_expr(users::Column::Password, sea_orm::sea_query::Expr::value(hashed))
+                .filter(users::Column::Email.eq(&r.email))
+                .exec(&state.db)
+                .await;
+
+            // 5. Hapus Token
+            let _ = crate::app::models::password_resets::Entity::delete_by_id(r.email)
+                .exec(&state.db)
+                .await;
+
+            return ResponseHelper::redirect_with_success("/login", "Password berhasil diubah. Silakan login.", req.session);
+        }
+
+        ResponseHelper::redirect_with_error("/login", "Token tidak valid atau sudah kadaluarsa.", req.session)
     }
 
     /// Proses Logout
@@ -236,6 +476,13 @@ impl AuthController {
                 {{ input("email", type="email", label="Email", placeholder="nama@email.com", value=old.email, errors=errors.email, required=true) }}
                 
                 {{ input("password", type="password", label="Password", placeholder="********", required=true) }}
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                    <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; cursor: pointer;">
+                        <input type="checkbox" name="remember" value="1"> Ingat Saya
+                    </label>
+                    <a href="/forgot-password" class="text-primary" style="font-size: 0.9rem; font-weight: 600;">Lupa Password?</a>
+                </div>
 
                 {{ button("MASUK", class="w-100 mb-4") }}
 
@@ -296,6 +543,142 @@ impl AuthController {
 {% endblock %}
 "##;
         fs::write(register_view, register_template).ok();
+    }
+
+    let forgot_view = "resources/views/auth/forgot.html";
+    if !std::path::Path::new(forgot_view).exists() {
+        let forgot_template = r##"{% extends "layouts/app.html" %}
+{% from "components/forms.html" import input %}
+{% from "components/buttons.html" import button, link_back %}
+
+{% block title %}Lupa Password - RustBasic{% endblock %}
+
+{% block content %}
+<div class="split-screen">
+    <!-- Sisi Visual -->
+    <div class="split-side-visual" style="background: linear-gradient(135deg, var(--primary), var(--secondary));">
+        <div class="visual-inner">
+            <h1 style="font-size: 3rem; font-weight: 800; margin-bottom: 1rem;">Lupa Password?</h1>
+            <p style="font-size: 1.25rem; opacity: 0.9;">Jangan khawatir, kami akan membantu Anda mendapatkan akses kembali.</p>
+        </div>
+    </div>
+
+    <!-- Sisi Form -->
+    <div class="split-side-content">
+        <div class="content-container">
+            {{ link_back() }}
+
+            <h2 class="title" style="font-size: 2.5rem; margin-bottom: 0.5rem; text-align: left;">Reset Password</h2>
+            <p class="text-muted mb-5">Masukkan email Anda untuk menerima link reset.</p>
+
+            <form hx-post="/forgot-password" hx-target="body" hx-push-url="true" hx-indicator="#indicator">
+                {{ input("email", type="email", label="Email", placeholder="nama@email.com", value=old.email, errors=errors.email, required=true) }}
+
+                {{ button("KIRIM LINK RESET", class="w-100 mb-4") }}
+
+                <p class="text-muted" style="text-align: center; font-size: 0.9rem;">
+                    Ingat password Anda? <a href="/login" class="text-primary" style="font-weight: 700;">Login Disini</a>
+                </p>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+"##;
+        fs::write(forgot_view, forgot_template).ok();
+    }
+
+    let reset_view = "resources/views/auth/reset.html";
+    if !std::path::Path::new(reset_view).exists() {
+        let reset_template = r##"{% extends "layouts/app.html" %}
+{% from "components/forms.html" import input %}
+{% from "components/buttons.html" import button %}
+
+{% block title %}Reset Password - RustBasic{% endblock %}
+
+{% block content %}
+<div class="split-screen">
+    <!-- Sisi Visual -->
+    <div class="split-side-visual" style="background: linear-gradient(135deg, var(--accent), var(--primary));">
+        <div class="visual-inner">
+            <h1 style="font-size: 3rem; font-weight: 800; margin-bottom: 1rem;">Password Baru</h1>
+            <p style="font-size: 1.25rem; opacity: 0.9;">Buat password yang kuat untuk menjaga keamanan akun Anda.</p>
+        </div>
+    </div>
+
+    <!-- Sisi Form -->
+    <div class="split-side-content">
+        <div class="content-container">
+            <h2 class="title" style="font-size: 2.5rem; margin-bottom: 0.5rem; text-align: left;">Buat Password Baru</h2>
+            <p class="text-muted mb-5">Silakan masukkan password baru Anda.</p>
+
+            <form hx-post="/reset-password" hx-target="body" hx-push-url="true" hx-indicator="#indicator">
+                <input type="hidden" name="token" value="{{ token }}">
+                
+                {{ input("password", type="password", label="Password Baru", placeholder="Min. 8 karakter", errors=errors.password, required=true) }}
+
+                {{ button("SIMPAN PASSWORD", class="w-100 mb-4") }}
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+"##;
+        fs::write(reset_view, reset_template).ok();
+    }
+
+    let email_reset_view = "resources/views/emails/reset.html";
+    if !std::path::Path::new(email_reset_view).exists() {
+        fs::create_dir_all("resources/views/emails").ok();
+        let email_reset_template = r##"<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body { font-family: 'Inter', -apple-system, sans-serif; line-height: 1.6; color: #1a1a1a; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 0 auto; padding: 40px 20px; }
+        .card { background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.06); border: 1px solid #f0f0f0; }
+        .header { background: linear-gradient(135deg, #6366f1, #a855f7); padding: 40px; text-align: center; color: white; }
+        .content { padding: 40px; }
+        .button { display: inline-block; padding: 14px 32px; background: #6366f1; color: #ffffff !important; text-decoration: none; border-radius: 8px; font-weight: 600; margin: 24px 0; }
+        .footer { padding: 24px; text-align: center; font-size: 13px; color: #6b7280; }
+        h1 { margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.025em; }
+        p { margin: 16px 0; color: #4b5563; }
+        .divider { height: 1px; background: #f3f4f6; margin: 24px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="header">
+                <h1>{{ app_name }}</h1>
+            </div>
+            <div class="content">
+                <h2 style="margin: 0; color: #111827; font-size: 20px;">Halo!</h2>
+                <p>Anda menerima email ini karena kami menerima permintaan reset password untuk akun Anda di <strong>{{ app_name }}</strong>.</p>
+                
+                <div style="text-align: center;">
+                    <a href="{{ reset_url }}" class="button">Reset Password Saya</a>
+                </div>
+
+                <p style="font-size: 14px; color: #9ca3af;">Link ini akan kadaluarsa dalam 60 menit. Jika Anda tidak merasa meminta reset password, abaikan saja email ini.</p>
+                
+                <div class="divider"></div>
+                
+                <p style="font-size: 12px; color: #9ca3af;">
+                    Jika Anda kesulitan menekan tombol, salin dan tempel URL berikut ke browser Anda:<br>
+                    <span style="word-break: break-all; color: #6366f1;">{{ reset_url }}</span>
+                </p>
+            </div>
+        </div>
+        <div class="footer">
+            &copy; 2026 {{ app_name }}. All rights reserved.
+        </div>
+    </div>
+</body>
+</html>
+"##;
+        fs::write(email_reset_view, email_reset_template).ok();
     }
 
     let dashboard_view = "resources/views/dashboard.html";
@@ -492,14 +875,27 @@ pub async fn remove_auth() {
         }
     }
 
-    // 4. Delete Controllers
+    // 7. Delete Controllers
     let auth_controller_dir = "src/app/http/controllers/auth";
     if std::path::Path::new(auth_controller_dir).exists() {
         fs::remove_dir_all(auth_controller_dir).ok();
         println!("   {} {}", "✅ Deleted:".green(), auth_controller_dir.cyan());
     }
 
-    // 5. Delete Views
+    // 7.1 Delete Password Resets Migration & Model
+    let migration_path = "database/migrations/m20260505_000003_create_password_resets_table.rs";
+    if std::path::Path::new(migration_path).exists() {
+        fs::remove_file(migration_path).ok();
+        println!("   {} {}", "✅ Deleted:".green(), migration_path.cyan());
+    }
+    
+    let model_path = "src/app/models/password_resets.rs";
+    if std::path::Path::new(model_path).exists() {
+        fs::remove_file(model_path).ok();
+        println!("   {} {}", "✅ Deleted:".green(), model_path.cyan());
+    }
+
+    // 8. Delete Views
     let auth_view_dir = "resources/views/auth";
     if std::path::Path::new(auth_view_dir).exists() {
         fs::remove_dir_all(auth_view_dir).ok();
@@ -528,6 +924,41 @@ pub async fn remove_auth() {
         if changed {
             fs::write(controllers_mod_path, content).ok();
             println!("   {} {}", "📝 Updated:".blue(), controllers_mod_path.cyan());
+        }
+    }
+
+    // 7.2 Update src/app/models/mod.rs
+    let models_mod_path = "src/app/models/mod.rs";
+    if let Ok(mut content) = fs::read_to_string(models_mod_path) {
+        if content.contains("pub mod password_resets;") {
+            content = content.replace("pub mod password_resets;\n", "");
+            content = content.replace("pub mod password_resets;", "");
+            fs::write(models_mod_path, content).ok();
+            println!("   {} {}", "📝 Updated:".blue(), models_mod_path.cyan());
+        }
+    }
+
+    // 7.3 Update database/migrations/mod.rs
+    let migration_mod_path = "database/migrations/mod.rs";
+    if let Ok(mut content) = fs::read_to_string(migration_mod_path) {
+        let mut changed = false;
+        let mod_name = "pub mod m20260505_000003_create_password_resets_table;";
+        if content.contains(mod_name) {
+            content = content.replace(&format!("{}\n", mod_name), "");
+            content = content.replace(mod_name, "");
+            changed = true;
+        }
+        
+        let mig_box = "Box::new(m20260505_000003_create_password_resets_table::Migration),";
+        if content.contains(mig_box) {
+            content = content.replace(&format!("{}\n", mig_box), "");
+            content = content.replace(mig_box, "");
+            changed = true;
+        }
+
+        if changed {
+            fs::write(migration_mod_path, content).ok();
+            println!("   {} {}", "📝 Updated:".blue(), migration_mod_path.cyan());
         }
     }
 

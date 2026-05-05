@@ -1,6 +1,6 @@
 use std::fs;
 use rustbasic::config::Config;
-use rustbasic::config::database::{connect, run_migrations};
+use rustbasic::config::database::{connect, run_migrations, rollback_migrations};
 use base64::{Engine as _, engine::general_purpose};
 use rand::RngCore;
 use regex::Regex;
@@ -15,6 +15,16 @@ pub async fn run_manual_migrations() {
     run_migrations(&db).await;
     
     println!("{}", "✅ Migrasi selesai!".green().bold());
+}
+
+pub async fn rollback_manual_migrations() {
+    let cfg = Config::load();
+    println!("{} {} {}", "⏳ Melakukan rollback migrasi di".blue(), cfg.db_connection.yellow(), "...".blue());
+    
+    let db = connect(&cfg).await;
+    rollback_migrations(&db).await;
+    
+    println!("{}", "✅ Rollback migrasi selesai!".green().bold());
 }
 
 pub async fn clear_cache() {

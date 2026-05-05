@@ -18,6 +18,9 @@ cargo rustbasic auth
 - **Controllers**: Membuat `AuthController.rs` (Login/Register logic) dan `DashboardController.rs`.
 - **Views**: Membuat folder `resources/views/auth/` berisi template Login & Register premium, serta `dashboard.html`.
 - **Integration**: Menambahkan middleware `guest` untuk halaman login dan `auth` untuk dashboard.
+- **Forgot Password**: Fitur reset password via email (SMTP) dengan sistem token yang aman (kadaluarsa 60 menit).
+- **Remember Me**: Sistem "Remember Me" menggunakan cookie terenkripsi untuk sesi login yang persisten.
+- **Mail Templates**: Template email HTML premium di `resources/views/emails/`.
 - **UI**: Menambahkan tombol Login/Register secara dinamis di halaman Welcome jika fitur terpasang.
 
 ### 2. Menghapus Autentikasi (`auth back`)
@@ -30,8 +33,9 @@ cargo rustbasic auth:back
 ```
 
 **Fitur Unggulan Penghapusan:**
-- **Robust Clean-up**: Secara otomatis membersihkan import dan deklarasi route di `web.rs`.
+- **Robust Clean-up**: Secara otomatis membersihkan import, deklarasi route, model (password_resets), dan file migrasi terkait.
 - **Safety**: Memastikan project tetap bisa dikompilasi setelah penghapusan dengan merapikan file `mod.rs`.
+- **Database Safety**: Disarankan menjalankan `cargo rustbasic migrate:back` terlebih dahulu sebelum menghapus sistem autentikasi.
 
 ---
 

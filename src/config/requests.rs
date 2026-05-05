@@ -27,6 +27,10 @@ impl Request {
         self.inputs.get(key).and_then(|v| v.as_str())
     }
 
+    pub fn query(&self, key: &str) -> Option<&str> {
+        self.input_as_str(key)
+    }
+
     pub fn all(&self) -> &Value {
         &self.inputs
     }
