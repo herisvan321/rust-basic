@@ -6,50 +6,35 @@ Aplikasi web modern berbasis Rust dengan arsitektur **Clean Monolith**. Dirancan
 
 ## 💎 Fitur Unggulan
 
+### 🚀 Core & Performance
 - **⚡ Performa Axum**: Backend super cepat dengan framework Axum 0.8 dan Tokio.
-- **🎨 Modern UI Architecture**: Pengalaman Single Page Application (SPA) yang sangat ringan menggunakan **HTMX** dan **Pure CSS**. Tidak ada library JavaScript berat (Hapus Alpine.js & Vanilla JS).
-- **🧩 Modular Minijinja Macros**: UI yang dibangun dengan komponen reusable yang terbagi secara logis (`forms`, `buttons`, `display`, `overlays`, `feedback`).
-- **📅 Carbon-like Time Management**: Penanganan waktu yang mudah dan kuat menggunakan `chrono` & `chrono-humanize`. Mendukung `.diff_for_humans()` dan zona waktu dinamis via `.env`.
-- **🔐 Hardened Security**: 
-    - **Session-IP Binding**: Sesi dikunci berdasarkan IP Address untuk mencegah hijacking.
-    - **Strict Env Enforcement**: Aplikasi tidak akan berjalan tanpa file `.env` yang valid.
-    - **CSRF Protection**: Proteksi otomatis pada semua request HTMX.
-- **📝 Production-Grade Logging**: Dual-output logging (Terminal berwarna & File bersih di `storage/logs/`).
-- **🔘 Smart Overlays**: Modal konfirmasi (seperti Logout) menggunakan teknik **CSS Checkbox Hack**.
-- **🚀 Premium Splitscreen UI**: Desain layar terbagi yang modern dan mewah tanpa kartu (_cardless_).
-- **📊 Premium Dashboard**: Panel kendali modern dengan statistik real-time dan navigasi sisi kiri yang elegan.
-- **📦 Flexible Assets & Binary Embedding**: File CSS dan JS inti (HTMX) dapat ditanam langsung ke dalam binary aplikasi menggunakan `include_str!` untuk performa maksimal, namun sistem kini juga mendukung penggunaan **CDN eksternal** secara fleksibel jika diperlukan.
-- **🔄 Live Reload**: Browser otomatis refresh saat Anda mengubah file `.rs` atau `.html` (hanya aktif saat `APP_DEBUG=true`).
-- **📧 SMTP Mail Service**: Integrasi `lettre` untuk pengiriman email asinkron (misal: Gmail).
+- **📦 Flexible Assets & Binary Embedding**: File CSS/JS inti ditanam ke binary via `include_str!` atau via CDN eksternal secara fleksibel.
+- **🔄 Live Reload**: Browser otomatis refresh saat mengubah file `.rs` atau `.html` (aktif saat `APP_DEBUG=true`).
+
+### 🎨 UI/UX Architecture
+- **🪄 HTMX SPA Experience**: Pengalaman Single Page Application yang ringan tanpa library JavaScript berat.
+- **🧩 Modular Minijinja Macros**: UI dibangun dengan komponen reusable (`forms`, `buttons`, `display`, `overlays`, `feedback`).
+- **🚀 Premium Design System**: Desain *Splitscreen UI* modern dan *Premium Dashboard* dengan statistik real-time.
+- **🔘 Smart Overlays**: Modal konfirmasi (seperti Logout) menggunakan teknik **CSS Checkbox Hack** (Zero JS).
+
+### 🔐 Hardened Security
+- **🛡️ Security First**: Proteksi CSRF otomatis, *Strict Env Enforcement*, dan *Bcrypt Password Hashing*.
+- **🌐 Session-IP Binding**: Sesi dikunci berdasarkan IP Address untuk mencegah hijacking sesi.
 - **🔑 Password Recovery**: Sistem reset password lengkap dengan token aman dan template email HTML premium.
+
+### 🛠️ Utilities & Communication
+- **📧 SMTP Mail Service**: Integrasi `lettre` untuk pengiriman email asinkron (mendukung Gmail, Mailtrap, dll).
+- **📅 Time Management**: Penanganan waktu kuat via `chrono` (mendukung `.diff_for_humans()` & Timezone dinamis).
+- **📝 Pro-Grade Logging**: Dual-output logging (Terminal berwarna & File audit di `storage/logs/`).
 
 ---
 
 ## 🚀 Development
 
-Untuk mempermudah pengembangan, Anda dapat menggunakan fitur **Auto-Reload** (aplikasi otomatis restart saat ada perubahan file) dan **Port Cleaner** (otomatis mematikan proses lama yang menyangkut di port).
-
-### 1. Instalasi Tool (Sekali saja)
-
-Pastikan Anda memiliki `cargo-watch` terinstal di sistem Anda:
+Untuk mempermudah pengembangan, pastikan Anda memiliki `cargo-watch` terinstal agar fitur **Auto-Reload** dan **Live Refresh** aktif secara otomatis.
 
 ```bash
 cargo install cargo-watch
-```
-
-### 2. Menjalankan Aplikasi dengan Auto-Reload & Live Refresh
-
-Kini Anda bisa menggunakan perintah singkat berikut (mirip `php rustbasic serve`):
-
-```bash
-cargo serve
-```
-
-_Perintah ini secara otomatis menjalankan `cargo watch` yang memantau file kode (`src`), template (`resources`), dan file `.env`. Berkat `tower-livereload`, browser Anda juga akan refresh otomatis._
-
-Untuk kontrol manual yang lebih detail, gunakan:
-```bash
-cargo watch -w src -w resources -x run
 ```
 
 ---
@@ -132,7 +117,7 @@ Cocok untuk memulai proyek baru yang benar-benar terpisah dari framework asli.
 
 ---
 
-## 🛠️ Langkah Memulai (Urutan Kerja)
+## 🚀 Langkah Memulai (Setup & Development)
 
 Ikuti urutan ini agar aplikasi berjalan sempurna tanpa hambatan:
 
@@ -152,12 +137,13 @@ Ikuti urutan ini agar aplikasi berjalan sempurna tanpa hambatan:
     ```bash
     cargo rustbasic auth
     ```
-5.  **Serve**: Jalankan server pengembangan.
+5.  **Jalankan Server**: Gunakan perintah singkat untuk mengaktifkan mode pengembangan (Auto-Reload + Live Refresh).
     ```bash
     cargo serve
     ```
+    _Akses aplikasi di: 👉 **[http://localhost:4000](http://localhost:4000)**_
 
-Akses aplikasi di: 👉 **[http://localhost:4000](http://localhost:4000)**
+    *(Untuk kontrol manual, gunakan: `cargo watch -w src -w resources -x run`)*
 
 ---
 
