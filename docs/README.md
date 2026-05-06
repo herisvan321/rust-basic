@@ -1,32 +1,23 @@
 # 📚 RustBasic Documentation Index
 
-Selamat datang di pusat dokumentasi **RustBasic Framework**. Di sini Anda akan menemukan panduan lengkap untuk setiap aspek framework.
+Pusat dokumentasi resmi **RustBasic Framework (RSX Edition)**.
 
 ---
 
 ## 🚀 Memulai (Basics)
 - **[Panduan Dasar](basics.md)**: Instalasi, konfigurasi awal, dan menjalankan server.
-- **[Manajemen Database](database.md)**: Dokumentasi Sea-ORM, migrasi, dan manajemen data.
+- **[RSX Views](views.md)**: **[UTAMA]** Panduan templating dengan sintaks RSX dan auto-components.
+- **[Manajemen Database](database.md)**: Dokumentasi Sea-ORM dan migrasi.
 - **[Routing & HTTP](http.md)**: Detail mengenai request, response, dan middleware.
-- **[HTMX Guide](../htmx.md)**: Filosofi HTMX dan interaksi Single Page Application.
 
 ## 🛠️ CLI & Scaffolding
 - **[CLI Reference](cli.md)**: Daftar perintah lengkap `cargo rustbasic`.
-- **[Premium Auth Scaffolding](auth_cli.md)**: **[BARU]** Panduan khusus sistem autentikasi premium otomatis.
-
-## 🎨 Frontend & Views
-- **[Minijinja Views](views.md)**: Panduan templating dan penggunaan UI macros.
-- **[HTMX Guide](../htmx.md)**: Filosofi HTMX & Pure CSS
+- **[Auth Scaffolding](auth_cli.md)**: Panduan sistem autentikasi otomatis berbasis RSX.
 
 ## ⚙️ Advanced & Production
-- **[Advanced Topics](advanced.md)**: Optimasi performa dan fitur tingkat lanjut.
-- **[Deployment Guide](deployment.md)**: Panduan rilis ke server produksi (Nginx, Systemd).
+- **[Deployment Guide](deployment.md)**: Panduan rilis ke server produksi.
+- **[Advanced Topics](advanced.md)**: Fitur tingkat lanjut.
 
 ---
 
-## 📝 Catatan Tambahan
-- **[Standard Operating Procedure](../agents.md)**: Manual untuk pengembang/agent.
-- **[AI System Prompt](../AI_PROMPT.md)**: Konfigurasi asisten AI.
-
----
-*Gunakan `cargo rustbasic route:list` untuk memantau endpoint yang aktif secara real-time.*
+_Gunakan perintah `cargo serve` untuk pengalaman pengembangan terbaik dengan auto-refresh browser._

@@ -1,78 +1,37 @@
 # 🔐 RustBasic Authentication CLI
 
-Dokumentasi ini menjelaskan cara menggunakan fitur *scaffolding* autentikasi otomatis pada framework RustBasic menggunakan perintah `cargo rustbasic`.
+Dokumentasi fitur *scaffolding* autentikasi otomatis pada framework RustBasic.
 
 ---
 
 ## 🚀 Perintah Utama
 
 ### 1. Memasang Autentikasi (`auth`)
-Gunakan perintah ini untuk membangun seluruh sistem login dan registrasi secara otomatis.
+Membangun sistem login, registrasi, dan dashboard secara otomatis dengan desain premium.
 
 ```bash
 cargo rustbasic auth
 ```
 
-**Apa yang dilakukan perintah ini?**
-- **Routes**: Membuat `src/routes/auth.rs` dan mendaftarkannya di `web.rs`.
-- **Controllers**: Membuat `AuthController.rs` (Login/Register logic) dan `DashboardController.rs`.
-- **Views**: Membuat folder `resources/views/auth/` berisi template Login & Register premium, serta `dashboard.html`.
-- **Integration**: Menambahkan middleware `guest` untuk halaman login dan `auth` untuk dashboard.
-- **Forgot Password**: Fitur reset password via email (SMTP) dengan sistem token yang aman (kadaluarsa 60 menit).
-- **Remember Me**: Sistem "Remember Me" menggunakan cookie terenkripsi untuk sesi login yang persisten.
-- **Mail Templates**: Template email HTML premium di `resources/views/emails/`.
-- **UI**: Menambahkan tombol Login/Register secara dinamis di halaman Welcome jika fitur terpasang.
-
-### 2. Menghapus Autentikasi (`auth back`)
-Gunakan perintah ini jika Anda ingin menghapus seluruh sistem autentikasi dan mengembalikan project ke kondisi bersih.
-
-```bash
-cargo rustbasic auth back
-# ATAU
-cargo rustbasic auth:back
-```
-
-**Fitur Unggulan Penghapusan:**
-- **Robust Clean-up**: Secara otomatis membersihkan import, deklarasi route, model (password_resets), dan file migrasi terkait.
-- **Safety**: Memastikan project tetap bisa dikompilasi setelah penghapusan dengan merapikan file `mod.rs`.
-- **Database Safety**: Disarankan menjalankan `cargo rustbasic migrate:back` terlebih dahulu sebelum menghapus sistem autentikasi.
+**Fitur Baru di Edisi RSX:**
+- **RSX Native**: Semua template yang dihasilkan menggunakan ekstensi `.rsx` dan sintaks RSX (`<Namespace.Component />`).
+- **Auto-Components**: Halaman login dan register menggunakan komponen `<Forms.Input />` dan `<Buttons.Button />` secara otomatis tanpa import manual.
+- **Minified Output**: Output HTML dari halaman auth secara otomatis diminifikasi untuk keamanan (menyembunyikan source code).
 
 ---
 
 ## 📂 Struktur File Tergenerasi
 
-Setelah menjalankan `auth`, file berikut akan tersedia:
+Setelah menjalankan `auth`, file-file berikut akan dibuat dengan sintaks RSX:
 
 | Path | Keterangan |
 | :--- | :--- |
-| `src/routes/auth.rs` | Definisi route `/login` dan `/register`. |
-| `src/app/http/controllers/auth/` | Logika backend untuk autentikasi. |
-| `src/app/http/controllers/dashboard_controller.rs` | Controller untuk halaman admin/dashboard. |
-| `resources/views/auth/` | Template HTML untuk halaman Login & Daftar. |
-| `resources/views/dashboard.html` | Template Dashboard dengan desain premium. |
+| `src/resources/views/auth/login.rsx` | Halaman login menggunakan sintaks RSX. |
+| `src/resources/views/auth/register.rsx` | Halaman registrasi menggunakan sintaks RSX. |
+| `src/resources/views/dashboard.rsx` | Template dashboard premium dengan statistik. |
+| `src/resources/views/emails/reset.rsx` | Template email reset password HTML premium. |
 
 ---
 
-## 🛠️ Kustomisasi Logic
-
-### Database & Model
-Sistem ini secara default menggunakan model `users` yang ada di `src/app/models/users.rs`. Pastikan tabel `users` sudah tersedia di database Anda. Jika belum, jalankan migrasi:
-
-```bash
-cargo rustbasic migrate
-```
-
-### Validasi & Hashing
-- **Hashing**: Menggunakan `bcrypt` dengan *default cost*.
-- **Validation**: Menggunakan struct `RegisterRequest` dan `LoginRequest` di dalam controller yang bisa Anda ubah aturannya sesuai kebutuhan.
-
----
-
-## 💡 Tips & Troubleshooting
-
-- **404 Error**: Jika halaman `/login` tidak ditemukan setelah instalasi, pastikan `cargo serve` telah melakukan *hot-reload* dengan benar.
-- **Project Broken**: Jika terjadi error kompilasi setelah menghapus auth, jalankan `cargo rustbasic auth back` sekali lagi untuk memastikan pembersihan menyeluruh.
-- **Route List**: Gunakan `cargo rustbasic route:list` untuk memverifikasi endpoint yang aktif.
-
----
-*Dokumentasi ini dibuat otomatis oleh Antigravity AI Agent.*
+## 🛠️ Kustomisasi
+Anda dapat memodifikasi logika di `src/app/http/controllers/auth/auth_controller.rs` dan memperbarui tampilan langsung di file `.rsx` terkait. Berkat fitur `cargo serve`, setiap perubahan pada template akan memicu auto-refresh di browser.

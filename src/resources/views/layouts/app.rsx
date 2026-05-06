@@ -1,5 +1,5 @@
 <!-- 
-  📑 LABEL: LAYOUT UTAMA (app.html)
+  📑 LABEL: LAYOUT UTAMA (app.rsx)
   Hanya menggunakan HTMX untuk interaksi.
 -->
 <!DOCTYPE html>
@@ -15,24 +15,21 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
     
     <!-- 2. File CSS Utama (Injected Local) -->
-    {% from "components/assets.html" import styles, htmx %}
-    {{ styles() }}
+    <Assets.Styles />
     
     <!-- 3. Library Frontend (HTMX Local Macro) -->
-    {{ htmx() }}
+    <Assets.Htmx />
 </head>
 <body hx-boost="true" hx-headers='{"X-CSRF-TOKEN": "{{ csrf_token }}"}'>
-    {% from "components/feedback.html" import indicator %}
-    {{ indicator() }}
+    <Feedback.Indicator />
     
     <main>
-        {% from "components/display.html" import alert %}
         <!-- Flash Messages (Tanpa JS, dirender langsung) -->
         {% if flash_success %}
-            {{ alert(flash_success, type="success") }}
+            <Display.Alert message="{{ flash_success }}" type="success" />
         {% endif %}
         {% if flash_error %}
-            {{ alert(flash_error, type="error") }}
+            <Display.Alert message="{{ flash_error }}" type="error" />
         {% endif %}
 
         <!-- Konten dari file lain akan muncul di sini -->

@@ -48,11 +48,11 @@ Aplikasi RustBasic memerlukan file pendukung agar berjalan dengan benar. Berikut
 ├── .env                 # Konfigurasi produksi (Wajib)
 ├── database/            # Database SQLite & Migrasi
 ├── public/              # File statis (Gambar, Favicon, dll)
-├── resources/           # Template HTML (Views)
+├── src/resources/           # Template HTML (Views)
 └── storage/             # Log aplikasi & Upload file
 ```
 
-*Catatan: Meskipun file CSS dan JS (HTMX) utama sudah tertanam di dalam binary, folder `resources/views` tetap wajib ada karena template dimuat secara dinamis saat runtime.*
+*Catatan: Meskipun file CSS dan JS (HTMX) utama sudah tertanam di dalam binary, folder `src/resources/views` tetap wajib ada karena template dimuat secara dinamis saat runtime.*
 
 ### 📦 Izin Tulis (Permissions)
 Pastikan user yang menjalankan aplikasi (misal: `www-data`) memiliki akses tulis ke folder berikut:

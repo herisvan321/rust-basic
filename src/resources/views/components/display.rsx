@@ -1,4 +1,4 @@
-{# 📑 LABEL: DISPLAY COMPONENTS (components/display.html) #}
+{# 📑 LABEL: DISPLAY COMPONENTS (components/display.rsx) #}
 
 {# 1. Card #}
 {% macro card(title="", class="") %}

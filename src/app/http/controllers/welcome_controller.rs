@@ -10,8 +10,8 @@ pub async fn index(req: Request) -> impl IntoResponse {
     // Cek apakah fitur Auth sudah terinstal (scaffolded)
     let auth_installed = std::path::Path::new("src/app/http/controllers/auth").exists();
 
-    // Render file "welcome.html" dengan data title
-    view(&req, "welcome.html", context! {
+    // Render file "welcome.rsx" dengan data title
+    view(&req, "welcome.rsx", context! {
         title => "Selamat Datang di RustBasic",
         auth_installed => auth_installed,
     })
@@ -25,4 +25,8 @@ pub async fn dev_info(State(state): State<AppState>, _req: Request) -> impl Into
         "timezone": state.config.app_timezone,
         "rate_limit": state.config.app_limit_request
     }))
+}
+
+pub async fn test_rsx(req: Request) -> impl IntoResponse {
+    view(&req, "test_rsx.rsx", context! { title => "Test RSX" })
 }

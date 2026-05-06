@@ -24,10 +24,10 @@ pub async fn logging_middleware(
     let path = req.uri().path().to_string();
     let ip = addr.ip().to_string();
 
-    // 1. Simpan IP ke tracker agar bisa diambil oleh DatabasePool saat menyimpan sesi
+    // 1. Simpan IP ke tracker
     IP_TRACKER.insert(session.get_session_id().to_string(), ip.clone());
 
-    // 2. Log ke Terminal (dengan warna)
+    // 2. Log ke Terminal (Format: [HTTP] TIMESTAMP METHOD PATH from IP)
     let method_str = method.as_str();
     let method_colored = match method_str {
         "GET" => method_str.green(),
@@ -38,9 +38,9 @@ pub async fn logging_middleware(
     };
 
     println!(
-        "{} {} {:<6} {} from {}",
-        chrono::Local::now().format("%Y-%m-%dT%H:%M:%S%.3fZ").to_string().dimmed(),
+        "[{}] {} {:<6} {} from {}",
         "HTTP".magenta().bold(),
+        chrono::Local::now().format("%Y-%m-%dT%H:%M:%S%.3fZ").to_string().dimmed(),
         method_colored.bold(),
         path.cyan(),
         ip.yellow()

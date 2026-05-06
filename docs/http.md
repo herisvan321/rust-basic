@@ -77,7 +77,7 @@ RustBasic mendukung berbagai tipe response:
 
 ## Render View (HTML)
 ```rust
-view(&req, "file.html", context! { ... })
+view(&req, "file.rsx", context! { ... })
 ```
 
 ## JSON Response

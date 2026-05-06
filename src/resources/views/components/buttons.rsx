@@ -1,4 +1,4 @@
-{# 📑 LABEL: BUTTON COMPONENTS (components/buttons.html) #}
+{# 📑 LABEL: BUTTON COMPONENTS (components/buttons.rsx) #}
 
 {% macro button(label, type="submit", variant="primary", class="", style="", hx_post="", hx_target="", hx_swap="") %}
     <button type="{{ type }}" 

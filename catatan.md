@@ -12,7 +12,7 @@ Aplikasi telah dipisahkan menjadi modul-modul kecil untuk skalabilitas tinggi:
 rustbasic/
 ├── database/             # Lokasi database SQLite & SQL migrasi
 ├── public/               # File statis (CSS, Gambar)
-├── resources/
+├── src/resources/
 │   └── views/            # Template HTML (Minijinja)
 │       ├── components/   # Modular UI Library (Split by logic)
 │       └── ...
@@ -47,11 +47,11 @@ Aplikasi menerapkan standar keamanan produksi:
 RustBasic meninggalkan library JavaScript berat (seperti Alpine.js) dan beralih ke **Murni HTMX + CSS**:
 
 - **Modular UI Library**: Komponen dipisah menjadi file kecil:
-    - `forms.html`: Penanganan input dan validasi error.
-    - `buttons.html`: Tombol aksi dan navigasi.
-    - `display.html`: Alert (Floating Toast), Stat Cards, Card.
-    - `overlays.html`: Modal Konfirmasi menggunakan teknik **Checkbox Hack** (Tanpa JS).
-    - `feedback.html`: Loading indicators dan Skeleton loading.
+    - `forms.rsx`: Penanganan input dan validasi error.
+    - `buttons.rsx`: Tombol aksi dan navigasi.
+    - `display.rsx`: Alert (Floating Toast), Stat Cards, Card.
+    - `overlays.rsx`: Modal Konfirmasi menggunakan teknik **Checkbox Hack** (Tanpa JS).
+    - `feedback.rsx`: Loading indicators dan Skeleton loading.
 - **Floating Alerts**: Notifikasi tidak lagi mendorong konten, melainkan melayang di pojok kanan atas dengan animasi halus.
 - **SPA Experience**: Navigasi instan menggunakan `hx-boost` dan `hx-indicator` untuk feedback visual.
 

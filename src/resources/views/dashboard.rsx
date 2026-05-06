@@ -1,6 +1,4 @@
-{% extends "layouts/app.html" %}
-{% from "components/buttons.html" import button %}
-{% from "components/display.html" import stat_card %}
+{% extends "layouts/app.rsx" %}
 
 {% block title %}{{ title }} - RustBasic{% endblock %}
 
@@ -19,8 +17,7 @@
                 <a href="/dashboard" class="btn" style="background: rgba(255,255,255,0.2); color: #fff; justify-content: flex-start; text-transform: none;">Dashboard Overview</a>
                 <a href="/" class="btn" style="color: #fff; justify-content: flex-start; text-transform: none; opacity: 0.7;">Beranda Utama</a>
                 <div style="margin-top: auto; padding-top: 2rem;">
-                    {% from "components/overlays.html" import logout_confirm_button %}
-                    {{ logout_confirm_button(id="dashboard-logout", label="LOGOUT", variant="outline", class="w-100", style="border: none; background: rgba(255,255,255,0.1); color: #fff;") }}
+                    <Overlays.Logout_confirm_button id="dashboard-logout" label="LOGOUT" variant="outline" class="w-100" style="border: none; background: rgba(255,255,255,0.1); color: #fff;" />
                 </div>
             </nav>
         </div>
@@ -36,17 +33,17 @@
 
             <!-- Grid Statistik -->
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; margin-bottom: 4rem;">
-                {{ stat_card("Total Pengguna", total_users) }}
+                <Display.Stat_card label="Total Pengguna" value="{{ total_users }}" />
                 
                 <div style="border-bottom: 4px solid var(--accent); padding: 1.5rem 0;">
                     <p class="text-muted text-uppercase" style="font-size: 0.8rem; font-weight: 700; letter-spacing: 0.1em; margin-bottom: 1rem;">Status Sistem</p>
-                    <div style="display: flex; align-items: center; gap: 0.75rem; font-size: 1.5rem; font-weight: 800; color: #2e7d32; padding: 1.2rem 0;">
+                    <div style="display: center; align-items: center; gap: 0.75rem; font-size: 1.5rem; font-weight: 800; color: #2e7d32; padding: 1.2rem 0;">
                         <div style="width: 12px; height: 12px; background: #4caf50; border-radius: 50%;"></div>
                         ONLINE
                     </div>
                 </div>
 
-                {{ stat_card("Performa", "99.9%", color="var(--secondary)") }}
+                <Display.Stat_card label="Performa" value="99.9%" color="var(--secondary)" />
             </div>
 
             <!-- Content Area -->

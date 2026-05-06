@@ -1,4 +1,4 @@
-{# 📑 LABEL: FEEDBACK COMPONENTS (components/feedback.html) #}
+{# 📑 LABEL: FEEDBACK COMPONENTS (components/feedback.rsx) #}
 
 {# 1. Loading Spinner #}
 {% macro spinner(class="") %}

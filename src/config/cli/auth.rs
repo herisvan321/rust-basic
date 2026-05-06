@@ -230,12 +230,12 @@ pub struct AuthController;
 impl AuthController {
     /// Menampilkan halaman login
     pub async fn login_page(req: Request) -> impl IntoResponse {
-        view(&req, "auth/login.html", context! { title => "Login" })
+        view(&req, "auth/login.rsx", context! { title => "Login" })
     }
 
     /// Menampilkan halaman register
     pub async fn register_page(req: Request) -> impl IntoResponse {
-        view(&req, "auth/register.html", context! { title => "Daftar Akun" })
+        view(&req, "auth/register.rsx", context! { title => "Daftar Akun" })
     }
 
     /// Proses Pendaftaran
@@ -315,7 +315,7 @@ impl AuthController {
 
     /// Menampilkan halaman lupa password
     pub async fn forgot_password_page(req: Request) -> impl IntoResponse {
-        view(&req, "auth/forgot.html", context! { title => "Lupa Password" })
+        view(&req, "auth/forgot.rsx", context! { title => "Lupa Password" })
     }
 
     /// Kirim link reset password
@@ -360,7 +360,7 @@ impl AuthController {
             let reset_url = format!("{}/reset-password?token={}", config.app_url, token);
 
             let subject = format!("Reset Password - {}", app_name);
-            let body = crate::config::view::render_to_string("emails/reset.html", context! {
+            let body = crate::config::view::render_to_string("emails/reset.rsx", context! {
                 app_name => app_name,
                 reset_url => reset_url,
             });
@@ -378,7 +378,7 @@ impl AuthController {
     /// Menampilkan halaman reset password
     pub async fn reset_password_page(req: Request) -> impl IntoResponse {
         let token = req.input_as_str("token").unwrap_or_default();
-        view(&req, "auth/reset.html", context! { title => "Reset Password", token => token })
+        view(&req, "auth/reset.rsx", context! { title => "Reset Password", token => token })
     }
 
     /// Proses update password baru
@@ -443,14 +443,10 @@ impl AuthController {
     }
 
     // 5. Views
-    let auth_view_dir = "resources/views/auth";
+    let auth_view_dir = "src/resources/views/auth";
     fs::create_dir_all(auth_view_dir).ok();
     
-    let login_view = "resources/views/auth/login.html";
-    if !std::path::Path::new(login_view).exists() {
-        let login_template = r##"{% extends "layouts/app.html" %}
-{% from "components/forms.html" import input %}
-{% from "components/buttons.html" import button, link_back %}
+    let login_template = r##"{% extends "layouts/app.rsx" %}
 
 {% block title %}Login - RustBasic{% endblock %}
 
@@ -467,15 +463,15 @@ impl AuthController {
     <!-- Sisi Form -->
     <div class="split-side-content">
         <div class="content-container">
-            {{ link_back() }}
+            <Buttons.Link_back />
             
             <h2 class="title" style="font-size: 2.5rem; margin-bottom: 0.5rem; text-align: left;">Login</h2>
             <p class="text-muted mb-5">Masukkan kredensial Anda untuk masuk.</p>
 
             <form hx-post="/login" hx-target="body" hx-push-url="true" hx-indicator="#indicator">
-                {{ input("email", type="email", label="Email", placeholder="nama@email.com", value=old.email, errors=errors.email, required=true) }}
+                <Forms.Input name="email" type="email" label="Email" placeholder="nama@email.com" value="{{ old.email }}" errors="{{ errors.email }}" required="true" />
                 
-                {{ input("password", type="password", label="Password", placeholder="********", required=true) }}
+                <Forms.Input name="password" type="password" label="Password" placeholder="********" required="true" />
 
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
                     <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; cursor: pointer;">
@@ -484,7 +480,7 @@ impl AuthController {
                     <a href="/forgot-password" class="text-primary" style="font-size: 0.9rem; font-weight: 600;">Lupa Password?</a>
                 </div>
 
-                {{ button("MASUK", class="w-100 mb-4") }}
+                <Buttons.Button label="MASUK" class="w-100 mb-4" />
 
                 <p class="text-muted" style="text-align: center; font-size: 0.9rem;">
                     Belum punya akun? <a href="/register" class="text-primary" style="font-weight: 700;">Daftar Sekarang</a>
@@ -495,14 +491,8 @@ impl AuthController {
 </div>
 {% endblock %}
 "##;
-        fs::write(login_view, login_template).ok();
-    }
-    
-    let register_view = "resources/views/auth/register.html";
-    if !std::path::Path::new(register_view).exists() {
-        let register_template = r##"{% extends "layouts/app.html" %}
-{% from "components/forms.html" import input %}
-{% from "components/buttons.html" import button, link_back %}
+
+    let register_template = r##"{% extends "layouts/app.rsx" %}
 
 {% block title %}Daftar - RustBasic{% endblock %}
 
@@ -519,19 +509,19 @@ impl AuthController {
     <!-- Sisi Form -->
     <div class="split-side-content">
         <div class="content-container">
-            {{ link_back() }}
+            <Buttons.Link_back />
 
             <h2 class="title" style="font-size: 2.5rem; margin-bottom: 0.5rem; text-align: left;">Daftar</h2>
             <p class="text-muted mb-5">Lengkapi formulir di bawah ini.</p>
 
             <form hx-post="/register" hx-target="body" hx-push-url="true" hx-indicator="#indicator">
-                {{ input("name", label="Nama Lengkap", placeholder="Nama Anda", value=old.name, errors=errors.name, required=true) }}
+                <Forms.Input name="name" label="Nama Lengkap" placeholder="Nama Anda" value="{{ old.name }}" errors="{{ errors.name }}" required="true" />
 
-                {{ input("email", type="email", label="Email", placeholder="nama@email.com", value=old.email, errors=errors.email, required=true) }}
+                <Forms.Input name="email" type="email" label="Email" placeholder="nama@email.com" value="{{ old.email }}" errors="{{ errors.email }}" required="true" />
 
-                {{ input("password", type="password", label="Password", placeholder="Min. 8 karakter", errors=errors.password, required=true) }}
+                <Forms.Input name="password" type="password" label="Password" placeholder="Min. 8 karakter" errors="{{ errors.password }}" required="true" />
 
-                {{ button("DAFTAR SEKARANG", class="w-100 mb-4") }}
+                <Buttons.Button label="DAFTAR SEKARANG" class="w-100 mb-4" />
 
                 <p class="text-muted" style="text-align: center; font-size: 0.9rem;">
                     Sudah punya akun? <a href="/login" class="text-primary" style="font-weight: 700;">Login Disini</a>
@@ -542,14 +532,8 @@ impl AuthController {
 </div>
 {% endblock %}
 "##;
-        fs::write(register_view, register_template).ok();
-    }
 
-    let forgot_view = "resources/views/auth/forgot.html";
-    if !std::path::Path::new(forgot_view).exists() {
-        let forgot_template = r##"{% extends "layouts/app.html" %}
-{% from "components/forms.html" import input %}
-{% from "components/buttons.html" import button, link_back %}
+    let forgot_template = r##"{% extends "layouts/app.rsx" %}
 
 {% block title %}Lupa Password - RustBasic{% endblock %}
 
@@ -566,15 +550,15 @@ impl AuthController {
     <!-- Sisi Form -->
     <div class="split-side-content">
         <div class="content-container">
-            {{ link_back() }}
+            <Buttons.Link_back />
 
             <h2 class="title" style="font-size: 2.5rem; margin-bottom: 0.5rem; text-align: left;">Reset Password</h2>
             <p class="text-muted mb-5">Masukkan email Anda untuk menerima link reset.</p>
 
             <form hx-post="/forgot-password" hx-target="body" hx-push-url="true" hx-indicator="#indicator">
-                {{ input("email", type="email", label="Email", placeholder="nama@email.com", value=old.email, errors=errors.email, required=true) }}
+                <Forms.Input name="email" type="email" label="Email" placeholder="nama@email.com" value="{{ old.email }}" errors="{{ errors.email }}" required="true" />
 
-                {{ button("KIRIM LINK RESET", class="w-100 mb-4") }}
+                <Buttons.Button label="KIRIM LINK RESET" class="w-100 mb-4" />
 
                 <p class="text-muted" style="text-align: center; font-size: 0.9rem;">
                     Ingat password Anda? <a href="/login" class="text-primary" style="font-weight: 700;">Login Disini</a>
@@ -585,14 +569,25 @@ impl AuthController {
 </div>
 {% endblock %}
 "##;
+
+    let login_view = "src/resources/views/auth/login.rsx";
+    if !std::path::Path::new(login_view).exists() {
+        fs::write(login_view, login_template).ok();
+    }
+    
+    let register_view = "src/resources/views/auth/register.rsx";
+    if !std::path::Path::new(register_view).exists() {
+        fs::write(register_view, register_template).ok();
+    }
+
+    let forgot_view = "src/resources/views/auth/forgot.rsx";
+    if !std::path::Path::new(forgot_view).exists() {
         fs::write(forgot_view, forgot_template).ok();
     }
 
-    let reset_view = "resources/views/auth/reset.html";
+    let reset_view = "src/resources/views/auth/reset.rsx";
     if !std::path::Path::new(reset_view).exists() {
-        let reset_template = r##"{% extends "layouts/app.html" %}
-{% from "components/forms.html" import input %}
-{% from "components/buttons.html" import button %}
+        let reset_template = r##"{% extends "layouts/app.rsx" %}
 
 {% block title %}Reset Password - RustBasic{% endblock %}
 
@@ -615,9 +610,9 @@ impl AuthController {
             <form hx-post="/reset-password" hx-target="body" hx-push-url="true" hx-indicator="#indicator">
                 <input type="hidden" name="token" value="{{ token }}">
                 
-                {{ input("password", type="password", label="Password Baru", placeholder="Min. 8 karakter", errors=errors.password, required=true) }}
+                <Forms.Input name="password" type="password" label="Password Baru" placeholder="Min. 8 karakter" errors="{{ errors.password }}" required="true" />
 
-                {{ button("SIMPAN PASSWORD", class="w-100 mb-4") }}
+                <Buttons.Button label="SIMPAN PASSWORD" class="w-100 mb-4" />
             </form>
         </div>
     </div>
@@ -627,9 +622,9 @@ impl AuthController {
         fs::write(reset_view, reset_template).ok();
     }
 
-    let email_reset_view = "resources/views/emails/reset.html";
+    let email_reset_view = "src/resources/views/emails/reset.rsx";
     if !std::path::Path::new(email_reset_view).exists() {
-        fs::create_dir_all("resources/views/emails").ok();
+        fs::create_dir_all("src/resources/views/emails").ok();
         let email_reset_template = r##"<!DOCTYPE html>
 <html>
 <head>
@@ -681,11 +676,9 @@ impl AuthController {
         fs::write(email_reset_view, email_reset_template).ok();
     }
 
-    let dashboard_view = "resources/views/dashboard.html";
+    let dashboard_view = "src/resources/views/dashboard.rsx";
     if !std::path::Path::new(dashboard_view).exists() {
-        let dashboard_template = r##"{% extends "layouts/app.html" %}
-{% from "components/buttons.html" import button %}
-{% from "components/display.html" import stat_card %}
+        let dashboard_template = r##"{% extends "layouts/app.rsx" %}
 
 {% block title %}{{ title }} - RustBasic{% endblock %}
 
@@ -704,8 +697,7 @@ impl AuthController {
                 <a href="/dashboard" class="btn" style="background: rgba(255,255,255,0.2); color: #fff; justify-content: flex-start; text-transform: none;">Dashboard Overview</a>
                 <a href="/" class="btn" style="color: #fff; justify-content: flex-start; text-transform: none; opacity: 0.7;">Beranda Utama</a>
                 <div style="margin-top: auto; padding-top: 2rem;">
-                    {% from "components/overlays.html" import logout_confirm_button %}
-                    {{ logout_confirm_button(id="dashboard-logout", label="LOGOUT", variant="outline", class="w-100", style="border: none; background: rgba(255,255,255,0.1); color: #fff;") }}
+                    <Overlays.Logout_confirm_button id="dashboard-logout" label="LOGOUT" variant="outline" class="w-100" style="border: none; background: rgba(255,255,255,0.1); color: #fff;" />
                 </div>
             </nav>
         </div>
@@ -721,7 +713,7 @@ impl AuthController {
 
             <!-- Grid Statistik -->
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; margin-bottom: 4rem;">
-                {{ stat_card("Total Pengguna", total_users) }}
+                <Display.Stat_card label="Total Pengguna" value="{{ total_users }}" />
                 
                 <div style="border-bottom: 4px solid var(--accent); padding: 1.5rem 0;">
                     <p class="text-muted text-uppercase" style="font-size: 0.8rem; font-weight: 700; letter-spacing: 0.1em; margin-bottom: 1rem;">Status Sistem</p>
@@ -731,7 +723,7 @@ impl AuthController {
                     </div>
                 </div>
 
-                {{ stat_card("Performa", "99.9%", color="var(--secondary)") }}
+                <Display.Stat_card label="Performa" value="99.9%" color="var(--secondary)" />
             </div>
 
             <!-- Content Area -->
@@ -773,7 +765,7 @@ impl DashboardController {
         let user = users::Entity::find_by_id(user_id).one(&state.db).await.ok().flatten();
         let total_users = users::Entity::find().count(&state.db).await.unwrap_or(0);
 
-        view(&req, "dashboard.html", context! {
+        view(&req, "dashboard.rsx", context! {
             title => "Dashboard",
             user_name => user.as_ref().map(|u| u.name.clone()).unwrap_or("Guest".to_string()),
             user_email => user.as_ref().map(|u| u.email.clone()).unwrap_or_default(),
@@ -787,15 +779,15 @@ impl DashboardController {
     }
     update_controller_mod_rs("dashboard_controller");
 
-    println!("   {} Folder resources/views/auth dan dashboard siap.", "✅ Views:".green());
+    println!("   {} Folder src/resources/views/auth dan dashboard siap.", "✅ Views:".green());
 
-    // 6. Update welcome.html
-    let welcome_path = "resources/views/welcome.html";
+    // 6. Update welcome.rsx
+    let welcome_path = "src/resources/views/welcome.rsx";
     if let Ok(content) = fs::read_to_string(welcome_path) {
         if !content.contains("{% if auth %}") {
-            println!("   {} {}", "⚠️  Manual:".yellow(), "Pastikan welcome.html memiliki tombol login/register.".dimmed());
+            println!("   {} {}", "⚠️  Manual:".yellow(), "Pastikan welcome.rsx memiliki tombol login/register.".dimmed());
         } else {
-            println!("   {} {}", "✅ OK:".green(), "welcome.html sudah memiliki logika auth.".dimmed());
+            println!("   {} {}", "✅ OK:".green(), "welcome.rsx sudah memiliki logika auth.".dimmed());
         }
     }
 
@@ -896,7 +888,7 @@ pub async fn remove_auth() {
     }
 
     // 8. Delete Views
-    let auth_view_dir = "resources/views/auth";
+    let auth_view_dir = "src/resources/views/auth";
     if std::path::Path::new(auth_view_dir).exists() {
         fs::remove_dir_all(auth_view_dir).ok();
         println!("   {} {}", "✅ Deleted:".green(), auth_view_dir.cyan());

@@ -1,4 +1,4 @@
-{# 📑 LABEL: OVERLAY COMPONENTS (components/overlays.html) #}
+{# 📑 LABEL: OVERLAY COMPONENTS (components/overlays.rsx) #}
 
 {# 1. Logout Confirmation Button & Modal (Fixed) #}
 {% macro logout_confirm_button(id="logout-modal", label="LOGOUT", variant="outline", class="", style="") %}

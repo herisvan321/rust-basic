@@ -7,7 +7,7 @@ use axum::{
     http::StatusCode,
     response::{Html, IntoResponse, Response},
 };
-use minijinja::{Environment, path_loader, context};
+use minijinja::{Environment, context};
 use chrono::DateTime;
 use chrono_humanize::HumanTime;
 use chrono_tz::Tz;
@@ -15,22 +15,109 @@ use std::sync::LazyLock;
 use crate::config::requests::Request as AppRequest;
 use crate::config::Config;
 use serde_json::{json, Value};
+use regex::Regex;
 
 // 1. Load Static Assets into Memory (Hidden from Public)
 static HTMX_SRC: LazyLock<String> = LazyLock::new(|| {
-    // Gunakan include_str! agar file masuk ke dalam binary saat kompilasi
-    include_str!("../../resources/js/htmx.min.js").to_string()
+    include_str!("../resources/js/htmx.min.js").to_string()
 });
 
 static CSS_SRC: LazyLock<String> = LazyLock::new(|| {
-    include_str!("../../resources/css/style.css").to_string()
+    include_str!("../resources/css/style.css").to_string()
 });
 
+/// Helper untuk mengubah atribut HTML (spasi) menjadi argumen Jinja (koma)
+fn transpile_attrs(attrs: &str) -> String {
+    let attrs = attrs.trim();
+    if attrs.is_empty() { return String::new(); }
+
+    let mut result = String::new();
+    let mut in_quotes = false;
+    let mut quote_char = '"';
+    
+    let chars: Vec<char> = attrs.chars().collect();
+    for i in 0..chars.len() {
+        let c = chars[i];
+        
+        // Deteksi quote
+        if (c == '"' || c == '\'') && (i == 0 || chars[i-1] != '\\') {
+            if !in_quotes {
+                in_quotes = true;
+                quote_char = c;
+            } else if c == quote_char {
+                in_quotes = false;
+            }
+        }
+
+        // Jika spasi di luar quote, ganti dengan koma
+        if c == ' ' && !in_quotes {
+            if i + 1 < chars.len() && chars[i+1] != ' ' && chars[i+1] != ',' {
+                result.push(',');
+            }
+        }
+        
+        result.push(c);
+    }
+    result
+}
 
 // 1. Setup Engine Template (Minijinja)
 pub static JINJA: LazyLock<Environment<'static>> = LazyLock::new(|| {
     let mut env = Environment::new();
-    env.set_loader(path_loader("resources/views"));
+    
+    // Custom Loader untuk mendukung ekstensi .rsx dan sintaks RSX
+    env.set_loader(|name| {
+        let path = format!("src/resources/views/{}", name);
+        
+        if let Ok(content) = std::fs::read_to_string(&path) {
+            if name.ends_with(".rsx") {
+                let mut transformed = content.clone();
+                
+                // 1. Auto-import komponen standar (kecuali untuk komponen itu sendiri)
+                if !name.contains("components/") {
+                    let imports = "{% import 'components/assets.rsx' as assets %}\n\
+                                   {% import 'components/buttons.rsx' as buttons %}\n\
+                                   {% import 'components/display.rsx' as display %}\n\
+                                   {% import 'components/feedback.rsx' as feedback %}\n\
+                                   {% import 'components/forms.rsx' as forms %}\n\
+                                   {% import 'components/overlays.rsx' as overlays %}\n";
+                    
+                    if let Some(pos) = transformed.find("{% extends") {
+                        if let Some(end_pos) = transformed[pos..].find("%}") {
+                            transformed.insert_str(pos + end_pos + 2, &format!("\n{}", imports));
+                        } else {
+                            transformed = format!("{}{}", imports, transformed);
+                        }
+                    } else {
+                        transformed = format!("{}{}", imports, transformed);
+                    }
+                }
+
+                // 2. Transpile Self-Closing Tags: <Forms.Input ... /> -> {{ forms.input(...) }}
+                let re_self = Regex::new(r"<([A-Z][a-zA-Z0-9_]*)\.([A-Z][a-zA-Z0-9_]*)\s*([^>]*)\/>").unwrap();
+                transformed = re_self.replace_all(&transformed, |caps: &regex::Captures| {
+                    let ns = caps[1].to_lowercase();
+                    let comp = caps[2].to_lowercase();
+                    let attrs = transpile_attrs(&caps[3]);
+                    format!("{{{{ {}.{}({}) }}}}", ns, comp, attrs)
+                }).to_string();
+
+                // 3. Transpile Block Tags: <Display.Card ...>...</Display.Card> -> {% call display.card(...) %}...{% endcall %}
+                let re_block = Regex::new(r"(?s)<([A-Z][a-zA-Z0-9_]*)\.([A-Z][a-zA-Z0-9_]*)\s*([^>]*)>(.*?)<\/([A-Z][a-zA-Z0-9_]*)\.([A-Z][a-zA-Z0-9_]*)>").unwrap();
+                transformed = re_block.replace_all(&transformed, |caps: &regex::Captures| {
+                    let ns = caps[1].to_lowercase();
+                    let comp = caps[2].to_lowercase();
+                    let attrs = transpile_attrs(&caps[3]);
+                    let children = &caps[4];
+                    format!("{{% call {}.{}({}) %}}{}{{% endcall %}}", ns, comp, attrs, children)
+                }).to_string();
+
+                return Ok(Some(transformed));
+            }
+            return Ok(Some(content));
+        }
+        Ok(None)
+    });
 
     // --- REGISTER CARBON-LIKE FILTERS ---
 
@@ -46,7 +133,6 @@ pub static JINJA: LazyLock<Environment<'static>> = LazyLock::new(|| {
     // Filter: {{ date | format_date("%d %b %Y") }}
     env.add_filter("format_date", |value: String, fmt: String| -> String {
         let cfg = Config::load();
-        // Trim spasi untuk mencegah gagal parsing
         let tz_str = cfg.app_timezone.trim();
         let tz: Tz = tz_str.parse().unwrap_or(chrono_tz::UTC);
         
@@ -65,12 +151,12 @@ pub static JINJA: LazyLock<Environment<'static>> = LazyLock::new(|| {
         chrono::Utc::now().with_timezone(&tz).to_rfc3339()
     });
 
-    // Global Function: {{ htmx_js() }} - Injeksi script htmx langsung
+    // Global Function: {{ htmx_js() }}
     env.add_function("htmx_js", || -> String {
         HTMX_SRC.clone()
     });
 
-    // Global Function: {{ app_css() }} - Injeksi style CSS langsung
+    // Global Function: {{ app_css() }}
     env.add_function("app_css", || -> String {
         CSS_SRC.clone()
     });
@@ -83,7 +169,6 @@ pub fn render(template: &str, context: minijinja::Value) -> Response {
     render_internal(template, context)
 }
 
-/// Fungsi Helper untuk render template menjadi String (berguna untuk email)
 pub fn render_to_string(template: &str, context: minijinja::Value) -> String {
     match JINJA.get_template(template) {
         Ok(tmpl) => tmpl.render(context).unwrap_or_else(|e| format!("Render error: {}", e)),
@@ -91,9 +176,8 @@ pub fn render_to_string(template: &str, context: minijinja::Value) -> String {
     }
 }
 
-// 3. Fungsi Helper untuk Render dengan Session (RustBasic Style)
+// 3. Fungsi Helper untuk Render dengan Session
 pub fn view(req: &AppRequest, template: &str, ctx: minijinja::Value) -> Response {
-    // Kita konversi minijinja::Value ke serde_json::Value untuk manipulasi mudah
     let mut ctx_value = serde_json::to_value(&ctx).unwrap_or_else(|_| json!({}));
     
     if !ctx_value.is_object() {
@@ -102,7 +186,6 @@ pub fn view(req: &AppRequest, template: &str, ctx: minijinja::Value) -> Response
     
     let obj = ctx_value.as_object_mut().unwrap();
 
-    // Inisialisasi default agar tidak error "undefined value" di template
     if !obj.contains_key("errors") {
         obj.insert("errors".to_string(), json!({}));
     }
@@ -116,7 +199,6 @@ pub fn view(req: &AppRequest, template: &str, ctx: minijinja::Value) -> Response
         obj.insert("flash_error".to_string(), json!(""));
     }
 
-    // Ambil Data dari Session (Flash Message, Errors, Old Input)
     if let Some(success) = req.session.get::<String>("flash_success") {
         obj.insert("flash_success".to_string(), json!(success));
         req.session.remove("flash_success");
@@ -133,12 +215,10 @@ pub fn view(req: &AppRequest, template: &str, ctx: minijinja::Value) -> Response
         obj.insert("old".to_string(), old);
     }
 
-    // Tambahkan CSRF Token
     if let Some(token) = req.session.get::<String>("_token") {
         obj.insert("csrf_token".to_string(), json!(token));
     }
 
-    // Tambahkan status login
     let is_logged_in = req.session.get::<i64>("user_id").is_some();
     obj.insert("auth".to_string(), json!(is_logged_in));
 
@@ -151,12 +231,27 @@ fn render_internal(template: &str, context: minijinja::Value) -> Response {
 
     match JINJA.get_template(template) {
         Ok(tmpl) => match tmpl.render(context.clone()) {
-            Ok(rendered) => Html(rendered).into_response(),
+            Ok(rendered) => {
+                // --- LOGIKA MINIFIKASI (Sembunyikan Source Code) ---
+                // 1. Hapus komentar HTML
+                let re_comments = Regex::new(r"(?s)<!--.*?-->").unwrap();
+                let without_comments = re_comments.replace_all(&rendered, "");
+                
+                // 2. Gabungkan baris dan hapus spasi berlebih untuk menyulitkan view-source
+                let minified = without_comments
+                    .lines()
+                    .map(|line| line.trim())
+                    .filter(|line| !line.is_empty())
+                    .collect::<Vec<_>>()
+                    .join(" ");
+                
+                Html(minified).into_response()
+            },
             Err(err) => {
                 tracing::error!("Gagal render template: {}", err);
                 
                 if cfg.app_debug {
-                    match JINJA.get_template("errors/debug.html") {
+                    match JINJA.get_template("errors/debug.rsx") {
                         Ok(debug_tmpl) => {
                             let debug_ctx = context! {
                                 code => 500,
@@ -168,14 +263,17 @@ fn render_internal(template: &str, context: minijinja::Value) -> Response {
                             };
                             match debug_tmpl.render(debug_ctx) {
                                 Ok(rendered) => return Html(rendered).into_response(),
-                                Err(_) => return (StatusCode::INTERNAL_SERVER_ERROR, "Critical Debug Render Error").into_response(),
+                                Err(e) => {
+                                    tracing::error!("Gagal render debug template: {}", e);
+                                    return (StatusCode::INTERNAL_SERVER_ERROR, "Critical Debug Render Error").into_response();
+                                }
                             }
                         },
                         Err(_) => return (StatusCode::INTERNAL_SERVER_ERROR, "Debug Template Missing").into_response(),
                     }
                 }
 
-                match JINJA.get_template("errors/minimal.html") {
+                match JINJA.get_template("errors/minimal.rsx") {
                     Ok(tmpl) => match tmpl.render(context! { code => 500, title => "Server Error", message => "Terjadi kesalahan saat memproses tampilan." }) {
                         Ok(rendered) => Html(rendered).into_response(),
                         Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, "Critical Render Error").into_response(),
@@ -188,7 +286,7 @@ fn render_internal(template: &str, context: minijinja::Value) -> Response {
             tracing::error!("Template tidak ditemukan: {}", err);
 
             if cfg.app_debug {
-                match JINJA.get_template("errors/debug.html") {
+                match JINJA.get_template("errors/debug.rsx") {
                     Ok(debug_tmpl) => {
                         let debug_ctx = context! {
                             code => 404,
@@ -200,14 +298,17 @@ fn render_internal(template: &str, context: minijinja::Value) -> Response {
                         };
                         match debug_tmpl.render(debug_ctx) {
                             Ok(rendered) => return Html(rendered).into_response(),
-                            Err(_) => return (StatusCode::NOT_FOUND, "Critical Debug Render Error").into_response(),
+                            Err(e) => {
+                                tracing::error!("Gagal render debug template: {}", e);
+                                return (StatusCode::NOT_FOUND, "Critical Debug Render Error").into_response();
+                            }
                         }
                     },
                     Err(_) => return (StatusCode::NOT_FOUND, "Debug Template Missing").into_response(),
                 }
             }
 
-            match JINJA.get_template("errors/minimal.html") {
+            match JINJA.get_template("errors/minimal.rsx") {
                 Ok(tmpl) => match tmpl.render(context! { code => 404, title => "Page Not Found", message => "Halaman atau template tidak ditemukan." }) {
                     Ok(rendered) => Html(rendered).into_response(),
                     Err(_) => (StatusCode::NOT_FOUND, "Not Found").into_response(),

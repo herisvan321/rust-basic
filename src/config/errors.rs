@@ -29,7 +29,7 @@ impl ErrorController {
             _ => "Error",
         };
 
-        (status, render("errors/minimal.html", context! {
+        (status, render("errors/minimal.rsx", context! {
             code => code,
             title => title,
             message => message

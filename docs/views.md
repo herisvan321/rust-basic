@@ -1,90 +1,78 @@
-# 🎨 Panduan View & Komponen (HTMX)
+# 🎨 Panduan View & Komponen (RSX Syntax)
 
-RustBasic menggunakan **Minijinja Macros** dan **HTMX** untuk membangun UI yang modular, cepat, dan murni tanpa library JavaScript eksternal.
+RustBasic menggunakan **RSX (Rust-style XML)** yang menggabungkan kekuatan **Minijinja** dengan sintaks yang modern dan intuitif. Seluruh template menggunakan ekstensi `.rsx`.
 
-## 🧩 Struktur Komponen
-Komponen terletak di `resources/views/components/` dan dibagi berdasarkan fungsinya:
+## 🚀 Sintaks RSX
+Kini Anda tidak perlu lagi mengimpor komponen secara manual. Semua komponen di `src/resources/views/components/` diimpor secara otomatis dan dapat dipanggil menggunakan sintaks tag:
 
-### 1. Forms (`forms.html`)
-Gunakan untuk input data dan formulir.
-- **`input(name, type, label, placeholder, value, errors, required)`**
-  ```html
-  {% from "components/forms.html" import input %}
-  {{ input("email", type="email", label="Alamat Email", placeholder="user@example.com") }}
-  ```
+### 1. Tag Mandiri (Self-Closing)
+Gunakan untuk komponen yang tidak memiliki konten di dalamnya.
+```html
+<Buttons.Button label="SIMPAN" variant="primary" />
+<Forms.Input name="email" label="Email" placeholder="nama@email.com" />
+```
 
-### 2. Buttons (`buttons.html`)
-Gunakan untuk tombol aksi dan navigasi.
-- **`button(label, variant, class, style, hx_post, hx_target)`**
-- **`link_button(href, label, variant, class, style)`**
-- **`link_back(href, label)`**
-  ```html
-  {% from "components/buttons.html" import button, link_button %}
-  {{ button("SIMPAN", variant="primary") }}
-  {{ link_button("/register", "DAFTAR", variant="outline") }}
-  ```
+### 2. Tag Blok (Block Tags)
+Gunakan untuk komponen yang membungkus konten lain (menggunakan `{{ caller() }}`).
+```html
+<Display.Card title="Statistik User">
+    <p>Konten ini akan muncul di dalam card.</p>
+</Display.Card>
+```
 
-### 3. Display (`display.html`)
-Gunakan untuk elemen presentasi data.
-- **`alert(message, type, dismissible)`**: Menampilkan pesan melayang (Floating) di pojok kanan atas.
-- **`stat_card(label, value, color)`**: Kartu statistik untuk dashboard.
-- **`card(title)`**: Kontainer card premium.
-  ```html
-  {% from "components/display.html" import alert, stat_card %}
-  {{ alert("Data berhasil disimpan!", type="success") }}
-  {{ stat_card("Total User", "1,240") }}
-  ```
+---
 
-### 4. Overlays (`overlays.html`)
-Gunakan untuk modal dan dialog konfirmasi.
-- **`modal(id, title, size)`**: Kontainer modal standar.
-- **`logout_confirm_button(id, label, variant)`**: Tombol logout dengan konfirmasi popup (Pure CSS/Checkbox Hack).
-  ```html
-  {% from "components/overlays.html" import logout_confirm_button %}
-  {{ logout_confirm_button(id="confirm-out", label="KELUAR") }}
-  ```
+## 🧩 Katalog Komponen
+Berikut adalah daftar namespace dan komponen yang tersedia secara otomatis:
 
-### 5. Feedback (`feedback.html`)
-Gunakan untuk indikator status sistem.
-- **`indicator(id, label)`**: Overlay loading full-screen (muncul otomatis saat request HTMX).
-- **`spinner()`**: Animasi loading melingkar.
-- **`skeleton_text(lines)`**: Efek loading placeholder.
-  ```html
-  {% from "components/feedback.html" import indicator %}
-  {{ indicator() }}
-  ```
+### 1. Forms (`Forms.`)
+Namespace: `Forms` (file: `components/forms.rsx`)
+- **`Input`**: `<Forms.Input name="x" label="y" />`
+- **`Textarea`**: `<Forms.Textarea name="x" label="y" />`
+- **`Select`**: `<Forms.Select name="x" label="y" />`
+
+### 2. Buttons (`Buttons.`)
+Namespace: `Buttons` (file: `components/buttons.rsx`)
+- **`Button`**: `<Buttons.Button label="Klik" />`
+- **`Link_button`**: `<Buttons.Link_button href="/url" label="Go" />`
+- **`Link_back`**: `<Buttons.Link_back />`
+
+### 3. Display (`Display.`)
+Namespace: `Display` (file: `components/display.rsx`)
+- **`Alert`**: `<Display.Alert message="Sukses!" type="success" />`
+- **`Stat_card`**: `<Display.Stat_card label="User" value="100" />`
+- **`Card`**: `<Display.Card title="Info">...</Display.Card>`
+
+### 4. Overlays (`Overlays.`)
+Namespace: `Overlays` (file: `components/overlays.rsx`)
+- **`Logout_confirm_button`**: `<Overlays.Logout_confirm_button id="out" label="LOGOUT" />`
+
+### 5. Feedback (`Feedback.`)
+Namespace: `Feedback` (file: `components/feedback.rsx`)
+- **`Indicator`**: `<Feedback.Indicator />` (Overlay loading full-screen)
+- **`Spinner`**: `<Feedback.Spinner />`
 
 ---
 
 ## 📅 Filter Waktu & Tanggal (Carbon-like)
-Anda dapat memanipulasi tampilan waktu langsung di template menggunakan filter berikut:
-
-1. **`diff_for_humans`**: Mengubah tanggal menjadi teks relatif.
-   - Contoh: `{{ user.created_at | diff_for_humans }}` -> *"2 hours ago"*
-2. **`format_date`**: Memformat tanggal sesuai pola (Otomatis konversi ke `APP_TIMEZONE`).
-   - Contoh: `{{ now() | format_date("%d %B %Y") }}` -> *"02 May 2026"*
-3. **`now()`**: Fungsi global untuk mendapatkan waktu saat ini.
-   - Contoh: `{{ now() }}`
+Anda tetap dapat menggunakan filter Minijinja standar:
+1. **`diff_for_humans`**: `{{ user.created_at | diff_for_humans }}` -> *"2 hours ago"*
+2. **`format_date`**: `{{ now() | format_date("%d %B %Y") }}` -> *"02 May 2026"*
+3. **`now()`**: Mendapatkan waktu saat ini.
 
 ---
 
-## ⚡ Filosofi HTMX & Pure CSS
-Semua komponen dirancang agar browser tidak perlu memuat file `.js` tambahan (selain library HTMX). Namun, framework kini mendukung penggunaan aset eksternal (CSS/JS via CDN) jika Anda ingin mengintegrasikan library pihak ketiga. Interaksi bawaan tetap menggunakan:
-1. **Teknik CSS Checkbox Hack** (untuk Modal/Popups).
-2. **HTMX Attributes** (`hx-on`, `hx-swap="delete"`, dll).
-3. **CSS Fixed Positioning** (untuk Floating elements).
-
-## 🔗 HTMX Integration
-Pastikan elemen form atau tombol menggunakan `hx-indicator="#indicator"` agar overlay loading muncul secara otomatis saat data dikirim ke server.
+## 🛡️ Keamanan & Privasi Source Code
+Secara default, RustBasic melakukan **Minifikasi Otomatis** pada output HTML. Saat pengguna melakukan "View Source" di browser:
+- Semua spasi berlebih dan baris baru dihapus.
+- Semua komentar HTML (`<!-- ... -->`) dibuang.
+- Kode akan tampak sebagai satu baris rapat yang sulit dibaca (Obfuscation ringan).
 
 ---
 
 ## 🔄 Hot Reload & Pengembangan
-Untuk mempercepat proses desain, gunakan fitur **Auto-Refresh Browser**:
-
-1. Pastikan `APP_DEBUG=true` di file `.env`.
-2. Jalankan server dengan perintah:
-   ```bash
-   cargo serve
-   ```
-3. Setiap kali Anda menyimpan file di `resources/views/`, server akan restart dan browser akan otomatis melakukan refresh. Ini sangat berguna saat menyesuaikan layout CSS atau macro Minijinja.
+Gunakan perintah berikut untuk pengembangan yang super cepat dengan auto-refresh browser:
+```bash
+cargo serve
+```
+Setiap kali file `.rsx` di `src/resources/views/` disimpan, browser akan otomatis memuat ulang halaman.

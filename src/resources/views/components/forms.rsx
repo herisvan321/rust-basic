@@ -1,4 +1,4 @@
-{# 📑 LABEL: FORM COMPONENTS (components/forms.html) #}
+{# 📑 LABEL: FORM COMPONENTS (components/forms.rsx) #}
 
 {% macro input(name, type="text", label="", placeholder="", value="", errors=[], required=false) %}
     <div class="mb-4">

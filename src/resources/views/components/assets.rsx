@@ -1,5 +1,5 @@
 <!-- 
-  📑 LABEL: ASSETS COMPONENT (components/assets.html)
+  📑 LABEL: ASSETS COMPONENT (components/assets.rsx)
   Komponen untuk menyuntikkan library JS & CSS lokal yang disembunyikan.
 -->
 

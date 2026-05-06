@@ -1,112 +1,71 @@
-# Routing
+# Dasar-Dasar RustBasic
 
-Routing di RustBasic dikelola di dalam folder `src/routes/`. Utama-nya berada di `src/routes/web.rs`.
+## 🛣️ Routing
+Routing dikelola di `src/routes/web.rs`. RustBasic menggunakan Axum sebagai engine utamanya.
 
-## Mendefinisikan Route
-Anda dapat mendefinisikan route menggunakan Axum syntax:
-
+### Mendefinisikan Route
 ```rust
-use axum::{routing::{get, post}, Router};
-use crate::app::http::controllers::WelcomeController;
+use axum::{routing::get, Router};
+use crate::app::http::controllers::welcome_controller;
 
-pub fn routes() -> Router {
+pub fn routes() -> Router<AppState> {
     Router::new()
-        .route("/", get(WelcomeController::index))
-        // Tambahkan route lainnya di sini
-}
-```
-
-## Route Grouping & Prefix
-Gunakan `.nest()` untuk mengelompokkan route:
-
-```rust
-Router::new()
-    .nest("/admin", admin_routes())
-```
-
----
-
-# Controllers
-
-Controller bertugas menangani logika request dan mengembalikan response. Disimpan di `src/app/http/controllers/`.
-
-## Membuat Controller
-Gunakan CLI yang sudah mendukung warna dan tabel:
-```bash
-cargo rustbasic make:controller Name
-cargo rustbasic make:middleware Name
-```
-
-## Melihat Daftar Route
-Gunakan perintah berikut untuk melihat seluruh URL yang terdaftar:
-```bash
-cargo rustbasic route:list
-```
-
-## Contoh Controller
-```rust
-pub struct WelcomeController;
-
-impl WelcomeController {
-    pub async fn index(req: Request) -> impl IntoResponse {
-        view(&req, "welcome.html", context! { 
-            title => "Selamat Datang" 
-        })
-    }
+        .route("/", get(welcome_controller::index))
 }
 ```
 
 ---
 
-# Views (Template)
+## ⚙️ Controllers
+Controller disimpan di `src/app/http/controllers/`. Anda bisa menggunakan CLI untuk membuatnya.
 
-RustBasic menggunakan engine **MiniJinja** yang sangat kuat. Template disimpan di `resources/views/`.
+### Membuat Controller
+```bash
+cargo rustbasic make:controller WelcomeController
+```
 
-## Render View
-Gunakan helper `view()`:
+### Contoh Logika
 ```rust
-view(&req, "nama_file.html", context! { key => value })
+pub async fn index(req: Request) -> impl IntoResponse {
+    view(&req, "welcome.rsx", context! { 
+        title => "Home" 
+    })
+}
 ```
 
-## Template Inheritance
-Di file `layout.html`:
-```html
-<html>
-  <body>
-    {% block content %}{% endblock %}
-  </body>
-</html>
-```
+---
 
-Di file halaman (misal `home.html`):
+## 🎨 Views
+Template RustBasic menggunakan ekstensi `.rsx` dan mendukung sintaks RSX.
+
+### Menggunakan Komponen
+Anda tidak perlu lagi mengimpor komponen secara manual. Gunakan sintaks tag:
+
 ```html
-{% extends "layout.html" %}
+{% extends "layouts/app.rsx" %}
+
 {% block content %}
-  <h1>Hello World</h1>
+    <Display.Card title="Halo Rust!">
+        <Buttons.Button label="Klik Saya" variant="primary" />
+    </Display.Card>
 {% endblock %}
+```
+
+### Folder Template
+Seluruh template berada di `src/resources/views/`.
 
 ---
 
-# Asset Management (Hidden Assets)
+## 📦 Asset Management
+Asset inti (CSS & HTMX) ditanam langsung ke dalam binary aplikasi untuk keamanan dan performa maksimal.
 
-RustBasic memiliki sistem unik di mana asset inti (CSS & JS) disembunyikan dari folder publik dan ditanam langsung ke dalam binary aplikasi.
-
-## Keuntungan
-- **Keamanan**: User tidak bisa mendownload file `.css` atau `.js` secara langsung via URL.
-- **Performa**: Asset diload langsung dari memori (RAM), nol disk I/O.
-- **Standalone**: Aplikasi tidak bergantung pada file eksternal di folder publik untuk asset inti.
-
-## Cara Penggunaan
-Asset ini dikelola melalui komponen `assets.html`.
-
-Di layout utama (`app.html`):
+### Penggunaan di Layout
+Cukup panggil komponen `Assets`:
 ```html
-{% from "components/assets.html" import styles, htmx %}
-{{ styles() }}
-{{ htmx() }}
+<Assets.Styles />
+<Assets.Htmx />
 ```
 
-File asli disimpan di:
-- `resources/css/style.css`
-- `resources/js/htmx.min.js`
-```
+File sumber asset berada di:
+- `src/resources/css/style.css`
+- `src/resources/js/htmx.min.js`

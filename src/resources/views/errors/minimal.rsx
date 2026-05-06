@@ -4,11 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ code }} | {{ title }}</title>
-     {% from "components/assets.html" import styles, htmx %}
-    {{ styles() }}
+    <Assets.Styles />
     
     <!-- 3. Library Frontend (HTMX Local Macro) -->
-    {{ htmx() }}
+    <Assets.Htmx />
 </head>
 <body>
     <div class="split-screen">

@@ -1,4 +1,6 @@
-Tulis prompt disini
+# 🦾 AI Action Center: RustBasic RSX Edition
+
+Gunakan referensi ini untuk memandu asisten AI dalam memodifikasi proyek.
 
 ---
 
@@ -10,25 +12,35 @@ Aplikasi telah dipisahkan menjadi modul-modul kecil untuk skalabilitas tinggi:
 rustbasic/
 ├── database/             # Lokasi database SQLite & SQL migrasi
 ├── public/               # File statis (CSS, Gambar)
-├── resources/
+├── src/resources/
 │   └── css/              # CSS files
 │   └── js/               # JS files
-│   └── views/            # Template HTML (Minijinja)
-│       ├── components/   # Modular UI Library (Split by logic)
+│   └── views/            # Template .rsx (RSX Syntax)
+│       ├── components/   # Modular UI Library (Auto-imported)
 │       └── layouts/      # Layouts
 ├── src/
 │   ├── main.rs           # Entry point (Strict Config & Mandatory .env)
 │   ├── app/              # Folder Inti Aplikasi (Controllers, Middleware)
-│   ├── config/           # Pusat Konfigurasi (Server, Session, Logging)
+│   ├── config/           # Pusat Konfigurasi (Server, Session, View Engine)
 │   └── routes/           # Pengaturan rute
 ├── storage/              # Penyimpanan File & Log
 └── .env                  # Environment Variables (Wajib Ada)
 ```
 
 ---
+
+## 🛡️ Standar Penulisan RSX (WAJIB)
+AI harus selalu menggunakan standar ini saat memodifikasi tampilan:
+1. **Ekstensi**: Selalu gunakan `.rsx`.
+2. **Tag Komponen**: Gunakan `<Namespace.Component />`. Contoh: `<Forms.Input />`, `<Buttons.Button />`.
+3. **Auto-Import**: Jangan gunakan `{% from ... import ... %}` manual.
+4. **Source Protection**: Output HTML otomatis diminifikasi oleh server.
+
+---
+
 # 🛠️ RustBasic CLI Documentation
 
-Panduan penggunaan alat baris perintah (**CLI**) khusus untuk framework RustBasic. Alat ini dirancang untuk mempercepat alur kerja pengembangan Anda.
+Panduan penggunaan alat baris perintah (**CLI**) lengkap untuk framework RustBasic.
 
 ## 🚀 Cara Menjalankan
 Gunakan perintah `cargo rustbasic` diikuti dengan sub-perintah yang diinginkan:
@@ -41,13 +53,11 @@ cargo rustbasic <perintah> [argumen]
 
 ## ⚡ Pengembangan (Shortcuts)
 
-Untuk mempermudah alur kerja harian, gunakan alias berikut:
-
 ### `cargo serve`
 Menjalankan server dalam mode pengembangan:
-- **Auto-Watch**: Memantau perubahan pada `src/`, `resources/` (template), dan file `.env`.
-- **Live Reload**: Otomatis merestart server dan me-refresh browser (via `tower-livereload`).
-- **Opsi**: Menggunakan `-c` (clear screen) agar log tetap bersih.
+- **RSX Transpilation**: Mengolah sintaks RSX menjadi Minijinja.
+- **Auto-Watch**: Memantau perubahan pada `src/`, `src/resources/` (template), dan file `.env`.
+- **Live Reload**: Otomatis merestart server dan me-refresh browser.
 - **Contoh**: `cargo serve`
 
 ---
@@ -81,65 +91,51 @@ Membuat Middleware Axum baru di `src/app/http/middleware/` dan otomatis mendafta
 
 ### `auth` / `make:auth`
 Membangun sistem autentikasi lengkap secara otomatis.
-- **Fitur**: Membuat Login, Register, dan Dashboard dengan desain premium.
+- **Fitur**: Membuat Login, Register, dan Dashboard dengan **sintaks RSX**.
 - **Logic**: Mengintegrasikan Sea-ORM, Bcrypt, dan validasi secara otomatis.
 - **Contoh**: `cargo rustbasic auth`
 
 ### `auth back` / `auth:back`
 Menghapus seluruh sistem autentikasi dan mengembalikan project ke kondisi bersih.
-- **Fungsi**: Menghapus controller, route, dan view yang tergenerasi serta merapikan router utama.
 - **Contoh**: `cargo rustbasic auth back`
 
 ---
 
-## 🗄️ 2. Database & Cache
+## 🗄️ 3. Database & Cache
 
 ### `migrate`
 Menjalankan seluruh file migrasi yang ada ke database (SQLite/MySQL).
 - **Contoh**: `cargo rustbasic migrate`
 
 ### `cache:clear`
-Membersihkan sistem secara menyeluruh:
-1. Mengosongkan file log di `storage/logs/` (truncate).
-2. Menghapus seluruh data sesi di database.
+Membersihkan sistem secara menyeluruh (log dan data sesi).
 - **Contoh**: `cargo rustbasic cache:clear`
     
 ### `key:generate`
 Membuat kunci aplikasi baru (`APP_KEY`) yang aman.
-- **Fungsi**: Menghasilkan 32-byte random key, di-encode ke base64, dan otomatis memperbarui file `.env`.
 - **Contoh**: `cargo rustbasic key:generate`
 
 ---
 
-## 🔍 3. Monitoring & Security
+## 🔍 4. Monitoring & Security
 
 ### `route:list`
 Menampilkan tabel daftar rute yang terdaftar di aplikasi (Method, Path, dan Handler).
-- **Contoh**: `cargo rustbasic route:list`
 
 ### `check:security`
-Melakukan audit keamanan aplikasi:
-- Cek keberadaan Middleware CSRF.
-- Cek library hashing password (Bcrypt).
-- Proteksi SQL Injection & XSS.
-- Audit kerentanan dependency via `cargo audit`.
-- **Contoh**: `cargo rustbasic check:security`
+Melakukan audit keamanan aplikasi (CSRF, Bcrypt, XSS protection).
 
 ### `check:update`
-Menghubungi crates.io untuk mengecek apakah ada versi terbaru dari paket (dependencies) yang Anda gunakan.
-- **Contoh**: `cargo rustbasic check:update`
+Mengecek pembaruan dependencies di crates.io.
 
 ---
 
-## 🚀 4. Build Manager
+## 🚀 5. Build Manager
 
 ### `build`
-Menjalankan menu interaktif untuk membangun (compile) aplikasi ke berbagai sistem operasi:
-- **Target OS**: Native, Windows, Linux, atau macOS.
-- **Mode**: Development atau Production (Release).
-- **Fitur**: Mendukung `cargo-zigbuild` untuk cross-compilation yang lebih mudah.
+Menu interaktif untuk kompilasi aplikasi ke berbagai sistem operasi (Cross-build).
 - **Contoh**: `cargo rustbasic build`
 
 ---
 
-_Dokumentasi ini diekstrak langsung dari implementasi teknis di `src/config/cli.rs`._
+_Dokumentasi ini adalah instruksi operasional untuk AI agar menjaga integritas RustBasic RSX Framework._
