@@ -475,8 +475,21 @@ impl AuthController {
             <p class="text-muted mb-5">Masukkan kredensial Anda untuk masuk.</p>
 
             <form hx-post="/login" hx-target="body" hx-push-url="true" hx-indicator="#indicator">
-                <input type="email" name="email" value="{{ old.email }}" required>
-                <input type="password" name="password" required>
+                <div style="margin-bottom: 1rem;">
+                    <label class="form-label" style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: 600;">Email</label>
+                    <input type="email" name="email" class="form-control" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px;" placeholder="nama@email.com" value="{{ old.email }}" required>
+                    {% if errors.email %}
+                        <div style="color: #dc3545; font-size: 0.85rem; margin-top: 0.25rem;">{{ errors.email }}</div>
+                    {% endif %}
+                </div>
+
+                <div style="margin-bottom: 1.5rem;">
+                    <label class="form-label" style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: 600;">Password</label>
+                    <input type="password" name="password" class="form-control" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px;" placeholder="Masukkan password Anda" required>
+                    {% if errors.password %}
+                        <div style="color: #dc3545; font-size: 0.85rem; margin-top: 0.25rem;">{{ errors.password }}</div>
+                    {% endif %}
+                </div>
 
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
                     <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; cursor: pointer;">
@@ -485,7 +498,7 @@ impl AuthController {
                     <a href="/forgot-password" class="text-primary" style="font-size: 0.9rem; font-weight: 600;">Lupa Password?</a>
                 </div>
 
-                <button type="submit" class="w-100 mb-4">MASUK</button>
+                <button type="submit" style="width: 100%; padding: 0.75rem; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-bottom: 1.5rem; box-shadow: 0 4px 6px rgba(99, 102, 241, 0.2);">MASUK</button>
 
                 <p class="text-muted" style="text-align: center; font-size: 0.9rem;">
                     Belum punya akun? <a href="/register" class="text-primary" style="font-weight: 700;">Daftar Sekarang</a>
