@@ -13,9 +13,8 @@ rustbasic/
 ├── database/             # Lokasi database SQLite & SQL migrasi
 ├── public/               # File statis (CSS, Gambar)
 ├── src/resources/
-│   └── views/            # Template HTML (Minijinja)
-│       ├── components/   # Modular UI Library (Split by logic)
-│       └── ...
+│   └── views/            # Template HTML (Minijinja - .rb.html)
+│       └── layouts/      # Layout Utama
 ├── src/
 │   ├── main.rs           # Entry point (Strict Config & Mandatory .env)
 │   ├── app/              # Folder Inti Aplikasi (Controllers, Middleware)
@@ -39,6 +38,7 @@ Aplikasi menerapkan standar keamanan produksi:
 - **Cache:Clear**: Perintah `cargo rustbasic cache:clear` sekarang memotong (truncate) file log tanpa menghapusnya, menjaga kompatibilitas dengan server yang sedang berjalan.
 - **Flexible Assets & Binary Embedding**: Library HTMX dan File CSS inti dapat ditanam ke dalam file eksekusi (binary) aplikasi untuk performa maksimal. Namun, framework kini juga mendukung penggunaan **CDN eksternal** secara fleksibel, memudahkan integrasi library pihak ketiga tanpa harus meng-host file tersebut secara lokal.
 - **Browser Live Reload**: Menggunakan `tower-livereload` yang hanya aktif jika `APP_DEBUG=true`. Fitur ini memungkinkan browser melakukan refresh otomatis setiap kali server melakukan restart atau ada perubahan pada file template/aset.
+- **Source Minification**: Output HTML secara default diminifikasi oleh server (spasi/komentar dihapus) untuk melindungi struktur source code.
 
 ---
 
@@ -46,14 +46,10 @@ Aplikasi menerapkan standar keamanan produksi:
 
 RustBasic meninggalkan library JavaScript berat (seperti Alpine.js) dan beralih ke **Murni HTMX + CSS**:
 
-- **Modular UI Library**: Komponen dipisah menjadi file kecil:
-    - `forms.rsx`: Penanganan input dan validasi error.
-    - `buttons.rsx`: Tombol aksi dan navigasi.
-    - `display.rsx`: Alert (Floating Toast), Stat Cards, Card.
-    - `overlays.rsx`: Modal Konfirmasi menggunakan teknik **Checkbox Hack** (Tanpa JS).
-    - `feedback.rsx`: Loading indicators dan Skeleton loading.
+- **HTML Murni & Jinja**: Menggunakan ekstensi `.rb.html`. Tidak menggunakan sistem komponen reaktif yang ajaib, murni HTML dengan kelas utilitas.
 - **Floating Alerts**: Notifikasi tidak lagi mendorong konten, melainkan melayang di pojok kanan atas dengan animasi halus.
 - **SPA Experience**: Navigasi instan menggunakan `hx-boost` dan `hx-indicator` untuk feedback visual.
+- **Modularity via Jinja**: Jika Anda membutuhkan komponen berulang (seperti tombol khusus atau form layout), gunakan fitur bawaan Minijinja seperti `{% include %}` atau `{% macro %}`.
 
 ---
 
@@ -77,18 +73,15 @@ cargo rustbasic cache:clear       # Truncate logs & sessions
 
 ## Menjalankan Migrasi
 cargo rustbasic migrate
-
-## Rollback Migrasi
-cargo rustbasic migrate:back
-# atau
-cargo rustbasic migrate:rollback
+cargo rustbasic migrate:refresh   # Reset semua dan jalankan ulang
+cargo rustbasic migrate:back      # Rollback 1 langkah
 
 cargo rustbasic route:list         # Menampilkan daftar route dalam tabel
 cargo rustbasic build              # Menu build interaktif
-cargo rustbasic auth               # Scaffold autentikasi (Login/Register/Reset)
-cargo rustbasic auth back          # Menghapus scaffold autentikasi secara bersih
+cargo rustbasic auth               # Scaffold autentikasi HTML (Login/Register/Reset)
+cargo rustbasic auth:back          # Menghapus scaffold autentikasi secara bersih
 ```
 
 ---
 
-_Dokumentasi ini diperbarui Mei 2026 mencerminkan Arsitektur HTMX, Modular Components, Hardened Session Security, dan Dual Logging._
+_Dokumentasi ini diperbarui pada Mei 2026 mencerminkan transisi ke format HTML murni (.rb.html), Arsitektur HTMX, Hardened Session Security, dan CLI baru._

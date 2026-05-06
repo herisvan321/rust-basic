@@ -26,93 +26,18 @@ static CSS_SRC: LazyLock<String> = LazyLock::new(|| {
     include_str!("../resources/css/style.css").to_string()
 });
 
-/// Helper untuk mengubah atribut HTML (spasi) menjadi argumen Jinja (koma)
-fn transpile_attrs(attrs: &str) -> String {
-    let attrs = attrs.trim();
-    if attrs.is_empty() { return String::new(); }
-
-    let mut result = String::new();
-    let mut in_quotes = false;
-    let mut quote_char = '"';
-    
-    let chars: Vec<char> = attrs.chars().collect();
-    for i in 0..chars.len() {
-        let c = chars[i];
-        
-        // Deteksi quote
-        if (c == '"' || c == '\'') && (i == 0 || chars[i-1] != '\\') {
-            if !in_quotes {
-                in_quotes = true;
-                quote_char = c;
-            } else if c == quote_char {
-                in_quotes = false;
-            }
-        }
-
-        // Jika spasi di luar quote, ganti dengan koma
-        if c == ' ' && !in_quotes {
-            if i + 1 < chars.len() && chars[i+1] != ' ' && chars[i+1] != ',' {
-                result.push(',');
-            }
-        }
-        
-        result.push(c);
-    }
-    result
-}
 
 // 1. Setup Engine Template (Minijinja)
 pub static JINJA: LazyLock<Environment<'static>> = LazyLock::new(|| {
     let mut env = Environment::new();
     
-    // Custom Loader untuk mendukung ekstensi .rsx dan sintaks RSX
+    // Custom Loader untuk mendukung ekstensi .rb.html
     env.set_loader(|name| {
         let path = format!("src/resources/views/{}", name);
         
         if let Ok(content) = std::fs::read_to_string(&path) {
-            if name.ends_with(".rsx") {
-                let mut transformed = content.clone();
-                
-                // 1. Auto-import komponen standar (kecuali untuk komponen itu sendiri)
-                if !name.contains("components/") {
-                    let imports = "{% import 'components/assets.rsx' as assets %}\n\
-                                   {% import 'components/buttons.rsx' as buttons %}\n\
-                                   {% import 'components/display.rsx' as display %}\n\
-                                   {% import 'components/feedback.rsx' as feedback %}\n\
-                                   {% import 'components/forms.rsx' as forms %}\n\
-                                   {% import 'components/overlays.rsx' as overlays %}\n";
-                    
-                    if let Some(pos) = transformed.find("{% extends") {
-                        if let Some(end_pos) = transformed[pos..].find("%}") {
-                            transformed.insert_str(pos + end_pos + 2, &format!("\n{}", imports));
-                        } else {
-                            transformed = format!("{}{}", imports, transformed);
-                        }
-                    } else {
-                        transformed = format!("{}{}", imports, transformed);
-                    }
-                }
-
-                // 2. Transpile Self-Closing Tags: <Forms.Input ... /> -> {{ forms.input(...) }}
-                let re_self = Regex::new(r"<([A-Z][a-zA-Z0-9_]*)\.([A-Z][a-zA-Z0-9_]*)\s*([^>]*)\/>").unwrap();
-                transformed = re_self.replace_all(&transformed, |caps: &regex::Captures| {
-                    let ns = caps[1].to_lowercase();
-                    let comp = caps[2].to_lowercase();
-                    let attrs = transpile_attrs(&caps[3]);
-                    format!("{{{{ {}.{}({}) }}}}", ns, comp, attrs)
-                }).to_string();
-
-                // 3. Transpile Block Tags: <Display.Card ...>...</Display.Card> -> {% call display.card(...) %}...{% endcall %}
-                let re_block = Regex::new(r"(?s)<([A-Z][a-zA-Z0-9_]*)\.([A-Z][a-zA-Z0-9_]*)\s*([^>]*)>(.*?)<\/([A-Z][a-zA-Z0-9_]*)\.([A-Z][a-zA-Z0-9_]*)>").unwrap();
-                transformed = re_block.replace_all(&transformed, |caps: &regex::Captures| {
-                    let ns = caps[1].to_lowercase();
-                    let comp = caps[2].to_lowercase();
-                    let attrs = transpile_attrs(&caps[3]);
-                    let children = &caps[4];
-                    format!("{{% call {}.{}({}) %}}{}{{% endcall %}}", ns, comp, attrs, children)
-                }).to_string();
-
-                return Ok(Some(transformed));
+            if name.ends_with(".rb.html") {
+                return Ok(Some(content));
             }
             return Ok(Some(content));
         }
@@ -251,7 +176,7 @@ fn render_internal(template: &str, context: minijinja::Value) -> Response {
                 tracing::error!("Gagal render template: {}", err);
                 
                 if cfg.app_debug {
-                    match JINJA.get_template("errors/debug.rsx") {
+                    match JINJA.get_template("errors/debug.rb.html") {
                         Ok(debug_tmpl) => {
                             let debug_ctx = context! {
                                 code => 500,
@@ -273,7 +198,7 @@ fn render_internal(template: &str, context: minijinja::Value) -> Response {
                     }
                 }
 
-                match JINJA.get_template("errors/minimal.rsx") {
+                match JINJA.get_template("errors/minimal.rb.html") {
                     Ok(tmpl) => match tmpl.render(context! { code => 500, title => "Server Error", message => "Terjadi kesalahan saat memproses tampilan." }) {
                         Ok(rendered) => Html(rendered).into_response(),
                         Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, "Critical Render Error").into_response(),
@@ -286,7 +211,7 @@ fn render_internal(template: &str, context: minijinja::Value) -> Response {
             tracing::error!("Template tidak ditemukan: {}", err);
 
             if cfg.app_debug {
-                match JINJA.get_template("errors/debug.rsx") {
+                match JINJA.get_template("errors/debug.rb.html") {
                     Ok(debug_tmpl) => {
                         let debug_ctx = context! {
                             code => 404,
@@ -308,7 +233,7 @@ fn render_internal(template: &str, context: minijinja::Value) -> Response {
                 }
             }
 
-            match JINJA.get_template("errors/minimal.rsx") {
+            match JINJA.get_template("errors/minimal.rb.html") {
                 Ok(tmpl) => match tmpl.render(context! { code => 404, title => "Page Not Found", message => "Halaman atau template tidak ditemukan." }) {
                     Ok(rendered) => Html(rendered).into_response(),
                     Err(_) => (StatusCode::NOT_FOUND, "Not Found").into_response(),

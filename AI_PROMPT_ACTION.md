@@ -1,6 +1,7 @@
-# 🦾 AI Action Center: RustBasic RSX Edition
+# 🦾 AI Action Center: RustBasic Framework
 
-Gunakan referensi ini untuk memandu asisten AI dalam memodifikasi proyek.
+prompt
+pastikan perpindah antar halaman tidak reload/refresh menggunakna htmx
 
 ---
 
@@ -15,9 +16,8 @@ rustbasic/
 ├── src/resources/
 │   └── css/              # CSS files
 │   └── js/               # JS files
-│   └── views/            # Template .rsx (RSX Syntax)
-│       ├── components/   # Modular UI Library (Auto-imported)
-│       └── layouts/      # Layouts
+│   └── views/            # Template .rb.html (HTML + Minijinja)
+│       └── layouts/      # Layout utama (app.rb.html)
 ├── src/
 │   ├── main.rs           # Entry point (Strict Config & Mandatory .env)
 │   ├── app/              # Folder Inti Aplikasi (Controllers, Middleware)
@@ -29,11 +29,11 @@ rustbasic/
 
 ---
 
-## 🛡️ Standar Penulisan RSX (WAJIB)
+## 🛡️ Standar Penulisan Template (WAJIB)
 AI harus selalu menggunakan standar ini saat memodifikasi tampilan:
-1. **Ekstensi**: Selalu gunakan `.rsx`.
-2. **Tag Komponen**: Gunakan `<Namespace.Component />`. Contoh: `<Forms.Input />`, `<Buttons.Button />`.
-3. **Auto-Import**: Jangan gunakan `{% from ... import ... %}` manual.
+1. **Ekstensi**: Selalu gunakan `.rb.html`.
+2. **Sintaks**: Gunakan tag HTML standar dan tag Minijinja (`{{ variable }}`, `{% block content %}`). Sistem komponen `<Namespace.Component />` telah **dihapus**.
+3. **No Component Magic**: Dilarang mencoba membuat atau memanggil komponen kustom bergaya RSX/JSX.
 4. **Source Protection**: Output HTML otomatis diminifikasi oleh server.
 
 ---
@@ -49,20 +49,25 @@ Gunakan perintah `cargo rustbasic` diikuti dengan sub-perintah yang diinginkan:
 cargo rustbasic <perintah> [argumen]
 ```
 
+Atau gunakan alias langsung jika sudah dikonfigurasi:
+```bash
+rb <perintah> [argumen]
+```
+
 ---
 
 ## ⚡ Pengembangan (Shortcuts)
 
 ### `cargo serve`
 Menjalankan server dalam mode pengembangan:
-- **RSX Transpilation**: Mengolah sintaks RSX menjadi Minijinja.
+- **Template Rendering**: Mengolah `.rb.html` dengan Minijinja.
 - **Auto-Watch**: Memantau perubahan pada `src/`, `src/resources/` (template), dan file `.env`.
 - **Live Reload**: Otomatis merestart server dan me-refresh browser.
 - **Contoh**: `cargo serve`
 
 ---
 
-## 📂 1. Generator Komponen (Scaffolding)
+## 📂 1. Generator (Scaffolding)
 
 ### `make:model`
 Membuat file Entity Sea-ORM baru di folder `src/app/models/`.
@@ -91,7 +96,7 @@ Membuat Middleware Axum baru di `src/app/http/middleware/` dan otomatis mendafta
 
 ### `auth` / `make:auth`
 Membangun sistem autentikasi lengkap secara otomatis.
-- **Fitur**: Membuat Login, Register, dan Dashboard dengan **sintaks RSX**.
+- **Fitur**: Membuat Login, Register, dan Dashboard dengan **sintaks HTML standar**.
 - **Logic**: Mengintegrasikan Sea-ORM, Bcrypt, dan validasi secara otomatis.
 - **Contoh**: `cargo rustbasic auth`
 
@@ -106,6 +111,14 @@ Menghapus seluruh sistem autentikasi dan mengembalikan project ke kondisi bersih
 ### `migrate`
 Menjalankan seluruh file migrasi yang ada ke database (SQLite/MySQL).
 - **Contoh**: `cargo rustbasic migrate`
+
+### `migrate:refresh`
+Melakukan rollback seluruh migrasi dan menjalankannya ulang dari awal. Sangat berguna saat fase development untuk mereset struktur tabel.
+- **Contoh**: `cargo rustbasic migrate:refresh`
+
+### `migrate:back` / `migrate:rollback`
+Membatalkan migrasi terakhir (rollback 1 step).
+- **Contoh**: `cargo rustbasic migrate:back`
 
 ### `cache:clear`
 Membersihkan sistem secara menyeluruh (log dan data sesi).
@@ -138,4 +151,4 @@ Menu interaktif untuk kompilasi aplikasi ke berbagai sistem operasi (Cross-build
 
 ---
 
-_Dokumentasi ini adalah instruksi operasional untuk AI agar menjaga integritas RustBasic RSX Framework._
+_Dokumentasi ini adalah instruksi operasional untuk AI agar menjaga integritas RustBasic Framework._

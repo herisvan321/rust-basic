@@ -11,7 +11,7 @@ pub async fn index(req: Request) -> impl IntoResponse {
     let auth_installed = std::path::Path::new("src/app/http/controllers/auth").exists();
 
     // Render file "welcome.rsx" dengan data title
-    view(&req, "welcome.rsx", context! {
+    view(&req, "welcome.rb.html", context! {
         title => "Selamat Datang di RustBasic",
         auth_installed => auth_installed,
     })
@@ -28,5 +28,5 @@ pub async fn dev_info(State(state): State<AppState>, _req: Request) -> impl Into
 }
 
 pub async fn test_rsx(req: Request) -> impl IntoResponse {
-    view(&req, "test_rsx.rsx", context! { title => "Test RSX" })
+    view(&req, "test_rsx.rb.html", context! { title => "Test RSX" })
 }

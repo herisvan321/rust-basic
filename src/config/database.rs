@@ -61,3 +61,7 @@ pub async fn run_migrations(db: &DatabaseConnection) {
 pub async fn rollback_migrations(db: &DatabaseConnection) {
     Migrator::down(db, Some(1)).await.expect("Gagal melakukan rollback migrasi");
 }
+
+pub async fn refresh_migrations(db: &DatabaseConnection) {
+    Migrator::refresh(db).await.expect("Gagal melakukan refresh migrasi");
+}

@@ -502,6 +502,10 @@ body::before {
 @keyframes skeleton-loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
 /* HTMX Transitions - Hanya muncul saat ada class .htmx-request */
+.htmx-indicator {
+  display: none;
+}
+
 .htmx-request.feedback-overlay,
 .htmx-request .feedback-overlay,
 .htmx-request.htmx-indicator,

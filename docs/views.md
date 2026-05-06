@@ -1,61 +1,70 @@
-# 🎨 Panduan View & Komponen (RSX Syntax)
+# 🎨 Panduan View & Template
 
-RustBasic menggunakan **RSX (Rust-style XML)** yang menggabungkan kekuatan **Minijinja** dengan sintaks yang modern dan intuitif. Seluruh template menggunakan ekstensi `.rsx`.
+RustBasic menggunakan **Minijinja** sebagai mesin template yang sangat cepat dan mirip dengan Jinja2/Django. Seluruh file template menggunakan ekstensi `.rb.html`.
 
-## 🚀 Sintaks RSX
-Kini Anda tidak perlu lagi mengimpor komponen secara manual. Semua komponen di `src/resources/views/components/` diimpor secara otomatis dan dapat dipanggil menggunakan sintaks tag:
+## 🚀 Sintaks Template Dasar
+Anda dapat menulis HTML standar secara langsung. Tidak ada tag kustom ajaib.
 
-### 1. Tag Mandiri (Self-Closing)
-Gunakan untuk komponen yang tidak memiliki konten di dalamnya.
+### 1. Menampilkan Variabel
+Gunakan tanda kurung kurawal ganda:
 ```html
-<Buttons.Button label="SIMPAN" variant="primary" />
-<Forms.Input name="email" label="Email" placeholder="nama@email.com" />
+<h1>Selamat Datang, {{ nama_user }}</h1>
 ```
 
-### 2. Tag Blok (Block Tags)
-Gunakan untuk komponen yang membungkus konten lain (menggunakan `{{ caller() }}`).
+### 2. Struktur Kontrol (If / For)
+Gunakan tag blok Minijinja standar:
 ```html
-<Display.Card title="Statistik User">
-    <p>Konten ini akan muncul di dalam card.</p>
-</Display.Card>
+{% if is_logged_in %}
+    <p>Halo Admin!</p>
+{% else %}
+    <p>Silakan Login.</p>
+{% endif %}
+
+<ul>
+{% for item in items %}
+    <li>{{ item }}</li>
+{% endfor %}
+</ul>
+```
+
+### 3. Layouts & Inheritance
+Gunakan ekstensi untuk mewarisi tata letak utama (`app.rb.html`):
+```html
+{% extends "layouts/app.rb.html" %}
+
+{% block title %}Halaman Dashboard{% endblock %}
+
+{% block content %}
+    <div>Konten Halaman</div>
+{% endblock %}
 ```
 
 ---
 
-## 🧩 Katalog Komponen
-Berikut adalah daftar namespace dan komponen yang tersedia secara otomatis:
+## 🧩 Sistem Desain (Pure CSS & HTML)
+Daripada menggunakan sistem komponen kustom (seperti `<Buttons.Button />`), framework ini mendorong penggunaan kelas utilitas CSS murni (seperti Tailwind/Bootstrap) langsung pada elemen HTML.
 
-### 1. Forms (`Forms.`)
-Namespace: `Forms` (file: `components/forms.rsx`)
-- **`Input`**: `<Forms.Input name="x" label="y" />`
-- **`Textarea`**: `<Forms.Textarea name="x" label="y" />`
-- **`Select`**: `<Forms.Select name="x" label="y" />`
+### 1. Buttons
+```html
+<button class="btn btn-primary">Simpan</button>
+<a href="/login" class="btn btn-outline">Batal</a>
+```
 
-### 2. Buttons (`Buttons.`)
-Namespace: `Buttons` (file: `components/buttons.rsx`)
-- **`Button`**: `<Buttons.Button label="Klik" />`
-- **`Link_button`**: `<Buttons.Link_button href="/url" label="Go" />`
-- **`Link_back`**: `<Buttons.Link_back />`
+### 2. Forms
+```html
+<label class="form-label">Email</label>
+<input type="email" name="email" class="form-control" placeholder="nama@email.com">
+```
 
-### 3. Display (`Display.`)
-Namespace: `Display` (file: `components/display.rsx`)
-- **`Alert`**: `<Display.Alert message="Sukses!" type="success" />`
-- **`Stat_card`**: `<Display.Stat_card label="User" value="100" />`
-- **`Card`**: `<Display.Card title="Info">...</Display.Card>`
-
-### 4. Overlays (`Overlays.`)
-Namespace: `Overlays` (file: `components/overlays.rsx`)
-- **`Logout_confirm_button`**: `<Overlays.Logout_confirm_button id="out" label="LOGOUT" />`
-
-### 5. Feedback (`Feedback.`)
-Namespace: `Feedback` (file: `components/feedback.rsx`)
-- **`Indicator`**: `<Feedback.Indicator />` (Overlay loading full-screen)
-- **`Spinner`**: `<Feedback.Spinner />`
+### 3. Alerts
+```html
+<div class="alert alert-success">Berhasil disimpan!</div>
+```
 
 ---
 
 ## 📅 Filter Waktu & Tanggal (Carbon-like)
-Anda tetap dapat menggunakan filter Minijinja standar:
+Anda tetap dapat menggunakan filter Minijinja bawaan RustBasic:
 1. **`diff_for_humans`**: `{{ user.created_at | diff_for_humans }}` -> *"2 hours ago"*
 2. **`format_date`**: `{{ now() | format_date("%d %B %Y") }}` -> *"02 May 2026"*
 3. **`now()`**: Mendapatkan waktu saat ini.
@@ -75,4 +84,4 @@ Gunakan perintah berikut untuk pengembangan yang super cepat dengan auto-refresh
 ```bash
 cargo serve
 ```
-Setiap kali file `.rsx` di `src/resources/views/` disimpan, browser akan otomatis memuat ulang halaman.
+Setiap kali file `.rb.html` di `src/resources/views/` disimpan, browser akan otomatis memuat ulang halaman.

@@ -1,5 +1,4 @@
-{% extends "layouts/app.rsx" %}
-
+{% extends "layouts/app.rb.html" %}
 {% block title %}Selamat Datang - RustBasic{% endblock %}
 
 {% block content %}
@@ -34,14 +33,16 @@
 
                 <div style="display: flex; flex-direction: column; gap: 1.25rem;">
                     {% if auth %}
-                        <Buttons.Link_button href="/dashboard" label="Buka Dashboard" class="w-100" />
-                        <Overlays.Logout_confirm_button id="welcome-logout" label="Logout" variant="outline" class="w-100" />
+                        <a href="/dashboard" class="btn btn-primary w-100">Buka Dashboard</a>
+                        <form action="/logout" method="POST">
+                            <button type="submit" class="btn btn-outline w-100">Logout</button>
+                        </form>
                     {% elif auth_installed %}
-                        <Buttons.Link_button href="/login" label="Login ke Akun" class="w-100" />
-                        <Buttons.Link_button href="/register" label="Daftar Sekarang" variant="outline" class="w-100" />
+                        <a href="/login" class="btn btn-primary w-100">Login ke Akun</a>
+                        <a href="/register" class="btn btn-outline w-100">Daftar Sekarang</a>
                     {% else %}
-                        <Buttons.Link_button href="https://github.com/herisvan321/rest-basic" label="Pelajari Framework" class="w-100" />
-                        <Buttons.Link_button href="/dev" label="Sistem Info" variant="outline" class="w-100" />
+                        <a href="https://github.com/herisvan321/rest-basic" class="btn btn-primary w-100">Pelajari Framework</a>
+                        <a href="/dev" class="btn btn-outline w-100">Sistem Info</a>
                     {% endif %}
                 </div>
 

@@ -9,8 +9,7 @@ pub mod builder;
 pub mod utils;
 pub mod auth;
 
-#[tokio::main]
-async fn main() {
+fn main() {
     dotenv().expect("❌ Error: File .env tidak ditemukan! Silakan salin .env.example menjadi .env sebelum menggunakan CLI.");
     let args: Vec<String> = env::args().collect();
 
@@ -57,10 +56,16 @@ async fn main() {
             scaffolding::make_middleware(&args[2]);
         }
         "migrate" => {
-            database::run_manual_migrations().await;
+            let rt = tokio::runtime::Runtime::new().unwrap();
+            rt.block_on(database::run_manual_migrations());
+        }
+        "migrate:refresh" => {
+            let rt = tokio::runtime::Runtime::new().unwrap();
+            rt.block_on(database::refresh_manual_migrations());
         }
         "migrate:back" | "migrate:rollback" => {
-            database::rollback_manual_migrations().await;
+            let rt = tokio::runtime::Runtime::new().unwrap();
+            rt.block_on(database::rollback_manual_migrations());
         }
         "route:list" => {
             monitoring::list_routes();
@@ -69,7 +74,8 @@ async fn main() {
             builder::build_project();
         }
         "cache:clear" => {
-            database::clear_cache().await;
+            let rt = tokio::runtime::Runtime::new().unwrap();
+            rt.block_on(database::clear_cache());
         }
         "check:update" => {
             monitoring::check_updates();
@@ -81,14 +87,16 @@ async fn main() {
             database::generate_app_key();
         }
         "make:auth" | "auth" => {
+            let rt = tokio::runtime::Runtime::new().unwrap();
             if args.len() >= 3 && args[2] == "back" {
-                auth::remove_auth().await;
+                rt.block_on(auth::remove_auth());
             } else {
-                auth::make_auth().await;
+                rt.block_on(auth::make_auth());
             }
         }
         "auth:back" => {
-            auth::remove_auth().await;
+            let rt = tokio::runtime::Runtime::new().unwrap();
+            rt.block_on(auth::remove_auth());
         }
         _ => {
             println!("{} {}", "❌ Error: Perintah tidak dikenal:".red().bold(), command.yellow());
@@ -106,6 +114,7 @@ fn print_help() {
     println!("  {} {} <Nama>  {}", "cargo rustbasic".blue(), "make:controller".green(), "Membuat controller Axum".dimmed());
     println!("  {} {} <Nama>  {}", "cargo rustbasic".blue(), "make:middleware".green(), "Membuat middleware Axum".dimmed());
     println!("  {} {}                  {}", "cargo rustbasic".blue(), "migrate".green(), "Menjalankan migrasi database (Sea-ORM)".dimmed());
+    println!("  {} {}          {}", "cargo rustbasic".blue(), "migrate:refresh".green(), "Rollback semua dan jalankan kembali migrasi".dimmed());
     println!("  {} {}             {}", "cargo rustbasic".blue(), "migrate:back".green(), "Membatalkan migrasi terakhir (Rollback)".dimmed());
     println!("  {} {}               {}", "cargo rustbasic".blue(), "route:list".green(), "Menampilkan daftar route".dimmed());
     println!("  {} {}                    {}", "cargo rustbasic".blue(), "build".green(), "Membangun project dengan pilihan".dimmed());

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Debug Error - {{ code }}</title>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@400;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/public/css/style.css?v=1.1">
+    <style>{{ app_css() | safe }}</style>
     <style>
         .debug-message {
             background: #1e293b;

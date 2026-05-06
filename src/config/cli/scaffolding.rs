@@ -30,7 +30,7 @@ pub struct {class_name};
 
 impl {class_name} {{
     pub async fn index(req: Request) -> impl IntoResponse {{
-        view(&req, "{snake_name}.rsx", context! {{
+        view(&req, "{snake_name}.rb.html", context! {{
             title => "{class_name}"
         }})
     }}

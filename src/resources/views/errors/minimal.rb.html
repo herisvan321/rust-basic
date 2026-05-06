@@ -4,10 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ code }} | {{ title }}</title>
-    <Assets.Styles />
-    
-    <!-- 3. Library Frontend (HTMX Local Macro) -->
-    <Assets.Htmx />
+    <style>{{ app_css() | safe }}</style>
+    <script>{{ htmx_js() | safe }}</script>
 </head>
 <body>
     <div class="split-screen">

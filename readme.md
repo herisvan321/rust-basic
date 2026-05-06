@@ -1,6 +1,6 @@
-# 🚀 RustBasic (Axum RSX Edition 2026)
+# 🚀 RustBasic Framework (Axum Edition 2026)
 
-Aplikasi web modern berbasis Rust dengan arsitektur **Clean Monolith**. Dirancang untuk performa maksimal, keamanan tinggi, dan pengalaman pengembang yang luar biasa dengan sintaks RSX (Rust-style XML).
+Aplikasi web modern berbasis Rust dengan arsitektur **Clean Monolith**. Dirancang untuk performa maksimal, keamanan tinggi, dan pengalaman pengembang yang luar biasa dengan sintaks standar HTML dan Minijinja.
 
 ---
 
@@ -8,14 +8,13 @@ Aplikasi web modern berbasis Rust dengan arsitektur **Clean Monolith**. Dirancan
 
 ### 🚀 Core & Performance
 - **⚡ Performa Axum**: Backend super cepat dengan framework Axum 0.8 dan Tokio.
-- **🎨 RSX Template System**: Menulis template dengan sintaks RSX (`<Namespace.Component />`) menggunakan engine Minijinja yang dioptimalkan.
+- **🎨 Template System**: Menulis template dengan sintaks HTML murni dan tag Minijinja (`.rb.html`).
 - **🛡️ Source Protection**: Otomatis melakukan **Minifikasi HTML** pada output untuk menyembunyikan struktur kode asli dari "View Source".
-- **🔄 Live Reload**: Browser otomatis refresh saat mengubah file kode atau template `.rsx` (aktif saat `cargo serve`).
+- **🔄 Live Reload**: Browser otomatis refresh saat mengubah file kode atau template `.rb.html` (aktif saat `cargo serve`).
 
 ### 🎨 UI/UX Architecture
 - **🪄 HTMX SPA Experience**: Pengalaman Single Page Application yang ringan tanpa library JavaScript berat.
-- **🧩 Auto-Import Components**: Panggil komponen UI langsung tanpa perlu import manual di dalam template.
-- **🚀 Premium Design System**: Desain modern dengan sistem komponen yang modular dan siap pakai.
+- **🚀 Premium Design System**: Desain modern menggunakan utility CSS khusus dan komponen HTML standar.
 
 ### 🔐 Hardened Security
 - **🛡️ Security First**: Proteksi CSRF otomatis, *Strict Env Enforcement*, dan *Bcrypt Password Hashing*.
@@ -24,15 +23,13 @@ Aplikasi web modern berbasis Rust dengan arsitektur **Clean Monolith**. Dirancan
 
 ---
 
-## 🛠️ Tech Stack & Components
+## 🛠️ CLI Terintegrasi
 
-### UI Component Library
-Terletak di `src/resources/views/components/`:
-- **`Forms`**: Input field, checkbox, select, dll.
-- **`Buttons`**: Tombol aksi, link button, tombol kembali.
-- **`Display`**: Card, Premium Alerts (Floating), Stat Cards.
-- **`Overlays`**: Modal dinamis dan Konfirmasi Logout.
-- **`Feedback`**: Loading Spinners dan HTMX Indicators.
+Manajemen proyek penuh melalui alat baris perintah bawaan:
+- **Scaffolding**: Otomatis generate Model, Controller, dan Middleware (`make:model`, `make:controller`).
+- **Database**: Jalankan atau reset migrasi (`migrate`, `migrate:refresh`, `migrate:back`).
+- **Authentication**: Pasang atau copot sistem autentikasi lengkap dengan sekali perintah (`auth`, `auth:back`).
+- **Monitoring**: Lihat daftar rute aktif (`route:list`) atau bersihkan cache (`cache:clear`).
 
 ---
 
@@ -45,10 +42,9 @@ rustbasic/
 ├── src/resources/
 │   ├── css/              # Asset CSS (Embedded)
 │   ├── js/               # Asset JS (HTMX Embedded)
-│   └── views/            # Template .rsx (RSX Syntax)
+│   └── views/            # Template .rb.html (HTML + Minijinja)
 │       ├── auth/         # Halaman Login & Register
 │       ├── emails/       # Template Email
-│       ├── components/   # Modular UI Components (Auto-imported)
 │       ├── errors/       # Template Error (404, 500, Debug)
 │       └── layouts/      # Layout Utama
 ├── src/
@@ -72,7 +68,6 @@ Akses panduan lengkap untuk setiap aspek framework RustBasic:
 - **[`AI_PROMPT.md`](AI_PROMPT.md)**: Instruksi sistem khusus untuk asisten AI.
 
 ### 🎨 Frontend & Interaksi
-- **[`docs/views.md`](docs/views.md)**: **[UTAMA]** Panduan lengkap sintaks RSX dan UI Components.
 - **[`htmx.md`](htmx.md)**: Panduan lengkap interaksi HTMX.
 
 ### ⚙️ Backend & Operasional
@@ -96,7 +91,7 @@ Akses panduan lengkap untuk setiap aspek framework RustBasic:
     ```bash
     cargo rustbasic migrate
     ```
-4.  **Auth (Opsional)**: Pasang sistem autentikasi RSX siap pakai.
+4.  **Auth (Opsional)**: Pasang sistem autentikasi siap pakai.
     ```bash
     cargo rustbasic auth
     ```
