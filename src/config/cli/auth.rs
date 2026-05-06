@@ -69,24 +69,41 @@ pub fn router() -> Router<AppState> {
     }
 
     // 3.1 Create Password Resets Migration
-    let migration_path = "database/migrations/m20260505_000003_create_password_resets_table.rs";
-    if !std::path::Path::new(migration_path).exists() {
-        let migration_template = r#"use sea_orm_migration::prelude::*;
+    let timestamp = chrono::Local::now().format("%Y%m%d_%H%M%S").to_string();
+    let migration_name = format!("m{}_create_password_resets_table", timestamp);
+    let migration_path = format!("database/migrations/{}.rs", migration_name);
+    
+    // Check if any password reset migration already exists
+    let mut exists = false;
+    if let Ok(entries) = std::fs::read_dir("database/migrations") {
+        for entry in entries.flatten() {
+            if let Some(name) = entry.file_name().to_str() {
+                if name.ends_with("_create_password_resets_table.rs") {
+                    exists = true;
+                    println!("   {} {}", "⚠️  Exists:".yellow(), name.cyan());
+                    break;
+                }
+            }
+        }
+    }
+
+    if !exists {
+        let migration_template = format!(r#"use sea_orm_migration::prelude::*;
 
 #[derive(Iden)]
-enum PasswordResets {
+enum PasswordResets {{
     Table,
     Email,
     Token,
     CreatedAt,
-}
+}}
 
 #[derive(DeriveMigrationName)]
 pub struct Migration;
 
 #[async_trait::async_trait]
-impl MigrationTrait for Migration {
-    async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
+impl MigrationTrait for Migration {{
+    async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {{
         manager
             .create_table(
                 Table::create()
@@ -103,30 +120,19 @@ impl MigrationTrait for Migration {
                     .to_owned(),
             )
             .await
-    }
+    }}
 
-    async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
+    async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {{
         manager
             .drop_table(Table::drop().table(PasswordResets::Table).to_owned())
             .await
-    }
-}
-"#;
-        fs::write(migration_path, migration_template).ok();
+    }}
+}}
+"#);
+        fs::write(&migration_path, migration_template).ok();
         
-        let migration_mod_path = "database/migrations/mod.rs";
-        if let Ok(content) = fs::read_to_string(migration_mod_path) {
-            if !content.contains("pub mod m20260505_000003_create_password_resets_table;") {
-                let mut lines: Vec<String> = content.lines().map(|s| s.to_string()).collect();
-                lines.insert(0, "pub mod m20260505_000003_create_password_resets_table;".to_string());
-                let mut new_content = lines.join("\n");
-                if new_content.contains("vec![") {
-                    new_content = new_content.replace("vec![", "vec![\n            Box::new(m20260505_000003_create_password_resets_table::Migration),");
-                }
-                fs::write(migration_mod_path, new_content).ok();
-            }
-        }
-        println!("   {} {}", "✅ Created:".green(), "Migration for password_resets".cyan());
+        super::scaffolding::update_migration_mod_rs(&migration_name);
+        println!("   {} {}", "✅ Created:".green(), format!("Migration {}", migration_name).cyan());
     }
 
     // 4. Create Controller Folder & mod.rs
@@ -514,13 +520,31 @@ impl AuthController {
             <p class="text-muted mb-5">Lengkapi formulir di bawah ini.</p>
 
             <form hx-post="/register" hx-target="body" hx-push-url="true" hx-indicator="#indicator">
-                <Forms.Input name="name" label="Nama Lengkap" placeholder="Nama Anda" value="{{ old.name }}" errors="{{ errors.name }}" required="true" />
+                <div style="margin-bottom: 1rem;">
+                    <label class="form-label" style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: 600;">Nama Lengkap</label>
+                    <input type="text" name="name" class="form-control" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px;" placeholder="Nama Anda" value="{{ old.name }}" required>
+                    {% if errors.name %}
+                        <div style="color: #dc3545; font-size: 0.85rem; margin-top: 0.25rem;">{{ errors.name }}</div>
+                    {% endif %}
+                </div>
 
-                <Forms.Input name="email" type="email" label="Email" placeholder="nama@email.com" value="{{ old.email }}" errors="{{ errors.email }}" required="true" />
+                <div style="margin-bottom: 1rem;">
+                    <label class="form-label" style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: 600;">Email</label>
+                    <input type="email" name="email" class="form-control" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px;" placeholder="nama@email.com" value="{{ old.email }}" required>
+                    {% if errors.email %}
+                        <div style="color: #dc3545; font-size: 0.85rem; margin-top: 0.25rem;">{{ errors.email }}</div>
+                    {% endif %}
+                </div>
 
-                <Forms.Input name="password" type="password" label="Password" placeholder="Min. 8 karakter" errors="{{ errors.password }}" required="true" />
+                <div style="margin-bottom: 1.5rem;">
+                    <label class="form-label" style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: 600;">Password</label>
+                    <input type="password" name="password" class="form-control" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px;" placeholder="Min. 8 karakter" required>
+                    {% if errors.password %}
+                        <div style="color: #dc3545; font-size: 0.85rem; margin-top: 0.25rem;">{{ errors.password }}</div>
+                    {% endif %}
+                </div>
 
-                <Buttons.Button label="DAFTAR SEKARANG" class="w-100 mb-4" />
+                <button type="submit" style="width: 100%; padding: 0.75rem; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-bottom: 1.5rem; box-shadow: 0 4px 6px rgba(99, 102, 241, 0.2);">DAFTAR SEKARANG</button>
 
                 <p class="text-muted" style="text-align: center; font-size: 0.9rem;">
                     Sudah punya akun? <a href="/login" class="text-primary" style="font-weight: 700;">Login Disini</a>
@@ -555,9 +579,15 @@ impl AuthController {
             <p class="text-muted mb-5">Masukkan email Anda untuk menerima link reset.</p>
 
             <form hx-post="/forgot-password" hx-target="body" hx-push-url="true" hx-indicator="#indicator">
-                <Forms.Input name="email" type="email" label="Email" placeholder="nama@email.com" value="{{ old.email }}" errors="{{ errors.email }}" required="true" />
+                <div style="margin-bottom: 1.5rem;">
+                    <label class="form-label" style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: 600;">Email</label>
+                    <input type="email" name="email" class="form-control" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px;" placeholder="nama@email.com" value="{{ old.email }}" required>
+                    {% if errors.email %}
+                        <div style="color: #dc3545; font-size: 0.85rem; margin-top: 0.25rem;">{{ errors.email }}</div>
+                    {% endif %}
+                </div>
 
-                <Buttons.Button label="KIRIM LINK RESET" class="w-100 mb-4" />
+                <button type="submit" style="width: 100%; padding: 0.75rem; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-bottom: 1.5rem; box-shadow: 0 4px 6px rgba(99, 102, 241, 0.2);">KIRIM LINK RESET</button>
 
                 <p class="text-muted" style="text-align: center; font-size: 0.9rem;">
                     Ingat password Anda? <a href="/login" class="text-primary" style="font-weight: 700;">Login Disini</a>
@@ -609,9 +639,15 @@ impl AuthController {
             <form hx-post="/reset-password" hx-target="body" hx-push-url="true" hx-indicator="#indicator">
                 <input type="hidden" name="token" value="{{ token }}">
                 
-                <Forms.Input name="password" type="password" label="Password Baru" placeholder="Min. 8 karakter" errors="{{ errors.password }}" required="true" />
+                <div style="margin-bottom: 1.5rem;">
+                    <label class="form-label" style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: 600;">Password Baru</label>
+                    <input type="password" name="password" class="form-control" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px;" placeholder="Min. 8 karakter" required>
+                    {% if errors.password %}
+                        <div style="color: #dc3545; font-size: 0.85rem; margin-top: 0.25rem;">{{ errors.password }}</div>
+                    {% endif %}
+                </div>
 
-                <Buttons.Button label="SIMPAN PASSWORD" class="w-100 mb-4" />
+                <button type="submit" style="width: 100%; padding: 0.75rem; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-bottom: 1.5rem; box-shadow: 0 4px 6px rgba(99, 102, 241, 0.2);">SIMPAN PASSWORD</button>
             </form>
         </div>
     </div>
@@ -696,7 +732,9 @@ impl AuthController {
                 <a href="/dashboard" class="btn" style="background: rgba(255,255,255,0.2); color: #fff; justify-content: flex-start; text-transform: none;">Dashboard Overview</a>
                 <a href="/" class="btn" style="color: #fff; justify-content: flex-start; text-transform: none; opacity: 0.7;">Beranda Utama</a>
                 <div style="margin-top: auto; padding-top: 2rem;">
-                    <Overlays.Logout_confirm_button id="dashboard-logout" label="LOGOUT" variant="outline" class="w-100" style="border: none; background: rgba(255,255,255,0.1); color: #fff;" />
+                    <form hx-post="/logout" hx-target="body" style="margin:0;">
+                        <button type="submit" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: white; font-weight: bold; cursor: pointer; text-align: center;">LOGOUT</button>
+                    </form>
                 </div>
             </nav>
         </div>
@@ -712,7 +750,10 @@ impl AuthController {
 
             <!-- Grid Statistik -->
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; margin-bottom: 4rem;">
-                <Display.Stat_card label="Total Pengguna" value="{{ total_users }}" />
+                <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #eee;">
+                    <p class="text-muted text-uppercase" style="font-size: 0.8rem; font-weight: 700; letter-spacing: 0.1em; margin-bottom: 1rem;">Total Pengguna</p>
+                    <div style="font-size: 2.5rem; font-weight: 800; color: var(--primary);">{{ total_users }}</div>
+                </div>
                 
                 <div style="border-bottom: 4px solid var(--accent); padding: 1.5rem 0;">
                     <p class="text-muted text-uppercase" style="font-size: 0.8rem; font-weight: 700; letter-spacing: 0.1em; margin-bottom: 1rem;">Status Sistem</p>
@@ -722,7 +763,10 @@ impl AuthController {
                     </div>
                 </div>
 
-                <Display.Stat_card label="Performa" value="99.9%" color="var(--secondary)" />
+                <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #eee;">
+                    <p class="text-muted text-uppercase" style="font-size: 0.8rem; font-weight: 700; letter-spacing: 0.1em; margin-bottom: 1rem;">Performa</p>
+                    <div style="font-size: 2.5rem; font-weight: 800; color: var(--secondary);">99.9%</div>
+                </div>
             </div>
 
             <!-- Content Area -->
@@ -874,10 +918,16 @@ pub async fn remove_auth() {
     }
 
     // 7.1 Delete Password Resets Migration & Model
-    let migration_path = "database/migrations/m20260505_000003_create_password_resets_table.rs";
-    if std::path::Path::new(migration_path).exists() {
-        fs::remove_file(migration_path).ok();
-        println!("   {} {}", "✅ Deleted:".green(), migration_path.cyan());
+    if let Ok(entries) = std::fs::read_dir("database/migrations") {
+        for entry in entries.flatten() {
+            if let Some(name) = entry.file_name().to_str() {
+                if name.ends_with("_create_password_resets_table.rs") {
+                    let path = entry.path();
+                    fs::remove_file(&path).ok();
+                    println!("   {} {}", "✅ Deleted:".green(), path.display().to_string().cyan());
+                }
+            }
+        }
     }
     
     let model_path = "src/app/models/password_resets.rs";
@@ -931,24 +981,25 @@ pub async fn remove_auth() {
 
     // 7.3 Update database/migrations/mod.rs
     let migration_mod_path = "database/migrations/mod.rs";
-    if let Ok(mut content) = fs::read_to_string(migration_mod_path) {
+    if let Ok(content) = fs::read_to_string(migration_mod_path) {
+        let mut lines: Vec<String> = content.lines().map(|s| s.to_string()).collect();
         let mut changed = false;
-        let mod_name = "pub mod m20260505_000003_create_password_resets_table;";
-        if content.contains(mod_name) {
-            content = content.replace(&format!("{}\n", mod_name), "");
-            content = content.replace(mod_name, "");
-            changed = true;
-        }
         
-        let mig_box = "Box::new(m20260505_000003_create_password_resets_table::Migration),";
-        if content.contains(mig_box) {
-            content = content.replace(&format!("{}\n", mig_box), "");
-            content = content.replace(mig_box, "");
-            changed = true;
-        }
+        // Remove the mod line
+        lines.retain(|line| {
+            if line.contains("_create_password_resets_table;") {
+                changed = true;
+                false
+            } else if line.contains("Box::new(") && line.contains("_create_password_resets_table::Migration") {
+                changed = true;
+                false
+            } else {
+                true
+            }
+        });
 
         if changed {
-            fs::write(migration_mod_path, content).ok();
+            fs::write(migration_mod_path, lines.join("\n")).ok();
             println!("   {} {}", "📝 Updated:".blue(), migration_mod_path.cyan());
         }
     }

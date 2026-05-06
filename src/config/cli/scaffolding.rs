@@ -272,6 +272,9 @@ pub fn update_migration_mod_rs(mod_name: &str) {
 
     // Tambahkan mod declaration
     if !content.contains(&format!("pub mod {};", mod_name)) {
+        if !content.ends_with('\n') {
+            content.push('\n');
+        }
         content.push_str(&format!("pub mod {};\n", mod_name));
     }
 
