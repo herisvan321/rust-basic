@@ -20,7 +20,7 @@ Sebelum melakukan modifikasi file, AI harus mengumpulkan data berikut:
 
 ### B. Ekstraksi HTML & Layout (RSX Syntax)
 - Buat file layout baru: `src/resources/views/layouts/<template_name>.rsx`.
-- Gunakan tag `<Assets.Styles />` dan `<Assets.Htmx />` untuk menyertakan aset inti.
+- Gunakan tag `<Assets.<template_name> />` dan `<Assets.<template_name> />` untuk menyertakan aset inti.
 - Buat file view di `src/resources/views/<template_name>/index.rsx`.
 - Gunakan `{% extends "layouts/<template_name>.rsx" %}`.
 
