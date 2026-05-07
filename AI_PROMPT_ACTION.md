@@ -1,13 +1,14 @@
 # 🦾 AI Action Center: RustBasic Framework
 
 prompt
-pastikan perpindah antar halaman tanpa reload/refresh menggunakan htmx, saya ingin berpindah antar halaman tanpa ada reload/refresh
+pastikan perpindah antar halaman tanpa reload/refresh menggunakan htmx, saya ingin berpindah antar halaman tanpa ada reload/refresh, 
 
 ---
 
 ## 📂 Struktur Folder (Modular & Clean)
 
 Aplikasi telah dipisahkan menjadi modul-modul kecil untuk skalabilitas tinggi:
+csrf protection pada htmx dengan menggunakan cargo-htmx, untuk input type=csrf wajib diubah menjadi token htmx
 
 ```text
 rustbasic/
@@ -60,12 +61,12 @@ rb <perintah> [argumen]
 
 ## ⚡ Pengembangan (Shortcuts)
 
-### `cargo serve`
+### `cargo rustbasic serve`
 Menjalankan server dalam mode pengembangan:
 - **Template Rendering**: Mengolah `.rb.html` dengan Minijinja.
 - **Auto-Watch**: Memantau perubahan pada `src/`, `src/resources/` (template), dan file `.env`.
 - **Live Reload**: Otomatis merestart server dan me-refresh browser.
-- **Contoh**: `cargo serve`
+- **Contoh**: `cargo rustbasic serve`
 
 ---
 

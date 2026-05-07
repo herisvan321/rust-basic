@@ -1,18 +1,18 @@
 # 📚 RustBasic Documentation Index
 
-Pusat dokumentasi resmi **RustBasic Framework (RSX Edition)**.
+Pusat dokumentasi resmi **RustBasic Framework**.
 
 ---
 
 ## 🚀 Memulai (Basics)
 - **[Panduan Dasar](basics.md)**: Instalasi, konfigurasi awal, dan menjalankan server.
-- **[RSX Views](views.md)**: **[UTAMA]** Panduan templating dengan sintaks RSX dan auto-components.
+- **[Views & Templates](views.md)**: **[UTAMA]** Panduan templating dengan sintaks HTML & Minijinja.
 - **[Manajemen Database](database.md)**: Dokumentasi Sea-ORM dan migrasi.
 - **[Routing & HTTP](http.md)**: Detail mengenai request, response, dan middleware.
 
 ## 🛠️ CLI & Scaffolding
 - **[CLI Reference](cli.md)**: Daftar perintah lengkap `cargo rustbasic`.
-- **[Auth Scaffolding](auth_cli.md)**: Panduan sistem autentikasi otomatis berbasis RSX.
+- **[Auth Scaffolding](auth_cli.md)**: Panduan sistem autentikasi otomatis.
 
 ## ⚙️ Advanced & Production
 - **[Deployment Guide](deployment.md)**: Panduan rilis ke server produksi.
@@ -20,4 +20,4 @@ Pusat dokumentasi resmi **RustBasic Framework (RSX Edition)**.
 
 ---
 
-_Gunakan perintah `cargo serve` untuk pengalaman pengembangan terbaik dengan auto-refresh browser._
+_Gunakan perintah `cargo rustbasic serve` untuk pengalaman pengembangan terbaik dengan auto-refresh browser._

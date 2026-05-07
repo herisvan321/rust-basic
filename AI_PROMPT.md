@@ -52,7 +52,7 @@ Membangun aplikasi web monolith yang cepat, aman, dan mewah menggunakan stack: *
 ---
 
 ## 🚀 PERINTAH EKSEKUSI
-- **Development**: Selalu gunakan `cargo serve` (Auto-Reload).
+- **Development**: Selalu gunakan `cargo rustbasic serve` (Auto-Reload).
 - **CLI**: Gunakan `cargo rustbasic <command>` (misalnya `make:controller`, `make:model`, `migrate:refresh`) untuk mempercepat pekerjaan.
 
 ---

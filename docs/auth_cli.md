@@ -50,4 +50,4 @@ cargo rustbasic auth:back
 ---
 
 ## 🛠️ Kustomisasi
-Anda dapat memodifikasi logika di `src/app/http/controllers/auth/auth_controller.rs` dan memperbarui tampilan langsung di file `.rb.html` terkait. Setiap perubahan pada template akan memicu auto-refresh di browser jika `cargo serve` sedang berjalan.
+Anda dapat memodifikasi logika di `src/app/http/controllers/auth/auth_controller.rs` dan memperbarui tampilan langsung di file `.rb.html` terkait. Setiap perubahan pada template akan memicu auto-refresh di browser jika `cargo rustbasic serve` sedang berjalan.

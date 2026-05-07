@@ -21,6 +21,17 @@ fn main() {
     let command = &args[1];
 
     match command.as_str() {
+         "serve" => {
+            println!("\n   {} {}", "🚀".bold(), "Menjalankan server RustBasic dengan Auto-Reload...".magenta().bold());
+            let status = std::process::Command::new("cargo")
+                .args(["watch", "-c", "-q", "--no-ignore", "-i", "target", "-w", "src", "-w", ".env", "-w", "src/resources", "-x", "run"])
+                .status()
+                .expect("❌ Gagal menjalankan cargo watch. Pastikan cargo-watch sudah terinstall: cargo install cargo-watch");
+            
+            if !status.success() {
+                std::process::exit(status.code().unwrap_or(1));
+            }
+        },
         "make:model" => {
             if args.len() < 3 {
                 println!("{}", "❌ Error: Nama model tidak ditentukan.".red().bold());
@@ -98,6 +109,7 @@ fn main() {
             let rt = tokio::runtime::Runtime::new().unwrap();
             rt.block_on(auth::remove_auth());
         }
+       
         _ => {
             println!("{} {}", "❌ Error: Perintah tidak dikenal:".red().bold(), command.yellow());
             print_help();
@@ -124,6 +136,8 @@ fn print_help() {
     println!("  {} {}             {}", "cargo rustbasic".blue(), "key:generate".green(), "Membuat APP_KEY baru di file .env".dimmed());
     println!("  {} {}                   {}", "cargo rustbasic".blue(), "make:auth".green(), "Scaffold autentikasi (Login/Register)".dimmed());
     println!("  {} {}                   {}", "cargo rustbasic".blue(), "auth:back".red(), "Menghapus semua scaffolding autentikasi".dimmed());
+    println!("  {} {}                    {}", "cargo rustbasic".blue(), "serve".green(), "Menjalankan server dengan Auto-Reload".dimmed());
+    println!("  {}                       {}", "cargo serve".blue(), "(Shortcut) Lebih cepat untuk menjalankan server".dimmed());
 
     println!();
 }

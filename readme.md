@@ -109,6 +109,7 @@ Akses panduan lengkap untuk setiap aspek framework RustBasic:
     ```bash
     cargo serve
     ```
+    _Atau `cargo rustbasic serve` jika ingin melalui menu CLI utama._
     _Akses aplikasi di: 👉 **[http://localhost:4000](http://localhost:4000)**_
 
 ---

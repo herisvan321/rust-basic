@@ -72,7 +72,7 @@ AI Agent **DILARANG** melakukan:
 ## 🛠️ 5. ACTION (Perintah Eksekusi)
 | Perintah | Kegunaan |
 | :--- | :--- |
-| `cargo serve` | **Wajib dipakai** (Auto-Reload + Live Browser Refresh). |
+| `cargo rustbasic serve` | **Wajib dipakai** (Auto-Reload + Live Browser Refresh). |
 | `cargo rustbasic make:controller <Name>` | Menghasilkan boilerplate controller yang merujuk ke `.rb.html`. |
 | `cargo rustbasic auth` | Memasang sistem auth lengkap dengan sintaks HTML murni. |
 | `cargo rustbasic migrate` | Sinkronisasi struktur tabel database. |

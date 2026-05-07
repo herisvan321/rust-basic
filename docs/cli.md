@@ -18,7 +18,7 @@ rb <perintah> [argumen]
 
 ## ⚡ Pengembangan (Shortcuts)
 
-### `cargo serve`
+### `cargo rustbasic serve`
 Menjalankan server dalam mode pengembangan dengan fitur:
 - **Auto-Watch**: Memantau perubahan pada kode Rust (`src/`), template (`.rb.html`), dan konfigurasi (`.env`).
 - **Live Reload**: Otomatis me-refresh browser saat Anda menyimpan perubahan template.

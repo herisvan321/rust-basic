@@ -70,7 +70,7 @@ src/resources/
 ## 🛠️ 5. ACTION (Verifikasi)
 | Perintah | Kegunaan |
 | :--- | :--- |
-| `cargo serve` | Menjalankan server untuk melihat hasil render template dengan Auto-reload. |
+| `cargo rustbasic serve` | Menjalankan server untuk melihat hasil render template dengan Auto-reload. |
 | `cargo rustbasic cache:clear` | Jalankan jika perubahan cache/log perlu dibersihkan. |
 
 ---
