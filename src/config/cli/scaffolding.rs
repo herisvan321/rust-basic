@@ -288,3 +288,69 @@ pub fn update_migration_mod_rs(mod_name: &str) {
     fs::write(mod_path, content).expect("Gagal memperbarui database/migrations/mod.rs");
     println!("{} {}", "📝".blue(), "database/migrations/mod.rs diperbarui.".dimmed());
 }
+
+pub fn make_seeder(name: &str) {
+    let clean_name = name.replace("Seeder", "");
+    let snake_name = to_snake_case(&clean_name);
+    let class_name = format!("{}Seeder", clean_name);
+    let file_name = format!("{}_seeder.rs", snake_name);
+    let file_path = format!("database/seeders/{}", file_name);
+
+    if std::path::Path::new(&file_path).exists() {
+        println!("{} {} {}", "⚠️  Seeder".yellow(), file_path.cyan(), "sudah ada.".yellow());
+        return;
+    }
+
+    let template = format!(
+r#"use sea_orm::{{DatabaseConnection, Set, ActiveModelTrait}};
+use crate::config::seeder::SeederTrait;
+// use crate::app::models::{{snake_name}}; // Sesuaikan dengan model Anda
+
+pub struct {class_name};
+
+#[async_trait::async_trait]
+impl SeederTrait for {class_name} {{
+    async fn run(&self, db: &DatabaseConnection) -> Result<(), sea_orm::DbErr> {{
+        println!("   {} Sedang memproses {class_name}...", "⏳".blue());
+        
+        // Contoh:
+        /*
+        let _ = {snake_name}::ActiveModel {{
+            name: Set("Example Data".to_owned()),
+            ..Default::default()
+        }}.insert(db).await?;
+        */
+
+        Ok(())
+    }}
+}}
+"#, class_name = class_name, snake_name = snake_name);
+
+    fs::write(&file_path, template).expect("Gagal membuat file seeder");
+    println!("{} {}", "✅ Seeder dibuat:".green(), file_path.cyan());
+
+    update_seeder_mod_rs(&class_name, &file_name.replace(".rs", ""));
+}
+
+pub fn update_seeder_mod_rs(class_name: &str, mod_name: &str) {
+    // 1. Update database/seeders/mod.rs (mod declaration)
+    let db_mod_path = "database/seeders/mod.rs";
+    let mut db_content = fs::read_to_string(db_mod_path).expect("Gagal membaca seeders/mod.rs");
+    let mod_line = format!("pub mod {};", mod_name);
+    if !db_content.contains(&mod_line) {
+        db_content.push_str(&format!("{}\n", mod_line));
+        fs::write(db_mod_path, db_content).ok();
+    }
+
+    // 2. Update src/config/seeder.rs (registration)
+    let config_path = "src/config/seeder.rs";
+    let mut config_content = fs::read_to_string(config_path).expect("Gagal membaca config/seeder.rs");
+    let search_pattern = "let seeders: Vec<Box<dyn SeederTrait>> = vec![";
+    if let Some(pos) = config_content.find(search_pattern) {
+        let insert_pos = pos + search_pattern.len();
+        config_content.insert_str(insert_pos, &format!("\n        Box::new(seeders::{}::{}),", mod_name, class_name));
+        fs::write(config_path, config_content).ok();
+    }
+    
+    println!("{} {}", "📝".blue(), "Pengaturan seeder diperbarui.".dimmed());
+}

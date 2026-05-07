@@ -1,6 +1,7 @@
 use std::fs;
 use rustbasic::config::Config;
 use rustbasic::config::database::{connect, run_migrations, rollback_migrations, refresh_migrations};
+use rustbasic::config::seeder;
 use base64::{Engine as _, engine::general_purpose};
 use rand::Rng;
 use regex::Regex;
@@ -107,4 +108,10 @@ pub fn generate_app_key() {
             println!("{} File .env tidak ditemukan.", "❌ Error:".red());
         }
     }
+}
+
+pub async fn run_manual_seeders() {
+    let cfg = Config::load();
+    let db = connect(&cfg).await;
+    seeder::run(&db).await;
 }

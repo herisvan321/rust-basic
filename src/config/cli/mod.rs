@@ -105,6 +105,17 @@ fn main() {
                 rt.block_on(auth::make_auth());
             }
         }
+        "db:seed" => {
+            let rt = tokio::runtime::Runtime::new().unwrap();
+            rt.block_on(database::run_manual_seeders());
+        }
+        "make:seeder" => {
+            if args.len() < 3 {
+                println!("{}", "❌ Error: Nama seeder tidak ditentukan.".red().bold());
+                return;
+            }
+            scaffolding::make_seeder(&args[2]);
+        }
         "auth:back" => {
             let rt = tokio::runtime::Runtime::new().unwrap();
             rt.block_on(auth::remove_auth());
@@ -136,6 +147,8 @@ fn print_help() {
     println!("  {} {}             {}", "cargo rustbasic".blue(), "key:generate".green(), "Membuat APP_KEY baru di file .env".dimmed());
     println!("  {} {}                   {}", "cargo rustbasic".blue(), "make:auth".green(), "Scaffold autentikasi (Login/Register)".dimmed());
     println!("  {} {}                   {}", "cargo rustbasic".blue(), "auth:back".red(), "Menghapus semua scaffolding autentikasi".dimmed());
+    println!("  {} {}                  {}", "cargo rustbasic".blue(), "db:seed".green(), "Menjalankan seeder database".dimmed());
+    println!("  {} {} <Nama>    {}", "cargo rustbasic".blue(), "make:seeder".green(), "Membuat file seeder baru".dimmed());
     println!("  {} {}                    {}", "cargo rustbasic".blue(), "serve".green(), "Menjalankan server dengan Auto-Reload".dimmed());
     println!("  {}                       {}", "cargo serve".blue(), "(Shortcut) Lebih cepat untuk menjalankan server".dimmed());
 
