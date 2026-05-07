@@ -2,7 +2,7 @@ use std::fs;
 use rustbasic::config::Config;
 use rustbasic::config::database::{connect, run_migrations, rollback_migrations, refresh_migrations};
 use base64::{Engine as _, engine::general_purpose};
-use rand::RngCore;
+use rand::Rng;
 use regex::Regex;
 use colored::*;
 use sea_orm::ConnectionTrait;

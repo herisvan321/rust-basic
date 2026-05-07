@@ -42,20 +42,19 @@ pub async fn start_server(
         config: Arc::new(cfg.clone()),
     };
 
-    // 1.5 Konfigurasi Rate Limiting (20 request per detik)
+    // 1.5 Konfigurasi Rate Limiting
     let governor_conf = Arc::new(
         GovernorConfigBuilder::default()
             .key_extractor(SmartIpKeyExtractor)
             .period(Duration::from_millis(1000 / cfg.app_limit_request))
             .burst_size(cfg.app_limit_request as u32)
-            .error_handler(handle_governor_error)
             .finish()
             .unwrap(),
     );
 
     // 2. Bangun Router
     let web_router = routes::web::router()
-        .layer(GovernorLayer { config: governor_conf });
+        .layer(GovernorLayer::new(governor_conf));
 
     let app = Router::new()
         .merge(web_router)
@@ -122,6 +121,7 @@ fn kill_port_if_in_use(port: u16) {
 }
 
 /// Menangani error dari Rate Limiter (Governor) dengan tampilan HTML Premium
+#[allow(dead_code)]
 fn handle_governor_error(err: GovernorError) -> axum::response::Response {
     match err {
         GovernorError::TooManyRequests { wait_time, .. } => {
