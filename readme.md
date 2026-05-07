@@ -1,3 +1,12 @@
+```text
+    ██████╗ ██╗   ██╗███████╗████████╗██████╗  █████╗ ███████╗██╗ ██████╗
+    ██╔══██╗██║   ██║██╔════╝╚══██╔══╝██╔══██╗██╔══██╗██╔════╝██║██╔════╝
+    ██████╔╝██║   ██║███████╗   ██║   ██████╔╝███████║███████╗██║██║     
+    ██╔══██╗██║   ██║╚════██║   ██║   ██╔══██╗██╔══██║╚════██║██║██║     
+    ██║  ██║╚██████╔╝███████║   ██║   ██████╔╝██║  ██║███████║██║╚██████╗
+    ╚═╝  ╚═╝ ╚═════╝ ╚══════╝   ╚═╝   ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═╝ ╚═════╝
+```
+
 # 🚀 RustBasic Framework (Axum Edition 2026)
 
 Aplikasi web modern berbasis Rust dengan arsitektur **Clean Monolith**. Dirancang untuk performa maksimal, keamanan tinggi, dan pengalaman pengembang yang luar biasa dengan sintaks standar HTML dan Minijinja.

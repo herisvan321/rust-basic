@@ -38,6 +38,7 @@ Sebelum melakukan modifikasi file, AI harus mengumpulkan data berikut:
 ### E. Routing & Controller
 - Tambahkan endpoint baru di `src/routes/web.rs`.
 - Buat controller yang merender file `.rb.html` baru.
+- Semua halaman pada file ini `src/resources/views/layouts/<template_name>.rb.html` harus dipisah dan dibuatkan endpoint baru di `src/routes/web.rs`.
 
 ---
 

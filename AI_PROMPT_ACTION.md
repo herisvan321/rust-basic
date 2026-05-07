@@ -1,7 +1,7 @@
 # 🦾 AI Action Center: RustBasic Framework
 
 prompt
-pastikan perpindah antar halaman tidak reload/refresh menggunakna htmx
+pastikan perpindah antar halaman tanpa reload/refresh menggunakan htmx, saya ingin berpindah antar halaman tanpa ada reload/refresh
 
 ---
 
