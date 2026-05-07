@@ -49,8 +49,8 @@ pub fn router() -> Router<AppState> {
         if !content.contains("use crate::routes::auth as auth_routes;") {
             content = content.replace("use axum::{Router, routing::get};", "use axum::{Router, routing::{get, post}, middleware::from_fn};");
             content = content.replace("use crate::config::server::AppState;", "use crate::app::http::controllers::{auth, dashboard_controller};\nuse crate::app::http::middleware::auth::auth_middleware;\nuse crate::config::server::AppState;\nuse crate::routes::auth as auth_routes;");
-            
-            let merge_logic = r#"    let auth_protected_routes = Router::new()
+
+            let merge_logic = r#"let auth_protected_routes = Router::new()
         .route("/dashboard", get(dashboard_controller::DashboardController::index))
         .route("/logout", post(auth::auth_controller::AuthController::logout))
         .layer(from_fn(auth_middleware));
@@ -61,7 +61,14 @@ pub fn router() -> Router<AppState> {
         .merge(auth_routes::router())
         .merge(auth_protected_routes)"#;
 
-            content = content.replace("Router::new()\n        .route(\"/\", get(welcome_controller::index))\n        .route(\"/dev\", get(welcome_controller::dev_info))", merge_logic);
+            // Use regex for more robust replacement (includes leading spaces)
+            let re = Regex::new(r#"(?s)Router::new\(\s*\n\s*\.route\("/", get\(welcome_controller::index\)\)\s*\n\s*\.route\("/dev", get\(welcome_controller::dev_info\)\)"#).unwrap();
+            if re.is_match(&content) {
+                content = re.replace(&content, merge_logic).to_string();
+            } else {
+                // Fallback for simple replacement
+                content = content.replace("Router::new()\n        .route(\"/\", get(welcome_controller::index))\n        .route(\"/dev\", get(welcome_controller::dev_info))", merge_logic);
+            }
             
             fs::write(web_route_path, content).ok();
             println!("   {} {}", "📝 Updated:".blue(), web_route_path.cyan());
@@ -460,48 +467,65 @@ impl AuthController {
 <div class="split-screen">
     <!-- Sisi Visual -->
     <div class="split-side-visual">
-        <div class="visual-inner">
-            <h1 style="font-size: 3rem; font-weight: 800; margin-bottom: 1rem;">Selamat Datang Kembali</h1>
-            <p style="font-size: 1.25rem; opacity: 0.9;">Masuk untuk melanjutkan petualangan Anda di ekosistem RustBasic.</p>
+        <div class="visual-inner" style="max-width: 600px;">
+            <div style="margin-bottom: 2rem;">
+                <span class="badge" style="background: rgba(255,255,255,0.2); color: #fff; border: none;">RUSTBASIC FRAMEWORK</span>
+            </div>
+            <h1 style="font-size: 3.5rem; font-weight: 900; line-height: 1.1; margin-bottom: 1.5rem; text-shadow: 0 10px 20px rgba(0,0,0,0.1);">
+                Selamat Datang <br> <span style="color: rgba(255,255,255,0.8);">Kembali</span>
+            </h1>
+            <p style="font-size: 1.2rem; opacity: 0.9; margin-bottom: 2.5rem; font-weight: 500;">
+                Masuk untuk melanjutkan pengembangan aplikasi modern Anda dengan kecepatan dan keamanan Rust.
+            </p>
+            <div class="tech-stack" style="justify-content: center; margin-top: 1rem;">
+                <span class="badge">Axum</span>
+                <span class="badge">Sea-ORM</span>
+                <span class="badge">Minijinja</span>
+            </div>
         </div>
     </div>
 
     <!-- Sisi Form -->
     <div class="split-side-content">
         <div class="content-container">
-            
-            
-            <h2 class="title" style="font-size: 2.5rem; margin-bottom: 0.5rem; text-align: left;">Login</h2>
-            <p class="text-muted mb-5">Masukkan kredensial Anda untuk masuk.</p>
+            <div style="margin-bottom: 3rem;">
+                <h2 class="title" style="font-size: 2.8rem; margin-bottom: 0.5rem;">Login</h2>
+                <p class="text-muted" style="font-weight: 500;">Silakan masukkan akun Anda untuk melanjutkan.</p>
+            </div>
 
-            <form hx-post="/login" hx-target="body" hx-push-url="true" hx-indicator="#indicator">
-                <div style="margin-bottom: 1rem;">
-                    <label class="form-label" style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: 600;">Email</label>
-                    <input type="email" name="email" class="form-control" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px;" placeholder="nama@email.com" value="{{ old.email }}" required>
+            <form hx-post="/login" hx-target="body" hx-push-url="true" hx-indicator="#indicator" style="display: flex; flex-direction: column; gap: 1.5rem;">
+                <div>
+                    <label class="form-label">Email Address</label>
+                    <input type="email" name="email" class="form-control" placeholder="nama@email.com" value="{{ old.email }}" required autofocus>
                     {% if errors.email %}
-                        <div style="color: #dc3545; font-size: 0.85rem; margin-top: 0.25rem;">{{ errors.email }}</div>
+                        <div style="color: var(--secondary); font-size: 0.85rem; margin-top: 0.5rem; font-weight: 600;">{{ errors.email }}</div>
                     {% endif %}
                 </div>
 
-                <div style="margin-bottom: 1.5rem;">
-                    <label class="form-label" style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: 600;">Password</label>
-                    <input type="password" name="password" class="form-control" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px;" placeholder="Masukkan password Anda" required>
+                <div>
+                    <label class="form-label">Password</label>
+                    <input type="password" name="password" class="form-control" placeholder="••••••••" required>
                     {% if errors.password %}
-                        <div style="color: #dc3545; font-size: 0.85rem; margin-top: 0.25rem;">{{ errors.password }}</div>
+                        <div style="color: var(--secondary); font-size: 0.85rem; margin-top: 0.5rem; font-weight: 600;">{{ errors.password }}</div>
                     {% endif %}
                 </div>
 
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-                    <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; cursor: pointer;">
-                        <input type="checkbox" name="remember" value="1"> Ingat Saya
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <label style="display: flex; align-items: center; gap: 0.6rem; font-size: 0.9rem; cursor: pointer; color: var(--text-muted); font-weight: 500;">
+                        <input type="checkbox" name="remember" value="1" style="width: 18px; height: 18px; accent-color: var(--primary);"> 
+                        Ingat Saya
                     </label>
-                    <a href="/forgot-password" class="text-primary" style="font-size: 0.9rem; font-weight: 600;">Lupa Password?</a>
+                    <a href="/forgot-password" style="font-size: 0.9rem; font-weight: 700; color: var(--primary); text-decoration: none;">Lupa Password?</a>
                 </div>
 
-                <button type="submit" style="width: 100%; padding: 0.75rem; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-bottom: 1.5rem; box-shadow: 0 4px 6px rgba(99, 102, 241, 0.2);">MASUK</button>
+                <div style="margin-top: 1rem;">
+                    <button type="submit" class="btn btn-primary w-100" style="padding: 1.25rem;">
+                        MASUK KE DASHBOARD
+                    </button>
+                </div>
 
-                <p class="text-muted" style="text-align: center; font-size: 0.9rem;">
-                    Belum punya akun? <a href="/register" class="text-primary" style="font-weight: 700;">Daftar Sekarang</a>
+                <p class="text-center" style="font-size: 0.95rem; color: var(--text-muted); margin-top: 1rem;">
+                    Belum punya akun? <a href="/register" style="font-weight: 800; color: var(--accent); text-decoration: none;">Daftar Sekarang</a>
                 </p>
             </form>
         </div>
@@ -518,49 +542,71 @@ impl AuthController {
 <div class="split-screen">
     <!-- Sisi Visual -->
     <div class="split-side-visual" style="background: linear-gradient(135deg, var(--secondary), var(--accent), var(--primary));">
-        <div class="visual-inner">
-            <h1 style="font-size: 3rem; font-weight: 800; margin-bottom: 1rem;">Bergabung Sekarang</h1>
-            <p style="font-size: 1.25rem; opacity: 0.9;">Mulai perjalanan Anda membangun aplikasi web performa tinggi.</p>
+        <div class="visual-inner" style="max-width: 600px;">
+            <div style="margin-bottom: 2rem;">
+                <span class="badge" style="background: rgba(255,255,255,0.2); color: #fff; border: none;">JOIN REVOLUTION</span>
+            </div>
+            <h1 style="font-size: 3.5rem; font-weight: 900; line-height: 1.1; margin-bottom: 1.5rem; text-shadow: 0 10px 20px rgba(0,0,0,0.1);">
+                Mulai Perjalanan <br> <span style="color: rgba(255,255,255,0.8);">Anda</span>
+            </h1>
+            <p style="font-size: 1.2rem; opacity: 0.9; margin-bottom: 2.5rem; font-weight: 500;">
+                Bangun infrastruktur digital yang kokoh dengan framework yang mengutamakan keamanan dan performa maksimal.
+            </p>
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+                <div style="text-align: center;">
+                    <div style="font-size: 1.5rem; font-weight: 800;">100%</div>
+                    <div style="font-size: 0.75rem; font-weight: 700; opacity: 0.8;">TYPE SAFE</div>
+                </div>
+                <div style="height: 40px; width: 1px; background: rgba(255,255,255,0.3);"></div>
+                <div style="text-align: center;">
+                    <div style="font-size: 1.5rem; font-weight: 800;">BLAZING</div>
+                    <div style="font-size: 0.75rem; font-weight: 700; opacity: 0.8;">FAST</div>
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- Sisi Form -->
     <div class="split-side-content">
         <div class="content-container">
-            
+            <div style="margin-bottom: 3rem;">
+                <h2 class="title" style="font-size: 2.8rem; margin-bottom: 0.5rem;">Daftar</h2>
+                <p class="text-muted" style="font-weight: 500;">Lengkapi formulir di bawah untuk bergabung.</p>
+            </div>
 
-            <h2 class="title" style="font-size: 2.5rem; margin-bottom: 0.5rem; text-align: left;">Daftar</h2>
-            <p class="text-muted mb-5">Lengkapi formulir di bawah ini.</p>
-
-            <form hx-post="/register" hx-target="body" hx-push-url="true" hx-indicator="#indicator">
-                <div style="margin-bottom: 1rem;">
-                    <label class="form-label" style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: 600;">Nama Lengkap</label>
-                    <input type="text" name="name" class="form-control" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px;" placeholder="Nama Anda" value="{{ old.name }}" required>
+            <form hx-post="/register" hx-target="body" hx-push-url="true" hx-indicator="#indicator" style="display: flex; flex-direction: column; gap: 1.5rem;">
+                <div>
+                    <label class="form-label">Nama Lengkap</label>
+                    <input type="text" name="name" class="form-control" placeholder="Nama Anda" value="{{ old.name }}" required autofocus>
                     {% if errors.name %}
-                        <div style="color: #dc3545; font-size: 0.85rem; margin-top: 0.25rem;">{{ errors.name }}</div>
+                        <div style="color: var(--secondary); font-size: 0.85rem; margin-top: 0.5rem; font-weight: 600;">{{ errors.name }}</div>
                     {% endif %}
                 </div>
 
-                <div style="margin-bottom: 1rem;">
-                    <label class="form-label" style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: 600;">Email</label>
-                    <input type="email" name="email" class="form-control" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px;" placeholder="nama@email.com" value="{{ old.email }}" required>
+                <div>
+                    <label class="form-label">Email Address</label>
+                    <input type="email" name="email" class="form-control" placeholder="nama@email.com" value="{{ old.email }}" required>
                     {% if errors.email %}
-                        <div style="color: #dc3545; font-size: 0.85rem; margin-top: 0.25rem;">{{ errors.email }}</div>
+                        <div style="color: var(--secondary); font-size: 0.85rem; margin-top: 0.5rem; font-weight: 600;">{{ errors.email }}</div>
                     {% endif %}
                 </div>
 
-                <div style="margin-bottom: 1.5rem;">
-                    <label class="form-label" style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: 600;">Password</label>
-                    <input type="password" name="password" class="form-control" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px;" placeholder="Min. 8 karakter" required>
+                <div>
+                    <label class="form-label">Password</label>
+                    <input type="password" name="password" class="form-control" placeholder="Min. 8 karakter" required>
                     {% if errors.password %}
-                        <div style="color: #dc3545; font-size: 0.85rem; margin-top: 0.25rem;">{{ errors.password }}</div>
+                        <div style="color: var(--secondary); font-size: 0.85rem; margin-top: 0.5rem; font-weight: 600;">{{ errors.password }}</div>
                     {% endif %}
                 </div>
 
-                <button type="submit" style="width: 100%; padding: 0.75rem; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-bottom: 1.5rem; box-shadow: 0 4px 6px rgba(99, 102, 241, 0.2);">DAFTAR SEKARANG</button>
+                <div style="margin-top: 1rem;">
+                    <button type="submit" class="btn btn-primary w-100" style="padding: 1.25rem;">
+                        BUAT AKUN SEKARANG
+                    </button>
+                </div>
 
-                <p class="text-muted" style="text-align: center; font-size: 0.9rem;">
-                    Sudah punya akun? <a href="/login" class="text-primary" style="font-weight: 700;">Login Disini</a>
+                <p class="text-center" style="font-size: 0.95rem; color: var(--text-muted); margin-top: 1rem;">
+                    Sudah punya akun? <a href="/login" style="font-weight: 800; color: var(--accent); text-decoration: none;">Login Disini</a>
                 </p>
             </form>
         </div>
@@ -577,33 +623,44 @@ impl AuthController {
 <div class="split-screen">
     <!-- Sisi Visual -->
     <div class="split-side-visual" style="background: linear-gradient(135deg, var(--primary), var(--secondary));">
-        <div class="visual-inner">
-            <h1 style="font-size: 3rem; font-weight: 800; margin-bottom: 1rem;">Lupa Password?</h1>
-            <p style="font-size: 1.25rem; opacity: 0.9;">Jangan khawatir, kami akan membantu Anda mendapatkan akses kembali.</p>
+        <div class="visual-inner" style="max-width: 600px;">
+            <div style="margin-bottom: 2rem;">
+                <span class="badge" style="background: rgba(255,255,255,0.2); color: #fff; border: none;">SECURITY ASSIST</span>
+            </div>
+            <h1 style="font-size: 3.5rem; font-weight: 900; line-height: 1.1; margin-bottom: 1.5rem; text-shadow: 0 10px 20px rgba(0,0,0,0.1);">
+                Lupa <br> <span style="color: rgba(255,255,255,0.8);">Password?</span>
+            </h1>
+            <p style="font-size: 1.2rem; opacity: 0.9; margin-bottom: 2.5rem; font-weight: 500;">
+                Jangan khawatir, hal ini biasa terjadi. Kami akan membantu Anda mendapatkan akses kembali dengan aman.
+            </p>
         </div>
     </div>
 
     <!-- Sisi Form -->
     <div class="split-side-content">
         <div class="content-container">
-            
+            <div style="margin-bottom: 3rem;">
+                <h2 class="title" style="font-size: 2.8rem; margin-bottom: 0.5rem;">Reset</h2>
+                <p class="text-muted" style="font-weight: 500;">Masukkan email Anda untuk menerima link reset.</p>
+            </div>
 
-            <h2 class="title" style="font-size: 2.5rem; margin-bottom: 0.5rem; text-align: left;">Reset Password</h2>
-            <p class="text-muted mb-5">Masukkan email Anda untuk menerima link reset.</p>
-
-            <form hx-post="/forgot-password" hx-target="body" hx-push-url="true" hx-indicator="#indicator">
-                <div style="margin-bottom: 1.5rem;">
-                    <label class="form-label" style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: 600;">Email</label>
-                    <input type="email" name="email" class="form-control" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px;" placeholder="nama@email.com" value="{{ old.email }}" required>
+            <form hx-post="/forgot-password" hx-target="body" hx-push-url="true" hx-indicator="#indicator" style="display: flex; flex-direction: column; gap: 1.5rem;">
+                <div>
+                    <label class="form-label">Email Address</label>
+                    <input type="email" name="email" class="form-control" placeholder="nama@email.com" value="{{ old.email }}" required autofocus>
                     {% if errors.email %}
-                        <div style="color: #dc3545; font-size: 0.85rem; margin-top: 0.25rem;">{{ errors.email }}</div>
+                        <div style="color: var(--secondary); font-size: 0.85rem; margin-top: 0.5rem; font-weight: 600;">{{ errors.email }}</div>
                     {% endif %}
                 </div>
 
-                <button type="submit" style="width: 100%; padding: 0.75rem; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-bottom: 1.5rem; box-shadow: 0 4px 6px rgba(99, 102, 241, 0.2);">KIRIM LINK RESET</button>
+                <div style="margin-top: 1rem;">
+                    <button type="submit" class="btn btn-primary w-100" style="padding: 1.25rem;">
+                        KIRIM LINK RESET PASSWORD
+                    </button>
+                </div>
 
-                <p class="text-muted" style="text-align: center; font-size: 0.9rem;">
-                    Ingat password Anda? <a href="/login" class="text-primary" style="font-weight: 700;">Login Disini</a>
+                <p class="text-center" style="font-size: 0.95rem; color: var(--text-muted); margin-top: 1rem;">
+                    Ingat password Anda? <a href="/login" style="font-weight: 800; color: var(--accent); text-decoration: none;">Login Disini</a>
                 </p>
             </form>
         </div>
@@ -637,30 +694,43 @@ impl AuthController {
 <div class="split-screen">
     <!-- Sisi Visual -->
     <div class="split-side-visual" style="background: linear-gradient(135deg, var(--accent), var(--primary));">
-        <div class="visual-inner">
-            <h1 style="font-size: 3rem; font-weight: 800; margin-bottom: 1rem;">Password Baru</h1>
-            <p style="font-size: 1.25rem; opacity: 0.9;">Buat password yang kuat untuk menjaga keamanan akun Anda.</p>
+        <div class="visual-inner" style="max-width: 600px;">
+            <div style="margin-bottom: 2rem;">
+                <span class="badge" style="background: rgba(255,255,255,0.2); color: #fff; border: none;">RECOVER ACCESS</span>
+            </div>
+            <h1 style="font-size: 3.5rem; font-weight: 900; line-height: 1.1; margin-bottom: 1.5rem; text-shadow: 0 10px 20px rgba(0,0,0,0.1);">
+                Buat Password <br> <span style="color: rgba(255,255,255,0.8);">Baru</span>
+            </h1>
+            <p style="font-size: 1.2rem; opacity: 0.9; margin-bottom: 2.5rem; font-weight: 500;">
+                Hampir selesai! Gunakan kombinasi password yang kuat untuk menjaga keamanan akun Anda di masa depan.
+            </p>
         </div>
     </div>
 
     <!-- Sisi Form -->
     <div class="split-side-content">
         <div class="content-container">
-            <h2 class="title" style="font-size: 2.5rem; margin-bottom: 0.5rem; text-align: left;">Buat Password Baru</h2>
-            <p class="text-muted mb-5">Silakan masukkan password baru Anda.</p>
+            <div style="margin-bottom: 3rem;">
+                <h2 class="title" style="font-size: 2.8rem; margin-bottom: 0.5rem;">Update</h2>
+                <p class="text-muted" style="font-weight: 500;">Silakan masukkan password baru Anda.</p>
+            </div>
 
-            <form hx-post="/reset-password" hx-target="body" hx-push-url="true" hx-indicator="#indicator">
+            <form hx-post="/reset-password" hx-target="body" hx-push-url="true" hx-indicator="#indicator" style="display: flex; flex-direction: column; gap: 1.5rem;">
                 <input type="hidden" name="token" value="{{ token }}">
                 
-                <div style="margin-bottom: 1.5rem;">
-                    <label class="form-label" style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: 600;">Password Baru</label>
-                    <input type="password" name="password" class="form-control" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px;" placeholder="Min. 8 karakter" required>
+                <div>
+                    <label class="form-label">Password Baru</label>
+                    <input type="password" name="password" class="form-control" placeholder="Min. 8 karakter" required autofocus>
                     {% if errors.password %}
-                        <div style="color: #dc3545; font-size: 0.85rem; margin-top: 0.25rem;">{{ errors.password }}</div>
+                        <div style="color: var(--secondary); font-size: 0.85rem; margin-top: 0.5rem; font-weight: 600;">{{ errors.password }}</div>
                     {% endif %}
                 </div>
 
-                <button type="submit" style="width: 100%; padding: 0.75rem; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-bottom: 1.5rem; box-shadow: 0 4px 6px rgba(99, 102, 241, 0.2);">SIMPAN PASSWORD</button>
+                <div style="margin-top: 1rem;">
+                    <button type="submit" class="btn btn-primary w-100" style="padding: 1.25rem;">
+                        SIMPAN PASSWORD BARU
+                    </button>
+                </div>
             </form>
         </div>
     </div>
@@ -731,67 +801,112 @@ impl AuthController {
 {% block title %}{{ title }} - RustBasic{% endblock %}
 
 {% block content %}
-<div class="split-screen">
-    <!-- Sidebar / Visual Side (Kiri - Narrower) -->
-    <div class="split-side-visual" style="flex: 0.4; align-items: flex-start; text-align: left; padding: 3rem;">
+<div class="split-screen" style="background: #f8faff;">
+    <!-- Sidebar / Navigation (Kiri) -->
+    <div class="split-side-visual" style="flex: 0.35; align-items: flex-start; text-align: left; padding: 3rem; background: linear-gradient(180deg, var(--text-main), #2d3436);">
         <div style="width: 100%;">
-            <div style="width: 80px; height: 80px; background: rgba(255,255,255,0.2); border-radius: 2rem; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 800; margin-bottom: 2rem; border: 2px solid rgba(255,255,255,0.3);">
-                {{ user_name[0] | upper }}
-            </div>
-            <h2 style="font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem;">{{ user_name }}</h2>
-            <p style="opacity: 0.8; margin-bottom: 3rem;">{{ user_email }}</p>
-
-            <nav style="display: flex; flex-direction: column; gap: 0.75rem; width: 100%;">
-                <a href="/dashboard" class="btn" style="background: rgba(255,255,255,0.2); color: #fff; justify-content: flex-start; text-transform: none;">Dashboard Overview</a>
-                <a href="/" class="btn" style="color: #fff; justify-content: flex-start; text-transform: none; opacity: 0.7;">Beranda Utama</a>
-                <div style="margin-top: auto; padding-top: 2rem;">
-                    <form hx-post="/logout" hx-target="body" style="margin:0;">
-                        <button type="submit" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: white; font-weight: bold; cursor: pointer; text-align: center;">LOGOUT</button>
-                    </form>
+            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 3rem;">
+                <div style="width: 50px; height: 50px; background: var(--primary); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 900; color: white; font-size: 1.5rem;">
+                    R
                 </div>
+                <h2 style="font-size: 1.5rem; font-weight: 800; color: white;">RustBasic</h2>
+            </div>
+
+            <div style="background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 1.5rem; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 3rem;">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div style="width: 45px; height: 45px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; color: white; font-size: 1.2rem;">
+                        {{ user_name[0] | upper }}
+                    </div>
+                    <div>
+                        <div style="font-weight: 700; color: white; font-size: 0.95rem;">{{ user_name }}</div>
+                        <div style="font-size: 0.8rem; color: rgba(255,255,255,0.5);">Administrator</div>
+                    </div>
+                </div>
+            </div>
+
+            <nav style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <a href="/dashboard" class="btn" style="background: var(--primary); color: white; justify-content: flex-start; text-transform: none; letter-spacing: normal; padding: 1rem 1.5rem; border-radius: 12px;">
+                    📊 Dashboard Overview
+                </a>
+                <a href="/" class="btn" style="color: rgba(255,255,255,0.6); justify-content: flex-start; text-transform: none; letter-spacing: normal; padding: 1rem 1.5rem;">
+                    🏠 Main Website
+                </a>
             </nav>
+
+            <div style="margin-top: 5rem;">
+                <form hx-post="/logout" hx-target="body" style="margin:0;">
+                    <button type="submit" class="btn w-100" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 12px; font-weight: 700; padding: 1rem;">
+                        🚪 KELUAR SISTEM
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 
-    <!-- Main Content (Kanan - Wider) -->
-    <div class="split-side-content" style="flex: 1.2; align-items: flex-start; justify-content: flex-start; background: #f8faff;">
+    <!-- Main Workspace (Kanan) -->
+    <div class="split-side-content" style="flex: 1.2; align-items: flex-start; justify-content: flex-start; padding: 0;">
         <div style="width: 100%; padding: 4rem;">
-            <div class="mb-5">
-                <h1 class="title" style="font-size: 3rem; text-align: left; margin-bottom: 0.5rem;">Dashboard</h1>
-                <p class="text-muted">Kelola aplikasi dan pantau aktivitas Anda di sini.</p>
-            </div>
-
-            <!-- Grid Statistik -->
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; margin-bottom: 4rem;">
-                <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #eee;">
-                    <p class="text-muted text-uppercase" style="font-size: 0.8rem; font-weight: 700; letter-spacing: 0.1em; margin-bottom: 1rem;">Total Pengguna</p>
-                    <div style="font-size: 2.5rem; font-weight: 800; color: var(--primary);">{{ total_users }}</div>
+            <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4rem;">
+                <div>
+                    <h1 class="title" style="font-size: 2.5rem; text-align: left; margin-bottom: 0.25rem;">Overview</h1>
+                    <p class="text-muted" style="font-weight: 500;">Selamat datang kembali, kendalikan project Anda.</p>
                 </div>
-                
-                <div style="border-bottom: 4px solid var(--accent); padding: 1.5rem 0;">
-                    <p class="text-muted text-uppercase" style="font-size: 0.8rem; font-weight: 700; letter-spacing: 0.1em; margin-bottom: 1rem;">Status Sistem</p>
-                    <div style="display: flex; align-items: center; gap: 0.75rem; font-size: 1.5rem; font-weight: 800; color: #2e7d32; padding: 1.2rem 0;">
-                        <div style="width: 12px; height: 12px; background: #4caf50; border-radius: 50%;"></div>
-                        ONLINE
+                <div style="display: flex; gap: 1rem;">
+                    <div class="badge" style="background: white; padding: 0.8rem 1.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
+                        Server: <span style="color: var(--primary);">Running</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Stats Grid -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 2rem; margin-bottom: 4rem;">
+                <div style="background: white; border-radius: 24px; padding: 2rem; box-shadow: 0 10px 20px rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.03);">
+                    <div style="color: var(--text-muted); font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1.5rem;">
+                        User Terdaftar
+                    </div>
+                    <div style="display: flex; align-items: baseline; gap: 0.5rem;">
+                        <div style="font-size: 3rem; font-weight: 900; color: var(--text-main);">{{ total_users }}</div>
+                        <div style="color: #10b981; font-weight: 700; font-size: 0.9rem;">↑ 12%</div>
                     </div>
                 </div>
 
-                <div style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #eee;">
-                    <p class="text-muted text-uppercase" style="font-size: 0.8rem; font-weight: 700; letter-spacing: 0.1em; margin-bottom: 1rem;">Performa</p>
-                    <div style="font-size: 2.5rem; font-weight: 800; color: var(--secondary);">99.9%</div>
+                <div style="background: white; border-radius: 24px; padding: 2rem; box-shadow: 0 10px 20px rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.03);">
+                    <div style="color: var(--text-muted); font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1.5rem;">
+                        Response Time
+                    </div>
+                    <div style="display: flex; align-items: baseline; gap: 0.5rem;">
+                        <div style="font-size: 3rem; font-weight: 900; color: var(--accent);">24</div>
+                        <div style="color: var(--accent); font-weight: 700; font-size: 0.9rem;">ms</div>
+                    </div>
+                </div>
+
+                <div style="background: white; border-radius: 24px; padding: 2rem; box-shadow: 0 10px 20px rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.03);">
+                    <div style="color: var(--text-muted); font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1.5rem;">
+                        Database Status
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.8rem; padding: 0.5rem 0;">
+                        <div style="width: 12px; height: 12px; background: #10b981; border-radius: 50%; box-shadow: 0 0 10px #10b981;"></div>
+                        <div style="font-size: 1.5rem; font-weight: 800; color: #10b981;">HEALTHY</div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Content Area -->
-            <div style="background: #fff; padding: 3rem; border-radius: 0; border-left: 8px solid var(--primary);">
-                <h2 style="font-weight: 800; margin-bottom: 1.5rem;">Informasi Sistem</h2>
-                <p class="text-muted" style="line-height: 1.8; margin-bottom: 2rem;">
-                    Aplikasi ini berjalan menggunakan backend Rust yang dioptimalkan. Semua data diproses secara real-time melalui koneksi SQLite yang aman.
-                </p>
-                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                    <span class="badge">Engine: Axum 0.8</span>
-                    <span class="badge">Render: Minijinja</span>
-                    <span class="badge">Frontend: HTMX + Minijinja</span>
+            <!-- Main Panel -->
+            <div class="glass-panel" style="max-width: none; padding: 3rem; margin: 0; border-radius: 32px; background: linear-gradient(135deg, white, #f1f3f5);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem;">
+                    <div>
+                        <h3 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem;">Informasi Server</h3>
+                        <p class="text-muted">Detail lingkungan eksekusi RustBasic Anda.</p>
+                    </div>
+                    <span class="badge" style="background: var(--primary); color: white;">v2026.1</span>
+                </div>
+                
+                <div style="background: var(--text-main); color: #00ff00; padding: 2rem; border-radius: 16px; font-family: monospace; font-size: 0.9rem; line-height: 1.6; box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);">
+                    <div style="color: #636e72;">// RustBasic Kernel System</div>
+                    <div>[OK] Compiled with Axum 0.8.2</div>
+                    <div>[OK] Database Pool: Sea-ORM Connection Established</div>
+                    <div>[OK] Live Reload: Active on port 4000</div>
+                    <div>[OK] Workers: 8 logical threads spawned</div>
                 </div>
             </div>
         </div>
@@ -900,8 +1015,8 @@ pub async fn remove_auth() {
 
         // Remove auth_protected_routes logic and restore basic Router
         if content.contains("let auth_protected_routes = Router::new()") {
-            let re = Regex::new(r##"(?s)let auth_protected_routes = Router::new\(\).*?\.layer\(from_fn\(auth_middleware\)\);"##).unwrap();
-            content = re.replace(&content, "").to_string();
+            let re = Regex::new(r##"(?s)\s*let auth_protected_routes = Router::new\(\).*?\.layer\(from_fn\(auth_middleware\)\);\s*"##).unwrap();
+            content = re.replace(&content, "\n").to_string();
             
             content = content.replace(".merge(auth_routes::router())", "");
             content = content.replace(".merge(auth_protected_routes)", "");
@@ -913,6 +1028,10 @@ pub async fn remove_auth() {
             
             let router_re = Regex::new(r##"(?s)Router::new\(\).*?\.route\(\s*\"/dev\"\s*,\s*get\(welcome_controller::dev_info\)\s*\)"##).unwrap();
             content = router_re.replace(&content, clean_router).to_string();
+            
+            // Final cleanup of multiple newlines
+            let multi_newline_re = Regex::new(r#"\n{3,}"#).unwrap();
+            content = multi_newline_re.replace_all(&content, "\n\n").to_string();
             
             changed = true;
         }
