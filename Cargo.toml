@@ -1,6 +1,6 @@
 [package]
 name = "rustbasic"
-version = "0.0.1"
+version = "0.0.4"
 edition = "2024"
 description = "The official starter template and CLI tool for the RustBasic Framework."
 license = "MIT"
@@ -19,7 +19,7 @@ path = "src/cli.rs"
 
 [dependencies]
 # Core Framework (Everything is here!)
-rustbasic-core = "0.0.3"
+rustbasic-core = "0.0.4"
 
 # Diperlukan untuk Procedural Macros (Derive) & Inti App
 axum = "0.8.9"

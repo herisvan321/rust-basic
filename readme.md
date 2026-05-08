@@ -12,7 +12,7 @@
 ## 📦 Persiapan Awal
 1. **Clone & Install**:
    ```bash
-   git clone https://github.com/herisvan321/rustbasic-starter my-app
+   git clone https://github.com/herisvan321/rustbasic my-app
    cd my-app
    cp .env.example .env
    ```
@@ -37,5 +37,6 @@ Lihat folder [`docs/`](docs/README.md) untuk panduan mendalam mengenai:
 
 ---
 
-Ditenagai oleh [rustbasic-core](https://crates.io/crates/rustbasic-core).
+Ditenagai oleh [rustbasic-core](https://github.com/herisvan321/rustbasic-core).
 Dipersembahkan oleh Tim RustBasic.
+
