@@ -302,7 +302,8 @@ pub fn make_seeder(name: &str) {
     }
 
     let template = format!(
-r#"use sea_orm::{{DatabaseConnection, Set, ActiveModelTrait}};
+r#"#[allow(unused_imports)]
+use sea_orm::{{DatabaseConnection, Set, ActiveModelTrait}};
 use colored::Colorize;
 use crate::config::seeder::SeederTrait;
 // use crate::app::models::{snake_name}; // Sesuaikan dengan model Anda
@@ -311,7 +312,7 @@ pub struct {class_name};
 
 #[async_trait::async_trait]
 impl SeederTrait for {class_name} {{
-    async fn run(&self, db: &DatabaseConnection) -> Result<(), sea_orm::DbErr> {{
+    async fn run(&self, _db: &DatabaseConnection) -> Result<(), sea_orm::DbErr> {{
         println!("   {{}} Sedang memproses {class_name}...", "⏳".blue());
         
         // Contoh:
@@ -319,7 +320,7 @@ impl SeederTrait for {class_name} {{
         let _ = {snake_name}::ActiveModel {{
             name: Set("Example Data".to_owned()),
             ..Default::default()
-        }}.insert(db).await?;
+        }}.insert(_db).await?;
         */
 
         Ok(())
