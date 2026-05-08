@@ -8,7 +8,6 @@ pub async fn run(db: &DatabaseConnection) {
     
     // REGISTRASI SEEDER DI SINI
     let seeders: Vec<Box<dyn SeederTrait>> = vec![
-        Box::new(seeders::test_seeder::TestSeeder),
         Box::new(seeders::database_seeder::DatabaseSeeder),
     ];
 
