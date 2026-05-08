@@ -1,3 +1,4 @@
+pub use rustbasic_core::*;
 pub mod app;
 pub mod routes;
 

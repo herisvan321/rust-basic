@@ -4,20 +4,22 @@
  * Juga mencatat IP ke dalam tracker sesi untuk keamanan database.
  * --------------------------------------------------------- */
 
-use axum::{
-    extract::{ConnectInfo, Request},
+use rustbasic_core::axum::{
+    body::Body,
+    extract::ConnectInfo,
+    http::Request,
     middleware::Next,
     response::Response,
 };
-use std::net::SocketAddr;
-use colored::*;
-use axum_session::Session;
+use rustbasic_core::colored::*;
+use rustbasic_core::axum_session::Session;
 use rustbasic_core::session_manager::{RustBasicSessionStore, IP_TRACKER};
+use std::net::SocketAddr;
 
 pub async fn logging_middleware(
     ConnectInfo(addr): ConnectInfo<SocketAddr>,
     session: Session<RustBasicSessionStore>,
-    req: Request,
+    req: Request<Body>,
     next: Next,
 ) -> Response {
     let method = req.method().clone();
@@ -40,14 +42,14 @@ pub async fn logging_middleware(
     println!(
         "[{}] {} {:<6} {} from {}",
         "HTTP".magenta().bold(),
-        chrono::Local::now().format("%Y-%m-%dT%H:%M:%S%.3fZ").to_string().dimmed(),
+        rustbasic_core::chrono::Local::now().format("%Y-%m-%dT%H:%M:%S%.3fZ").to_string().dimmed(),
         method_colored.bold(),
         path.cyan(),
         ip.yellow()
     );
 
     // 3. Log ke File (Tanpa warna via tracing)
-    tracing::info!(method = %method, path = %path, ip = %ip, "Request");
+    rustbasic_core::tracing::info!(method = %method, path = %path, ip = %ip, "Request");
 
     next.run(req).await
 }

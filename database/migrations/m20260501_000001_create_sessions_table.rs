@@ -1,4 +1,5 @@
 use sea_orm_migration::prelude::*;
+use async_trait::async_trait;
 
 #[derive(Iden)]
 enum Sessions {
@@ -20,7 +21,7 @@ impl MigrationName for Migration {
     }
 }
 
-#[async_trait::async_trait]
+#[async_trait]
 impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager

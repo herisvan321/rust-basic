@@ -1,14 +1,16 @@
-use sea_orm::{DatabaseConnection, Set, ActiveModelTrait, EntityTrait, ColumnTrait, QueryFilter};
+use rustbasic_core::sea_orm::{DatabaseConnection, Set, ActiveModelTrait, EntityTrait, ColumnTrait, QueryFilter};
 use rustbasic_core::seeder::SeederTrait;
 use crate::app::models::users;
-use bcrypt::{hash, DEFAULT_COST};
-use colored::Colorize;
+use rustbasic_core::bcrypt::{hash, DEFAULT_COST};
+use rustbasic_core::colored::Colorize;
+
+use async_trait::async_trait;
 
 pub struct DatabaseSeeder;
 
-#[async_trait::async_trait]
+#[async_trait]
 impl SeederTrait for DatabaseSeeder {
-    async fn run(&self, db: &DatabaseConnection) -> Result<(), sea_orm::DbErr> {
+    async fn run(&self, db: &DatabaseConnection) -> Result<(), rustbasic_core::sea_orm::DbErr> {
         println!("   {} Sedang memproses DatabaseSeeder...", "⏳".blue());
         
         // 1. Cek apakah user admin sudah ada

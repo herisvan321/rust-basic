@@ -1,5 +1,5 @@
-use sea_orm::DatabaseConnection;
-use colored::*;
+use rustbasic_core::sea_orm::DatabaseConnection;
+use rustbasic_core::colored::*;
 use crate::seeders;
 use rustbasic_core::seeder::SeederTrait;
 
@@ -8,6 +8,7 @@ pub async fn run(db: &DatabaseConnection) {
     
     // REGISTRASI SEEDER DI SINI
     let seeders: Vec<Box<dyn SeederTrait>> = vec![
+        Box::new(seeders::test_seeder::TestSeeder),
         Box::new(seeders::database_seeder::DatabaseSeeder),
     ];
 

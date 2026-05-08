@@ -36,7 +36,7 @@ Setelah menjalankan `auth`, file-file berikut akan dibuat:
 
 ---
 
-## 🗑️ Menghapus Autentikasi (`auth:back`)
+### 2. Menghapus Autentikasi (`auth:back`)
 Jika Anda ingin membersihkan alur auth dan memulai dari awal:
 
 ```bash
@@ -46,6 +46,11 @@ Atau:
 ```bash
 cargo rustbasic auth:back
 ```
+
+**Proses Pembersihan:**
+- Menghapus seluruh file rute, controller, middleware, model, dan view yang terkait dengan autentikasi.
+- Mengembalikan konfigurasi `mod.rs` ke keadaan semula.
+- **Pembersihan Database**: Secara otomatis menghapus catatan migrasi dari tabel `seaql_migrations` sehingga tidak terjadi konflik saat Anda memasang ulang autentikasi nanti.
 
 ---
 

@@ -3,15 +3,15 @@
  * Melindungi aplikasi dari Cross-Site Request Forgery.
  * --------------------------------------------------------- */
 
-use axum::{
+use rustbasic_core::axum::{
     body::Body,
     http::{Request, StatusCode, Method},
     middleware::Next,
     response::Response,
 };
-use axum_session::Session;
+use rustbasic_core::axum_session::Session;
 use rustbasic_core::session_manager::RustBasicSessionStore;
-use rand::distr::SampleString;
+use rustbasic_core::rand::distr::SampleString;
 
 pub async fn csrf_middleware(
     session: Session<RustBasicSessionStore>,
@@ -22,7 +22,7 @@ pub async fn csrf_middleware(
     let token = match session.get::<String>("_token") {
         Some(t) => t,
         None => {
-            let new_token = rand::distr::Alphanumeric.sample_string(&mut rand::rng(), 40);
+            let new_token = rustbasic_core::rand::distr::Alphanumeric.sample_string(&mut rustbasic_core::rand::rng(), 40);
             session.set("_token", new_token.clone());
             new_token
         }

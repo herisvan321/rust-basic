@@ -56,8 +56,16 @@ Memasang sistem autentikasi lengkap dengan standar visual premium.
 ## 🗄️ 3. Database & Cache
 
 ### `migrate`
-Menjalankan semua migrasi database.
+Menjalankan semua migrasi database yang belum dieksekusi.
 - Perintah: `cargo rustbasic migrate`
+
+### `migrate:refresh`
+Melakukan rollback pada seluruh migrasi dan menjalankannya kembali dari awal. Berguna untuk mereset struktur database.
+- Perintah: `cargo rustbasic migrate:refresh`
+
+### `migrate:back` (atau `migrate:rollback`)
+Membatalkan (rollback) satu langkah migrasi terakhir.
+- Perintah: `cargo rustbasic migrate:back`
 
 ### `db:seed`
 Menjalankan seluruh database seeder yang terdaftar di `src/app/seeder.rs`.

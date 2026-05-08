@@ -3,7 +3,7 @@
  * Menambahkan header keamanan standar industri.
  * --------------------------------------------------------- */
 
-use axum::{
+use rustbasic_core::axum::{
     body::Body,
     http::{Request, header},
     middleware::Next,

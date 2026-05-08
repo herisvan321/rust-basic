@@ -46,6 +46,12 @@ cargo rustbasic make:migration Name
 cargo rustbasic migrate
 ```
 
+## Refresh Migrasi
+Gunakan perintah ini untuk membatalkan semua migrasi dan menjalankannya kembali (meriset database):
+```bash
+cargo rustbasic migrate:refresh
+```
+
 ## Rollback Migrasi
 Gunakan perintah ini untuk membatalkan satu langkah migrasi terakhir:
 ```bash
@@ -105,13 +111,13 @@ cargo rustbasic db:seed
 ```
 
 ## Cara Registrasi Seeder
-Setelah membuat file seeder, Anda harus mendaftarkannya di **`src/config/seeder.rs`** agar bisa dijalankan oleh framework. CLI `make:seeder` akan mencoba mendaftarkannya secara otomatis.
+Setelah membuat file seeder, Anda harus mendaftarkannya di **`src/app/seeder.rs`** agar bisa dijalankan oleh framework. CLI `make:seeder` akan mencoba mendaftarkannya secara otomatis.
 
 ## Contoh Struktur Seeder
 Setiap seeder harus mengimplementasikan `SeederTrait`:
 ```rust
 use sea_orm::{DatabaseConnection, Set, ActiveModelTrait};
-use crate::config::seeder::SeederTrait;
+use rustbasic_core::seeder::SeederTrait;
 
 pub struct DatabaseSeeder;
 

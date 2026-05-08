@@ -2,9 +2,9 @@ use crate::app::view;
 use rustbasic_core::requests::Request;
 use rustbasic_core::responses::ResponseHelper;
 use rustbasic_core::server::AppState;
-use axum::extract::State;
-use axum::response::IntoResponse;
-use minijinja::context;
+use rustbasic_core::axum::extract::State;
+use rustbasic_core::axum::response::IntoResponse;
+use rustbasic_core::minijinja::context;
 
 pub async fn index(req: Request) -> impl IntoResponse {
     // Cek apakah fitur Auth sudah terinstal (scaffolded)
@@ -18,7 +18,7 @@ pub async fn index(req: Request) -> impl IntoResponse {
 }
 
 pub async fn dev_info(State(state): State<AppState>, _req: Request) -> impl IntoResponse {
-    ResponseHelper::json(serde_json::json!({
+    ResponseHelper::json(rustbasic_core::serde_json::json!({
         "status": "success",
         "app_name": state.config.app_name,
         "environment": if state.config.app_debug { "development" } else { "production" },

@@ -1,5 +1,5 @@
-use tower_http::services::ServeDir;
-use dotenvy::dotenv;
+use rustbasic_core::tower_http::services::ServeDir;
+use rustbasic_core::dotenvy::dotenv;
 use rustbasic_core::Config;
 
 #[tokio::main]
@@ -20,11 +20,11 @@ async fn main() {
     let session_store = rustbasic_core::session::setup_session(&cfg).await;
 
     // 5. Bangun Router Aplikasi
-    let app_router = rustbasic_core::Router::new()
+    let app_router: rustbasic_core::axum::Router<rustbasic_core::server::AppState> = rustbasic_core::axum::Router::new()
         .merge(rustbasic::routes::web::router())
-        .layer(rustbasic_core::middleware::from_fn(rustbasic::app::http::middleware::csrf::csrf_middleware))
-        .layer(rustbasic_core::middleware::from_fn(rustbasic::app::http::middleware::security_headers::security_headers_middleware))
-        .layer(rustbasic_core::middleware::from_fn(rustbasic::app::http::middleware::logging::logging_middleware));
+        .layer(rustbasic_core::axum::middleware::from_fn(rustbasic::app::http::middleware::csrf::csrf_middleware))
+        .layer(rustbasic_core::axum::middleware::from_fn(rustbasic::app::http::middleware::security_headers::security_headers_middleware))
+        .layer(rustbasic_core::axum::middleware::from_fn(rustbasic::app::http::middleware::logging::logging_middleware));
 
     // 6. Setup Statics & Jalankan Server
     let static_files = ServeDir::new("public");
