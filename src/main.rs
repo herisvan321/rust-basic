@@ -14,7 +14,7 @@ async fn main() {
 
     // 3. Setup Database & Sea-ORM
     let db = rustbasic_core::database::connect(&cfg).await;
-    rustbasic::migrations::Migrator::up(&db, None).await.ok(); // <-- Jalankan migrasi otomatis
+    rustbasic::migrations::Migrator::up(&db, None).await.expect("❌ Gagal menjalankan migrasi otomatis"); // <-- Jalankan migrasi otomatis
     
     // 4. Inisialisasi Session Store
     rustbasic_core::session::init_sessions(&cfg).await;
