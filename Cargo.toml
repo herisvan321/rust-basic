@@ -19,7 +19,7 @@ path = "src/cli.rs"
 
 [dependencies]
 # Core Framework (Local Path)
-rustbasic-core = { version = "0.0.5", path = "crates/rustbasic-core" }
+rustbasic-core = "0.0.5"
 
 # Diperlukan untuk Procedural Macros (Derive) & Inti App
 axum = "0.8.9"
