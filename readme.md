@@ -1,6 +1,6 @@
 # 🦀 RustBasic Starter Kit
 
-**RustBasic** adalah framework monolith modern untuk bahasa pemrograman Rust, yang dirancang untuk kecepatan pengembangan maksimal (seperti Laravel) namun dengan performa dan keamanan Rust.
+**RustBasic** adalah framework monolith modern untuk bahasa pemrograman Rust, yang dirancang untuk kecepatan pengembangan maksimal namun dengan performa dan keamanan Rust.
 
 ## 🚀 Fitur Unggulan
 - ⚡ **Axum Powered**: Backend super cepat dan efisien.
