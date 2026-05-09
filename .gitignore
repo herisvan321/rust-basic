@@ -1,5 +1,5 @@
 /target
-# /crates (Removed from ignore to allow git install to work)
+/crates
 .env
 !.env.example
 /database/*.sqlite
