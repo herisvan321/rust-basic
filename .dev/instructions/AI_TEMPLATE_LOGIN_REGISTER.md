@@ -4,6 +4,7 @@ Gunakan instruksi ini untuk memperbarui tampilan halaman Login dan Register di p
 
 ## 📋 Deskripsi Template
 Template `login_register.html` menggunakan desain **Premium Modern** dengan fitur:
+
 - **Glassmorphism**: Efek blur pada background form.
 - **Split Screen**: Sisi visual untuk branding dan sisi form untuk interaksi.
 - **Responsif**: Layout otomatis menyesuaikan untuk perangkat mobile.
@@ -47,14 +48,7 @@ Jika ingin menggunakan CSS dari template secara permanen:
 
 ---
 
-## 🎨 Token Desain (CSS Variables)
-Gunakan variabel ini jika ingin melakukan tweaking warna:
-- `--primary`: `#6366f1` (Indigo)
-- `--secondary`: `#ec4899` (Pink)
-- `--surface`: `#1e293b` (Slate Dark)
-- `--glass`: `rgba(30, 41, 59, 0.7)`
 
----
 
 ## 🚀 Perintah Cepat untuk AI
 "Tolong perbarui file `src/resources/views/auth/login.rb.html` menggunakan desain dari template premium di `.dev/instructions/login_register.html`. Pastikan semua logika HTMX dan variabel error tetap berfungsi."
