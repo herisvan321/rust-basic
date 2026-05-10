@@ -1,7 +1,6 @@
 use rustbasic_core::tower_http::services::ServeDir;
 use rustbasic_core::dotenvy::dotenv;
 use rustbasic_core::Config;
-use rustbasic_core::sea_orm_migration::MigratorTrait;
 
 #[tokio::main]
 async fn main() {
@@ -14,13 +13,8 @@ async fn main() {
 
     // 3. Setup Database & Sea-ORM
     let db = rustbasic_core::database::connect(&cfg).await;
-    match rustbasic::migrations::Migrator::up(&db, None).await {
-        Ok(_) => {},
-        Err(e) => {
-            eprintln!("\n⚠️  Migrasi otomatis dilewati: {}", e);
-            eprintln!("   💡 Jalankan 'rustbasic migrate' secara manual, atau hapus database jika ada file migrasi yang hilang.\n");
-        }
-    }
+    // Migrasi TIDAK dijalankan otomatis saat serve.
+    // Gunakan 'rustbasic migrate' untuk menjalankan migrasi secara manual.
     
     // 4. Inisialisasi Session Store
     rustbasic_core::session::init_sessions(&cfg).await;
