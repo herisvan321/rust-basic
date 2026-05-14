@@ -1,11 +1,12 @@
 # 🦀 RustBasic Starter Kit
 
-**RustBasic** adalah framework Full-stack modern untuk bahasa pemrograman Rust, yang dirancang untuk kecepatan pengembangan maksimal namun dengan performa dan keamanan Rust.
+**RustBasic** adalah framework Full-stack modern untuk bahasa pemrograman Rust, yang dirancang untuk kecepatan pengembangan maksimal namun dengan performa dan keamanan Rust. Dilengkapi antarmuka bergaya premium yang memadukan tema modern Y2K cerah dengan utilitas penuh **Bootstrap 5.3.8** dan **HTMX**.
 
 ## 🚀 Fitur Unggulan
-- ⚡ **Axum Powered**: Backend super cepat dan efisien.
-- 🗄️ **Sea-ORM**: Manajemen database async yang mudah dan aman.
-- 🎨 **Minijinja**: Engine template HTML standar yang familiar.
+- ⚡ **Axum Powered**: Backend super cepat dan efisien berbasis **Axum 0.8+**.
+- 🗄️ **Sea-ORM**: Manajemen database *async* yang mudah, aman, dan berkinerja tinggi.
+- 🎨 **Minijinja & Interseptor Global**: Engine template HTML standar dengan injeksi otomatis variabel global (seperti `user_roles`, `user_permissions`, dan `csrf_token`) di setiap *view* tanpa mengotori pengontrol.
+- 📦 **Bootstrap 5.3.8 Ready**: Pustaka gaya, *grid*, dan komponen interaktif Bootstrap siap pakai secara murni melalui penyajian berkas statis lokal (`public/`).
 - 🛡️ **Built-in CLI**: Generator kode (Controller, Model, Auth) otomatis.
 - 🔄 **Live Reload**: Refresh browser otomatis saat ada perubahan kode/template.
 
@@ -58,8 +59,9 @@ rustbasic db:seed                        # Jalankan seeder database
 ## 📝 Panduan Pengembangan
 1. **Model**: Terletak di `src/app/models/`
 2. **Controller**: Terletak di `src/app/http/controllers/`
-3. **View (Template)**: Terletak di `src/resources/views/` (Format `.rb.html`)
+3. **View (Template)**: Terletak di `src/resources/views/` (Format `.rb.html`) dengan fondasi desain **Bootstrap 5.3.8** dan **HTMX**.
 4. **Routes**: Konfigurasi route ada di `src/routes/web.rs`
+5. **Aset Statis**: Berkas statis publik (CSS, JS, Gambar) diletakkan pada folder `public/` dan otomatis tersaji di jalur dasar.
 
 ---
 
