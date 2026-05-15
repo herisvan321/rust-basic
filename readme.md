@@ -10,22 +10,11 @@
 - 🛡️ **Built-in CLI**: Generator kode (Controller, Model, Auth) otomatis.
 - 🔄 **Live Reload**: Refresh browser otomatis saat ada perubahan kode/template.
 
-## 🚀 Smart Installer (Rekomendasi)
-
-Instal CLI RustBasic secara otomatis dengan satu perintah. Script ini akan menangani konfigurasi path dan dependensi sistem secara cerdas.
-
-### 🍎 macOS & 🐧 Linux
+## ️ Instalasi Manual (Via Cargo)
 ```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/herisvan321/rustbasic-cli-install/main/rustbasic.sh)"
+cargo install rustbasic-cli
 ```
-
-### 🪟 Windows (PowerShell)
-```powershell
-powershell -ExecutionPolicy Bypass -Command "iwr -useb https://raw.githubusercontent.com/herisvan321/rustbasic-cli-install/main/rustbasic.ps1 | iex"
-```
-
-> [!TIP]
-> Script installer juga dapat digunakan untuk **Reinstall** (update) atau **Uninstall** RustBasic secara bersih dari sistem Anda.
+*Catatan: Pastikan direktori bin cargo (`~/.cargo/bin`) sudah masuk ke dalam PATH sistem Anda.*
 
 ---
 
@@ -49,6 +38,8 @@ rustbasic make:auth                      # Membuat sistem Login/Register instan
 
 ### Database & Migrasi
 ```bash
+rustbasic make:migration create_users    # Membuat file migrasi baru (Create)
+rustbasic make:migration:add bio users  # Membuat migrasi tambah kolom (Add)
 rustbasic migrate                        # Jalankan migrasi
 rustbasic migrate:refresh                # Reset dan jalankan ulang migrasi
 rustbasic db:seed                        # Jalankan seeder database
@@ -56,12 +47,35 @@ rustbasic db:seed                        # Jalankan seeder database
 
 ---
 
+## 🌐 API Documentation
+RustBasic hadir dengan struktur rute API yang terpisah dan sudah mendukung **CORS**. Anda dapat mengelola rute API di `src/routes/api.rs`.
+
+Endpoint bawaan:
+- `GET /api/health`: Mengecek status kesehatan server.
+- `GET /api/version`: Menampilkan informasi versi framework.
+
+> [!NOTE]
+> Rute API secara otomatis melewati proteksi CSRF, sehingga cocok untuk dipanggil oleh aplikasi Mobile atau Frontend (React/Vue/Next.js).
+
+---
+
+## ⚙️ Environment (.env)
+Pastikan Anda telah mengonfigurasi file `.env` sebelum menjalankan aplikasi:
+- `APP_URL`: Alamat dasar aplikasi (Default: `http://localhost:4000`).
+- `DATABASE_URL`: Koneksi database (SQLite/MySQL/PostgreSQL).
+- `APP_KEY`: Kunci enkripsi aplikasi (Gunakan `rustbasic key:generate` jika kosong).
+
+---
+
 ## 📝 Panduan Pengembangan
 1. **Model**: Terletak di `src/app/models/`
 2. **Controller**: Terletak di `src/app/http/controllers/`
-3. **View (Template)**: Terletak di `src/resources/views/` (Format `.rb.html`) dengan fondasi desain **Bootstrap 5.3.8** dan **HTMX**.
-4. **Routes**: Konfigurasi route ada di `src/routes/web.rs`
-5. **Aset Statis**: Berkas statis publik (CSS, JS, Gambar) diletakkan pada folder `public/` dan otomatis tersaji di jalur dasar.
+3. **View (Template)**: Terletak di `src/resources/views/` (Format `.rb.html`)
+4. **Routes**:
+   - `src/routes/web.rs`: Untuk rute web (dengan CSRF).
+   - `src/routes/api.rs`: Untuk rute API (dengan CORS).
+5. **Aset Statis**: Berkas statis publik diletakkan di folder `public/`.
+6. **CLI Handler**: Logika perintah CLI delegasi berada di `src/cli.rs`.
 
 ---
 
