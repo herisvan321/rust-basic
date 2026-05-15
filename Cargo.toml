@@ -13,13 +13,9 @@ default-run = "rustbasic"
 name = "rustbasic"
 path = "src/main.rs"
 
-[[bin]]
-name = "rustbasic-cli"
-path = "src/cli.rs"
-
 [dependencies]
 # Core Framework (Local Path)
-rustbasic-core = "0.1.4"
+rustbasic-core = { path = "../rustbasic-core" }
 
 # Diperlukan untuk Procedural Macros (Derive) & Inti App
 axum = "0.8.9"

@@ -1,4 +1,5 @@
 use rustbasic_core::tower_http::services::ServeDir;
+use rustbasic_core::sea_orm_migration::MigratorTrait;
 use rustbasic_core::dotenvy::dotenv;
 use rustbasic_core::Config;
 
@@ -10,6 +11,30 @@ async fn main() {
 
     // 2. Muat Konfigurasi
     let cfg = Config::load();
+
+    // 2.1 Cek Command CLI (migrate, seed)
+    let args: Vec<String> = std::env::args().collect();
+    if args.len() > 1 && (args[1].starts_with("migrate") || args[1] == "db:seed") {
+        let db = rustbasic_core::database::connect(&cfg).await;
+        let command = args[1].as_str();
+
+        match command {
+            "migrate" => {
+                let _ = rustbasic::migrations::Migrator::up(&db, None).await;
+            }
+            "migrate:refresh" => {
+                let _ = rustbasic::migrations::Migrator::fresh(&db).await;
+            }
+            "migrate:back" | "migrate:rollback" => {
+                let _ = rustbasic::migrations::Migrator::down(&db, Some(1)).await;
+            }
+            "db:seed" => {
+                rustbasic::app::seeder::run(&db).await;
+            }
+            _ => {}
+        }
+        return;
+    }
 
     // 3. Setup Database & Sea-ORM
     let db = rustbasic_core::database::connect(&cfg).await;
