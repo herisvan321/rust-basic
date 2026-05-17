@@ -33,7 +33,7 @@ Sebelum melakukan modifikasi file, AI harus mengumpulkan data berikut:
 ### D. Ekstraksi JavaScript & HTMX
 - Buat folder: `src/resources/js/<template_name>/`.
 - Pindahkan script dari tag `<script>` ke `src/resources/js/<template_name>/script.js`.
-- **HTMX First**: Gantikan interaksi JS sederhana (misal modal, tab, load data) dengan atribut HTMX sebisa mungkin.
+- **HTMX First**: Gantikan interaksi JS sederhana (misal modal, tab, load data) dengan atribut HTMX sebisa mungkin. Jika ada vanilla JavaScript, WAJIB diganti menjadi HTMX.
 
 ### E. Routing & Controller
 - Tambahkan endpoint baru di `src/routes/web.rs`.
@@ -60,7 +60,6 @@ src/resources/
 
 ## ⚠️ 4. LIMIT & RESTRICTIONS (Batasan)
 - **Ekstensi RB.HTML**: Semua file template WAJIB menggunakan ekstensi `.rb.html`.
-- **Standar HTML**: Gunakan HTML murni. Sistem komponen bergaya JSX (seperti `<Buttons.Button />`) **sudah dihapus**.
 - **Hybrid Embedding**: Ingat bahwa template di-embed via `rust-embed` namun mendukung live-reload di mode debug.
 - **Minification Aware**: Sadari bahwa output akhir akan diminifikasi oleh server (spasi/komentar dihapus) untuk perlindungan source code.
 - **No Inline**: Usahakan tidak membiarkan inline CSS atau inline JS di dalam file HTML view. Pisahkan ke file tersendiri.
