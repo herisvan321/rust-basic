@@ -22,18 +22,20 @@ Sebelum melakukan modifikasi file, AI harus mengumpulkan data berikut:
 ### B. Ekstraksi HTML & Layout (Standar HTML + Jinja)
 - Buat file layout baru: `src/resources/views/layouts/<template_name>.rb.html`.
 - Sertakan aset inti di dalam blok `<head>` dan `<body>` dengan menggunakan helper `{{ app_css() | safe }}` dan `{{ htmx_js() | safe }}` jika memungkinkan.
+- Wajib sertakan juga core framework Bootstrap di setiap layout: `<link rel="stylesheet" href="/css/bootstrap.min.css">` di dalam `<head>` dan `<script src="/js/bootstrap.bundle.min.js"></script>` di akhir `<body>`.
 - Buat file view halaman spesifik di `src/resources/views/<template_name>/index.rb.html`.
 - Gunakan `{% extends "layouts/<template_name>.rb.html" %}` di setiap halaman.
 
 ### C. Ekstraksi Komponen (Jinja Include/Macro Murni)
-- **Tidak ada komponen ajaib RSX**. Jika bagian UI berulang (seperti Navbar, Footer), pisahkan ke dalam file `.rb.html` kecil (misal: `src/resources/views/partials/navbar.rb.html`).
+
 - Panggil bagian tersebut menggunakan sintaks Minijinja standar: `{% include "partials/navbar.rb.html" %}`.
 - Jika butuh komponen dengan parameter, gunakan sintaks `{% macro %}` bawaan Minijinja standar.
 
 ### D. Ekstraksi JavaScript & HTMX
 - Buat folder: `src/resources/js/<template_name>/`.
-- Pindahkan script dari tag `<script>` ke `src/resources/js/<template_name>/script.js`.
-- **HTMX First**: Gantikan interaksi JS sederhana (misal modal, tab, load data) dengan atribut HTMX sebisa mungkin. Jika ada vanilla JavaScript, WAJIB diganti menjadi HTMX.
+- Pindahkan script dari tag `<script>` ke `src/resources/js/<template_name>/script.js` dan pastikan kode Vanilla JS diubah menjadi jQuery v4.
+- **HTMX First**: Gantikan interaksi JS sederhana (misal modal, tab, load data) dengan atribut HTMX sebisa mungkin. Jika ada vanilla JavaScript, WAJIB diganti menjadi HTMX atau menggunakan jQuery v4 jika HTMX tidak memungkinkan.
+- **Cegah Duplikasi**: Saat memanggil script JS di dalam loop HTMX, selalu bungkus inisialisasi dengan `if ($('#element_id').length > 0)` atau gunakan event listener seperti `htmx:load` untuk mencegah script berjalan berkali-kali dan menyebabkan error atau duplikasi elemen.
 
 ### E. Routing & Controller
 - Tambahkan endpoint baru di `src/routes/web.rs`.
@@ -75,3 +77,4 @@ src/resources/
 ---
 
 _Instruksi ini melengkapi `agents.md` khusus untuk bagian manajemen template UI._
+
