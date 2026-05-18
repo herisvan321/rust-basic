@@ -1,78 +1,71 @@
-# 🚀 Panduan Deployment RustBasic
+# 🚀 Panduan Deployment VPS (SPA Edition)
 
-Dokumen ini menjelaskan cara men-deploy aplikasi RustBasic ke server produksi.
-
----
-
-## 🏗️ 1. Persiapan Lingkungan Produksi
-
-### A. Konfigurasi `.env`
-Pastikan file `.env` di server produksi memiliki pengaturan keamanan yang ketat:
-```ini
-APP_ENV=production
-APP_DEBUG=false
-APP_PORT=4000
-APP_HOST=127.0.0.1  # Gunakan localhost jika di balik Reverse Proxy
-APP_KEY=base64:... # Wajib unik dan rahasia!
-DB_CONNECTION=sqlite # Atau mysql
-```
-
-### B. Database
-- **SQLite**: Pastikan folder database (atau file `.db`) memiliki izin tulis (write permission) bagi pengguna yang menjalankan aplikasi.
-- **MySQL**: Pastikan database sudah dibuat dan user memiliki akses penuh.
+Dokumen ini menjelaskan alur pembangunan (*build pipeline*) dan langkah-langkah merilis aplikasi **RustBasic Modern SPA** Anda ke server produksi VPS Linux (Ubuntu/Debian) secara aman, efisien, dan tanpa dependensi luar (*zero-dependency*).
 
 ---
 
-## 📦 2. Kompilasi (Build)
+## 📦 1. Alur Pembangunan (Build Pipeline)
 
-Jalankan perintah build release untuk mengoptimalkan performa binary:
+Berkat teknologi **Single-Binary Embedding**, seluruh aset frontend React.js yang terkompilasi (`public/build`) dan template HTML root (`app.rb.html`) disematkan secara penuh langsung ke dalam satu file biner executable Rust saat proses rilis kompilasi.
+
+Untuk merakit berkas biner mandiri tersebut, jalankan **dua perintah berurutan** berikut pada komputer pengembang atau server CI/CD Anda:
 
 ```bash
+# Langkah A: Kompilasi seluruh kode React & Tailwind ke folder public/build/
+npm run build
+
+# Langkah B: Kompilasi biner Rust dengan kompresi optimal
 cargo build --release
 ```
 
-Binary hasil build akan berada di: `target/release/rustbasic` (atau nama binary yang Anda tentukan).
-
-### Cross-Compilation (Opsi)
-Jika Anda men-deploy dari macOS ke server Linux, gunakan `cargo-zigbuild` atau `rustbasic build` untuk memilih target OS yang sesuai.
+Berkas biner executable mandiri hasil kompilasi akan tersimpan di: **`target/release/rustbasic`**.
 
 ---
 
-## 🚢 3. Struktur Folder di Server
+## 🚢 2. Struktur Folder Bersih di Server Produksi
 
-Berkat fitur **Hybrid Embedding**, aplikasi RustBasic kini benar-benar portabel. Seluruh template HTML (Views), CSS, dan JS utama sudah tertanam di dalam file binary saat Anda melakukan build release.
+Saat dideploy ke server produksi, aplikasi Anda benar-benar hemat memori disk dan mandiri. Anda **DILARANG menyalin folder `src/` (kode sumber backend), `node_modules/`, `public/` (folder aset statis asli), atau file `.jsx`** ke server produksi!
 
-Berikut adalah struktur folder minimum yang diperlukan di server:
+Berikut adalah struktur folder minimum yang Anda butuhkan di direktori `/var/www/app/` server produksi VPS Anda:
 
 ```text
 /var/www/app/
-├── rustbasic            # Binary aplikasi (hasil build release)
-├── .env                 # Konfigurasi produksi (Wajib)
-├── database/            # Database SQLite & Migrasi (Jika menggunakan SQLite)
-├── public/              # File statis tambahan (Gambar luar, Favicon, dll)
-└── storage/             # Log aplikasi & Upload file
+├── rustbasic            # File biner executable hasil build (Wajib)
+├── .env                 # Berkas konfigurasi produksi (Wajib)
+├── database/            # Tempat penyimpanan berkas SQLite (Jika menggunakan SQLite)
+└── storage/             # Tempat log sistem & berkas hasil upload user
 ```
 
-> [!NOTE]
-> **Tidak ada folder `src/`**: Anda tidak perlu lagi menyertakan folder `src/resources/views` di server produksi. Binary Anda sudah mandiri (*self-contained*).
-
-### 📦 Izin Tulis (Permissions)
-Pastikan user yang menjalankan aplikasi (misal: `www-data`) memiliki akses tulis ke folder berikut:
-- **`database/`**: Agar bisa membuat/mengedit file SQLite.
-- **`storage/`**: Agar bisa menulis file log dan upload.
+### 📂 Hak Akses Direktori (Permissions)
+Pastikan user sistem yang bertugas menjalankan aplikasi (misalnya `www-data`) memiliki hak akses baca dan tulis ke direktori database dan storage:
 
 ```bash
-sudo chown -R www-data:www-data database storage
-sudo chmod -R 775 database storage
+sudo chown -R www-data:www-data /var/www/app
+sudo chmod -R 775 /var/www/app/database /var/www/app/storage
 ```
 
 ---
 
-## 🛠️ 4. Menjalankan Aplikasi (Systemd)
+## ⚙️ 3. Konfigurasi Produksi (`.env`)
 
-Sangat disarankan menggunakan Systemd (di Linux) untuk memastikan aplikasi tetap berjalan (auto-restart) dan berjalan di background.
+Pastikan berkas `.env` di server produksi Anda memiliki konfigurasi keamanan yang ketat dan efisien:
 
-Buat file `/etc/systemd/system/rustbasic.service`:
+```ini
+APP_ENV=production
+APP_DEBUG=false       # WAJIB false! Mengaktifkan pembacaan aset statis 100% dari RAM biner
+APP_PORT=4000         # Port backend Axum berjalan
+APP_HOST=127.0.0.1    # Hanya melayani request lokal dari Reverse Proxy Nginx
+APP_KEY=base64:...   # Wajib unik, aman, dan rahasia! Generate via 'rustbasic key:generate'
+DB_CONNECTION=sqlite
+```
+
+---
+
+## 🛠️ 4. Menjalankan Aplikasi di Background (Systemd)
+
+Sangat disarankan menggunakan **Systemd** di Linux untuk mengelola jalannya aplikasi (otomatis memicu restart jika terjadi error tak terduga, melacak logs, dan memicu boot otomatis saat server VPS dinyalakan ulang).
+
+Buat file baru di `/etc/systemd/system/rustbasic.service`:
 ```ini
 [Unit]
 Description=RustBasic Web Application
@@ -89,17 +82,18 @@ Restart=always
 WantedBy=multi-user.target
 ```
 
-Aktifkan service:
+Aktifkan dan jalankan service aplikasi:
 ```bash
+sudo systemctl daemon-reload
 sudo systemctl enable rustbasic
 sudo systemctl start rustbasic
 ```
 
 ---
 
-## 🌐 5. Reverse Proxy (Nginx)
+## 🌐 5. Reverse Proxy dengan Nginx (SSL & HTTPS)
 
-Gunakan Nginx untuk menangani SSL (HTTPS) dan meneruskan request ke aplikasi Rust.
+Gunakan **Nginx** sebagai pintu depan penerima trafik publik yang bertugas menangani enkripsi SSL (HTTPS) dan meneruskan request secara instan ke aplikasi RustBasic yang berjalan di port 4000:
 
 ```nginx
 server {
@@ -118,13 +112,9 @@ server {
 
 ---
 
-## 🛡️ 6. Checklist Keamanan Produksi
-- [ ] `APP_DEBUG` diset ke `false`.
-- [ ] `APP_KEY` sudah diganti dengan yang baru (`rustbasic key:generate`).
-- [ ] Port aplikasi (4000) ditutup oleh firewall (hanya bisa diakses via Nginx).
-- [ ] Log di `storage/logs/` dipantau secara berkala.
-- [ ] File database SQLite tidak diletakkan di folder publik.
-
----
-
-_Panduan ini dibuat untuk memastikan aplikasi RustBasic berjalan dengan aman, stabil, dan performa maksimal di lingkungan produksi._
+## 🛡️ 6. Checklist Keamanan Sebelum Launching
+- [ ] **Variabel `APP_DEBUG`**: Wajib bernilai `false`.
+- [ ] **Variabel `APP_KEY`**: Sudah diganti menggunakan string unik baru (`rustbasic key:generate`).
+- [ ] **Firewall VPS**: Tutup akses luar langsung ke port 4000 (hanya boleh dimasuki via Nginx di port 80/443).
+- [ ] **Directory Protection**: Pastikan file database SQLite (`database/*.sqlite`) tidak berada di folder publik.
+- [ ] **Log Monitoring**: Log kesalahan di `storage/logs/` terpantau secara teratur.

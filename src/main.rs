@@ -1,4 +1,3 @@
-use rustbasic_core::tower_http::services::ServeDir;
 use rustbasic_core::dotenvy::dotenv;
 use rustbasic_core::Config;
 
@@ -37,7 +36,6 @@ async fn main() {
         .nest("/api", api_router)
         .merge(web_router);
 
-    // 6. Setup Statics & Jalankan Server
-    let static_files = ServeDir::new("public");
-    rustbasic_core::server::start_server(cfg, session_store, static_files, db, app_router).await;
+    // 6. Jalankan Server
+    rustbasic_core::server::start_server(cfg, session_store, db, app_router).await;
 }

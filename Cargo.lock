@@ -1842,6 +1842,7 @@ checksum = "805bfd7352166bae857ee569628b52bcd85a1cecf7810861ebceb1686b72b75d"
 dependencies = [
  "memo-map",
  "serde",
+ "serde_json",
 ]
 
 [[package]]
@@ -2612,7 +2613,7 @@ dependencies = [
 
 [[package]]
 name = "rustbasic"
-version = "0.1.7"
+version = "0.1.8"
 dependencies = [
  "async-trait",
  "axum",
@@ -2629,7 +2630,7 @@ dependencies = [
 
 [[package]]
 name = "rustbasic-cli"
-version = "0.0.3"
+version = "0.0.5"
 dependencies = [
  "async-trait",
  "base64",
@@ -2648,7 +2649,7 @@ dependencies = [
 
 [[package]]
 name = "rustbasic-core"
-version = "0.1.7"
+version = "0.1.9"
 dependencies = [
  "async-trait",
  "axum",

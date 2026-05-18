@@ -359,30 +359,7 @@ body::before {
   to { opacity: 0; transform: translateY(-20px); pointer-events: none; visibility: hidden; }
 }
 
-/* 🌀 SUBTLE PROGRESS BAR (Top of Page) */
-.htmx-indicator-bar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 3px;
-  background: transparent;
-  z-index: 20000;
-  pointer-events: none;
-}
 
-.htmx-request .htmx-indicator-bar-inner {
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, var(--primary), var(--secondary));
-  animation: htmx-loading-bar 2s ease-in-out infinite;
-}
-
-@keyframes htmx-loading-bar {
-  0% { transform: translateX(-100%); }
-  50% { transform: translateX(0); }
-  100% { transform: translateX(100%); }
-}
 
 /* Tetap pertahankan auto-hide untuk Alert, tapi hilangkan animasi di main */
 .alert-box {
@@ -501,20 +478,7 @@ body::before {
 }
 @keyframes skeleton-loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
-/* HTMX Transitions - Hanya muncul saat ada class .htmx-request */
-.htmx-indicator {
-  display: none;
-}
 
-.htmx-request.feedback-overlay,
-.htmx-request .feedback-overlay,
-.htmx-request.htmx-indicator,
-.htmx-request .htmx-indicator { 
-  display: flex !important; 
-  pointer-events: all;
-}
-
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
 /* ---------------------------------------------------------
  * 🔗 MODAL LOGIC (Checkbox Hack)

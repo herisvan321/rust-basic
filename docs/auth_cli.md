@@ -15,8 +15,8 @@ rustbasic auth
 
 **Fitur Unggulan:**
 - **Modern Split-Screen UI**: Desain antarmuka kelas atas dengan estetika *Glassmorphism* dan *Mesh Gradient*.
-- **HTML & Minijinja Native**: Menggunakan sintaks HTML standar dan power dari engine Minijinja (`.rb.html`).
-- **HTMX Powered**: Interaksi form tanpa reload menggunakan HTMX (termasuk validasi inline).
+- **React & Inertia SPA**: Membangun Single Page Application menggunakan React.js dan Inertia.js (tanpa reload halaman).
+- **Inertia.js useForm**: Penanganan state form reaktif, transisi halus, dan penanganan error instan.
 - **Floating Toasts**: Sistem pesan sukses/error melayang dengan animasi CSS otomatis (tanpa JS tambahan).
 - **Secure by Default**: Terproteksi oleh `csrf_middleware` dan validasi *server-side* yang kuat.
 
@@ -28,11 +28,13 @@ Setelah menjalankan `auth`, file-file berikut akan dibuat:
 
 | Path | Keterangan |
 | :--- | :--- |
-| `src/resources/views/auth/login.rb.html` | Halaman login dengan desain split-screen modern. |
-| `src/resources/views/auth/register.rb.html` | Halaman registrasi dengan validasi real-time. |
-| `src/resources/views/auth/forgot.rb.html` | Alur pemulihan password. |
-| `src/resources/views/dashboard.rb.html` | Dashboard administrator premium dengan statistik grid. |
-| `src/app/http/controllers/auth/` | Pusat logika autentikasi (Login, Register, Reset). |
+| `src/resources/js/Pages/Auth/Login.jsx` | Halaman login React dengan desain split-screen modern. |
+| `src/resources/js/Pages/Auth/Register.jsx` | Halaman registrasi React dengan state reaktif `useForm`. |
+| `src/resources/js/Pages/Auth/Forgot.jsx` | Alur React untuk pemulihan password. |
+| `src/resources/js/Pages/Auth/Reset.jsx` | Alur React untuk reset password. |
+| `src/resources/js/Pages/Dashboard.jsx` | Dashboard administrator premium berbasis React SPA. |
+| `src/app/http/controllers/auth/auth_controller.rs` | Logika backend autentikasi modern berbasis JSON & Inertia. |
+| `src/resources/views/emails/reset.rb.html` | Template email reset password Minijinja. |
 
 ---
 

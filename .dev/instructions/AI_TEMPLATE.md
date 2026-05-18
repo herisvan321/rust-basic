@@ -1,80 +1,101 @@
-# 🎨 RustBasic AI Template Workflow
+# 🎨 RustBasic AI Template Workflow (React SPA Edition)
 
-Dokumen ini mendefinisikan standar kerja bagi AI Agent saat melakukan porting atau implementasi template UI ke dalam framework **RustBasic**.
+Dokumen ini mendefinisikan alur kerja standar bagi AI Agent saat melakukan porting atau implementasi halaman/komponen UI ke dalam framework **RustBasic** menggunakan stack **React.js + Inertia.js**.
 
 ---
 
 ## 📥 1. INPUT (Analisis & Persiapan)
 Sebelum melakukan modifikasi file, AI harus mengumpulkan data berikut:
-- **Nama Template**: Nama ini akan menjadi nama folder utama.
-- **Source Code**: Gunakan file sumber (misal `template.html`) sebagai referensi utama.
-- **Identifikasi Aset**: Scan file source untuk menemukan blok `<style>`, `<script>`, dan struktur HTML utama.
-- **Premium Aesthetics**: Wajib mengadaptasi desain menjadi modern, premium, dan responsif sesuai standar RustBasic.
+*   **Nama Halaman**: Tentukan nama komponen React yang akan dibuat (contoh: `About.jsx`, `Welcome.jsx`, `Dashboard/Profile.jsx`).
+*   **Analisis Desain UI**: Tinjau desain/komponen visual asli untuk disesuaikan dengan estetika premium RustBasic (glassmorphism, tema gelap, bento box, orbs).
+*   **Identifikasi State & Interaktivitas**: Identifikasi bagian UI mana saja yang memerlukan perubahan dinamis (seperti counter, modal, input form) untuk diimplementasikan menggunakan React hooks.
 
 ---
 
-## ⚙️ 2. PROSES (Teknis Pemisahan HTML & Aset)
+## ⚙️ 2. PROSES (Teknis Pemisahan & Kompilasi React)
 
-### A. Ekstraksi CSS
-- Buat folder: `src/resources/css/<template_name>/`.
-- Pindahkan semua CSS dari tag `<style>` ke `src/resources/css/<template_name>/style.css`.
+### A. Konversi Gaya (Tailwind CSS)
+*   **Adaptasi Tailwind**: Gunakan class utility **Tailwind CSS** untuk penataan gaya yang seragam, premium, responsif, dan mudah dipelihara.
+*   **Hindari Pure CSS Manual**: Di era React SPA, kurangi penulisan file CSS mentah manual. Maksimalkan utility class Tailwind untuk visual glassmorphism, gradasi warna modern, dan bayangan orbs.
 
-### B. Ekstraksi HTML & Layout (Standar HTML + Jinja)
-- Buat file layout baru: `src/resources/views/layouts/<template_name>.rb.html`.
-- Sertakan aset inti di dalam blok `<head>` dan `<body>` dengan menggunakan helper `{{ app_css() | safe }}` dan `{{ htmx_js() | safe }}` jika memungkinkan.
-- Wajib sertakan juga core framework Bootstrap di setiap layout: `<link rel="stylesheet" href="/css/bootstrap.min.css">` di dalam `<head>` dan `<script src="/js/bootstrap.bundle.min.js"></script>` di akhir `<body>`.
-- Buat file view halaman spesifik di `src/resources/views/<template_name>/index.rb.html`.
-- Gunakan `{% extends "layouts/<template_name>.rb.html" %}` di setiap halaman.
+### B. Pembuatan Halaman React (Pages)
+*   Buat berkas halaman baru di dalam folder [`src/resources/js/Pages/`](file:///Users/herisvanhendra/Desktop/Desktop%20new/project/belajar%20rust/rustbasic/src/resources/js/Pages/).
+*   Komponen wajib diekspor secara *default* (`export default`).
+*   Seluruh navigasi antar halaman internal **WAJIB** menggunakan `<Link>` dari `@inertiajs/react` agar SPA tidak mengalami reload halaman secara penuh:
 
-### C. Ekstraksi Komponen (Jinja Include/Macro Murni)
+```jsx
+import { Link } from '@inertiajs/react';
 
-- Panggil bagian tersebut menggunakan sintaks Minijinja standar: `{% include "partials/navbar.rb.html" %}`.
-- Jika butuh komponen dengan parameter, gunakan sintaks `{% macro %}` bawaan Minijinja standar.
+export default function About({ author, version }) {
+  return (
+    <div className="p-8 bg-slate-950 min-h-screen text-slate-100">
+      <h1 className="text-3xl font-bold">Tentang Aplikasi</h1>
+      <p className="mt-4">Pembuat: {author}</p>
+      <p>Versi: {version}</p>
+      <Link href="/" className="mt-6 inline-block text-indigo-400 hover:underline">
+        ← Kembali ke Beranda
+      </Link>
+    </div>
+  );
+}
+```
 
-### D. Ekstraksi JavaScript & HTMX
-- Buat folder: `src/resources/js/<template_name>/`.
-- Pindahkan script dari tag `<script>` ke `src/resources/js/<template_name>/script.js` dan pastikan kode Vanilla JS diubah menjadi jQuery v4.
-- **HTMX First**: Gantikan interaksi JS sederhana (misal modal, tab, load data) dengan atribut HTMX sebisa mungkin. Jika ada vanilla JavaScript, WAJIB diganti menjadi HTMX atau menggunakan jQuery v4 jika HTMX tidak memungkinkan.
-- **Cegah Duplikasi**: Saat memanggil script JS di dalam loop HTMX, selalu bungkus inisialisasi dengan `if ($('#element_id').length > 0)` atau gunakan event listener seperti `htmx:load` untuk mencegah script berjalan berkali-kali dan menyebabkan error atau duplikasi elemen.
+### C. Ekstraksi Komponen Modular (Components)
+*   Jika ada bagian UI yang digunakan berulang-kali (seperti Navbar, Footer, Button Premium), pisahkan ke dalam folder [`src/resources/js/Components/`](file:///Users/herisvanhendra/Desktop/Desktop%20new/project/belajar%20rust/rustbasic/src/resources/js/Components/).
+*   Panggil komponen tersebut di dalam halaman Page Anda:
 
-### E. Routing & Controller
-- Tambahkan endpoint baru di `src/routes/web.rs`.
-- Buat controller yang merender file `.rb.html` baru.
-- Semua halaman pada file ini `src/resources/views/layouts/<template_name>.rb.html` harus dipisah dan dibuatkan endpoint baru di `src/routes/web.rs`.
+```jsx
+import Navbar from '../Components/Navbar';
+
+export default function Dashboard() {
+  return (
+    <div>
+      <Navbar user="Admin" />
+      <main className="p-6">Konten Utama...</main>
+    </div>
+  );
+}
+```
+
+### D. Routing & Controller (Axum)
+*   Daftarkan rute Anda di [`src/routes/web.rs`](file:///Users/herisvanhendra/Desktop/Desktop%20new/project/belajar%20rust/rustbasic/src/routes/web.rs).
+*   Buat controller Axum yang memanggil helper `inertia` untuk memicu render komponen React SPA di browser:
+
+```rust
+pub async fn about(req: Request) -> Response {
+    inertia(req, "About", json!({
+        "author": "Heris",
+        "version": "1.0.0"
+    }))
+}
+```
 
 ---
 
 ## 📤 3. OUTPUT (Struktur File Akhir)
 ```text
-src/resources/
-├── css/
-│   └── <template_name>/style.css
-├── js/
-│   └── <template_name>/script.js
-└── views/
-    ├── <template_name>/
-    │   └── index.rb.html
-    └── layouts/
-        └── <template_name>.rb.html
+src/resources/js/
+├── Pages/
+│   ├── Welcome.jsx
+│   └── About.jsx
+├── Components/
+│   ├── Navbar.jsx
+│   └── Footer.jsx
+└── main.jsx
 ```
 
 ---
 
 ## ⚠️ 4. LIMIT & RESTRICTIONS (Batasan)
-- **Ekstensi RB.HTML**: Semua file template WAJIB menggunakan ekstensi `.rb.html`.
-- **Hybrid Embedding**: Ingat bahwa template di-embed via `rust-embed` namun mendukung live-reload di mode debug.
-- **Minification Aware**: Sadari bahwa output akhir akan diminifikasi oleh server (spasi/komentar dihapus) untuk perlindungan source code.
-- **No Inline**: Usahakan tidak membiarkan inline CSS atau inline JS di dalam file HTML view. Pisahkan ke file tersendiri.
+*   **Ekstensi React**: Seluruh berkas halaman React menggunakan ekstensi `.jsx`.
+*   **Link Bebas Reload**: DILARANG menggunakan tag anchor murni `<a>` untuk navigasi internal halaman SPA. Selalu gunakan komponen `<Link>` dari `@inertiajs/react`.
+*   **Compile First**: Ingat untuk selalu menjalankan kompilasi frontend (`npm run build`) sebelum mengompilasi biner Rust akhir di server produksi agar perubahan visual Anda tertanam ke dalam memori RAM biner.
 
 ---
 
-## 🛠️ 5. ACTION (Verifikasi)
+## 🛠️ 5. ACTION (Verifikasi Jalannya Kode)
 | Perintah | Kegunaan |
 | :--- | :--- |
-| `cargo rustbasic serve` | Menjalankan server untuk melihat hasil render template dengan Auto-reload. |
-| `cargo rustbasic cache:clear` | Jalankan jika perubahan cache/log perlu dibersihkan. |
-
----
-
-_Instruksi ini melengkapi `agents.md` khusus untuk bagian manajemen template UI._
-
+| `npm run dev` | Menjalankan Vite dev server untuk fitur instant Hot Module Replacement (HMR) saat development lokal. |
+| `rustbasic serve` | Menjalankan backend server Axum. |
+| `npm run build` | Melakukan kompilasi optimal frontend React ke folder `public/build/` sebelum rilis produksi. |

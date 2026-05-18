@@ -1,22 +1,23 @@
-# 📚 RustBasic Documentation Index
+# 📚 RustBasic SPA Documentation Index
 
-Pusat dokumentasi resmi **RustBasic Framework**.
+Selamat datang di pusat dokumentasi resmi **RustBasic Framework — Modern SPA Edition**. Halaman ini memetakan seluruh panduan teknis yang Anda butuhkan untuk membangun aplikasi monolith reaktif, berkinerja tinggi, dan ultra-premium menggunakan jembatan **Inertia.js** dan **React.js**.
 
 ---
 
-## 🚀 Memulai (Basics)
-- **[Panduan Dasar](basics.md)**: Instalasi, konfigurasi awal, dan menjalankan server.
-- **[Views & Templates](views.md)**: Panduan templating dengan sintaks HTML & Minijinja.
-- **[Manajemen Database](database.md)**: Dokumentasi Sea-ORM dan migrasi.
-- **[Routing & HTTP](http.md)**: Detail mengenai request, response, dan middleware.
+## 🚀 Memulai Pengembangan (Basics)
+*   **[Dasar-Dasar SPA](basics.md)**: Konsep SPA monolith, inisiasi routing web, controller, dan manajemen data.
+*   **[Views & JSX Komponen](views.md)**: Panduan membangun antarmuka premium dengan React, Tailwind CSS, Inertia form helper, dan asset embedding.
+*   **[Manajemen Database](database.md)**: Dokumentasi integrasi database Sea-ORM, pembuatan model, dan migrasi tabel.
+*   **[Routing & HTTP Stack](http.md)**: Detail mengenai middleware Axum, penanganan request/response Inertia, dan keamanan proteksi CSRF otomatis.
 
 ## 🛠️ CLI & Scaffolding
-- **[CLI Reference](cli.md)**: Daftar perintah lengkap menggunakan `rustbasic-cli`.
-- **[Auth Scaffolding](auth_cli.md)**: Panduan sistem autentikasi otomatis.
+*   **[CLI Reference](cli.md)**: Daftar pintasan perintah lengkap menggunakan `rustbasic-cli` di terminal.
+*   **[Auth Scaffolding](auth_cli.md)**: Dokumentasi setup sistem autentikasi otomatis yang premium.
 
 ## ⚙️ Advanced & Production
-- **[Deployment Guide](deployment.md)**: Panduan rilis ke server produksi.
-- **[Advanced Topics](advanced.md)**: Fitur tingkat lanjut.
+*   **[Panduan Deployment VPS](deployment.md)**: Alur pembangunan kompilasi produksi (*build pipeline*) dan rilis satu file biner mandiri (*zero-dependency deployment*).
+*   **[Arsitektur Framework](architecture.md)**: Membedah struktur delegasi CLI, core library, dan pengiriman data *Shared Props* global.
+*   **[Advanced Topics](advanced.md)**: Optimasi performa, kompresi aset, dan fitur-fitur tingkat lanjut.
 
 ---
 

@@ -1,99 +1,83 @@
-# Middleware
+# HTTP Stack, CSRF & Middleware (SPA Edition)
 
-Middleware adalah lapisan yang memproses request sebelum sampai ke controller. Disimpan di `src/app/http/middleware/`.
+Dokumen ini menjelaskan bagaimana framework **RustBasic Modern SPA** memproses request HTTP, menangani keamanan CSRF secara otomatis, dan mengelola alur response di sisi server Axum.
 
-## Menggunakan Middleware
-Daftarkan middleware di `src/routes/mod.rs` atau `web.rs`:
+---
+
+## 🔒 1. Keamanan & Proteksi CSRF Otomatis
+
+Keamanan aplikasi Anda terlindungi secara penuh menggunakan proteksi **CSRF (Cross-Site Request Forgery)** di tingkat rute web.
+
+### Bagaimana CSRF Bekerja di Edisi SPA?
+Di era Multi-Page Application (MPA) lama, Anda harus menyisipkan input teks tersembunyi (`<input type="hidden" name="_token">`) di setiap formulir HTML secara manual. 
+
+Pada edisi **Modern SPA**, semua proses tersebut terjadi **secara otomatis di balik layar**:
+1.  Setiap kali halaman SPA dimuat, middleware Axum secara otomatis membangkitkan token CSRF baru yang unik dan menyimpannya di cookie sesi browser yang aman.
+2.  Saat Anda mengirim data menggunakan Inertia form helper (`useForm` atau `router.post`), **Inertia secara otomatis membaca token CSRF tersebut dari cookie dan meloloskannya di header HTTP** pada setiap request AJAX yang mengubah data (POST, PUT, DELETE, PATCH).
+3.  Middleware RustBasic di backend akan memotong request, memvalidasi keabsahan token header tersebut, dan menolak request (mengembalikan respon `403 Forbidden`) jika token tidak cocok.
+
+> [!TIP]
+> **Bebas Kode Manual**: Anda tidak perlu lagi menulis kode input hidden CSRF atau memanggil helper token manual di berkas React. Cukup gunakan form helper bawaan Inertia, dan keamanan CSRF Anda terjamin 100%!
+
+---
+
+## ⚙️ 2. Middleware Stack (Axum Layers)
+
+Middleware adalah komponen filter yang memproses request sebelum dialirkan ke controller Anda. Middleware disimpan di [`src/app/http/middleware/`](file:///Users/herisvanhendra/Desktop/Desktop%20new/project/belajar%20rust/rustbasic/src/app/http/middleware/).
+
+### Membuat Middleware Baru
+Gunakan CLI RustBasic untuk membuat kerangka file middleware baru:
+```bash
+rustbasic make:middleware CheckRole
+```
+
+### Mendaftarkan Middleware pada Rute
+Anda dapat menumpuk layer middleware pada rute Axum di dalam [`src/routes/web.rs`](file:///Users/herisvanhendra/Desktop/Desktop%20new/project/belajar%20rust/rustbasic/src/routes/web.rs):
+
 ```rust
 Router::new()
-    .route("/dashboard", get(handler))
-    .layer(axum::middleware::from_fn(auth_middleware))
-```
-
-## Membuat Middleware
-Gunakan CLI untuk membuat file middleware baru secara otomatis:
-```bash
-rustbasic make:middleware Name
+    .route("/admin/dashboard", get(admin_controller::index))
+    // Hanya pengguna yang terverifikasi sebagai Admin yang boleh masuk
+    .layer(axum::middleware::from_fn(admin_auth_middleware))
 ```
 
 ---
 
-# Rate Limiting & Security
+## 📤 3. HTTP Responses di Server Axum
 
-Aplikasi menyertakan perlindungan otomatis terhadap DDoS dan Brute Force menggunakan `tower-governor`.
+Backend Axum pada RustBasic Modern SPA melayani response yang dirancang khusus untuk memenuhi protokol komunikasi Inertia:
 
-## Konfigurasi
-Atur batas request di file `.env`:
-```env
-APP_LIMIT_REQUEST=20
-```
-Ini akan membatasi setiap IP maksimal 20 request per detik.
+### A. Rendring Halaman SPA (`inertia`)
+Metode utama untuk memicu render komponen React SPA Anda. Fungsi ini secara cerdas mendeteksi apakah request berupa kunjungan awal browser (mengembalikan HTML utuh) atau navigasi internal SPA (mengembalikan JSON mentah):
 
-## Tampilan Error
-Jika batas terlampaui, aplikasi akan otomatis menampilkan halaman error **429 Too Many Requests** dengan sisa waktu tunggu yang dinamis.
-
----
-
-# CSRF Protection
-
-RustBasic secara otomatis menyertakan perlindungan CSRF untuk request yang mengubah data (POST, PUT, DELETE).
-
-## Cara Kerja
-1. Middleware CSRF akan mengecek token di cookie dan form.
-2. Jika tidak cocok, request akan ditolak (403 Forbidden).
-
-## Penggunaan di Template
-Secara default, CSRF token dikirimkan melalui header `X-CSRF-TOKEN` untuk interaksi HTMX. Anda dapat menyisipkannya menggunakan helper:
-
-```html
-<body hx-headers='{"X-CSRF-TOKEN": "{{ csrf_token() }}"}'>
-    <!-- Konten -->
-</body>
-```
-
-Untuk form tradisional:
-```html
-<form method="POST">
-    <input type="hidden" name="_token" value="{{ csrf_token() }}">
-    <!-- input lainnya -->
-</form>
-```
-
----
-
-# HTTP Requests
-
-Objek `Request` di RustBasic membungkus fungsionalitas umum seperti Session dan Auth.
-
-## Mengambil Data Form
 ```rust
-pub async fn store(Form(input): Form<MyStruct>) -> impl IntoResponse {
-    // ...
+use crate::app::inertia::inertia;
+use rustbasic_core::serde_json::json;
+
+pub async fn show_about(req: Request) -> Response {
+    inertia(req, "About", json!({
+        "appVersion": "1.0.0",
+        "author": "Heris Van Hendra"
+    }))
 }
 ```
 
-## Akses Session dari Request
+### B. Redirect Dinamis (SPA Friendly)
+Saat melakukan proses penyimpanan data (seperti login atau registrasi), Anda sering kali perlu mengarahkan pengguna kembali ke halaman lain. 
+
+Gunakan redirect bawaan Axum yang secara otomatis meloloskan kode status HTTP `303 See Other` (kode status wajib menurut protokol Inertia agar browser SPA mengetahui bahwa redirect ditujukan untuk memuat data JSON baru, bukan merusak siklus navigasi React):
+
 ```rust
-let user_id = req.session().get::<i32>("user_id");
-```
-
----
-
-# HTTP Responses
-
-RustBasic mendukung berbagai tipe response:
-
-## Render View (HTML)
-```rust
-view(&req, "file.rb.html", context! { ... })
-```
-
-## JSON Response
-```rust
-axum::Json(serde_json::json!({ "status": "ok" }))
-```
-
-## Redirect
-```rust
+// Mengarahkan pengguna kembali ke halaman login setelah registrasi sukses
 axum::response::Redirect::to("/login")
+```
+
+### C. JSON Mentah (API Responses)
+Jika Anda membangun endpoint API murni yang tidak menyajikan halaman visual, Anda tetap dapat mengembalikan objek JSON standar Axum:
+
+```rust
+axum::Json(serde_json::json!({
+    "success": true,
+    "message": "Data berhasil dihapus secara permanen."
+}))
 ```

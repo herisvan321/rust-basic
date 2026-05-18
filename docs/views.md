@@ -1,95 +1,103 @@
-# 🎨 Panduan View & Template
+# 🎨 Panduan Views & JSX Komponen (React SPA)
 
-RustBasic menggunakan **Minijinja** sebagai mesin template yang sangat cepat dan mirip dengan Jinja2/Django. Seluruh file template menggunakan ekstensi `.rb.html`.
+Edisi **Modern SPA** pada framework RustBasic meninggalkan sistem templating server-side murni, dan berpindah secara penuh menggunakan **React.js (JSX)** sebagai mesin antarmuka pengguna yang sangat reaktif, cepat, dan terstruktur.
 
-## 🚀 Sintaks Template Dasar
-Anda dapat menulis HTML standar secara langsung. Tidak ada tag kustom ajaib.
+---
 
-### 1. Menampilkan Variabel
-Gunakan tanda kurung kurawal ganda:
-```html
-<h1>Selamat Datang, {{ nama_user }}</h1>
-```
+## ⚙️ 1. Struktur Halaman & Komponen React
 
-### 2. Struktur Kontrol (If / For)
-Gunakan tag blok Minijinja standar:
-```html
-{% if is_logged_in %}
-    <p>Halo Admin!</p>
-{% else %}
-    <p>Silakan Login.</p>
-{% endif %}
+Untuk menjaga keteraturan kode, struktur folder frontend di bawah [`src/resources/js/`](file:///Users/herisvanhendra/Desktop/Desktop%20new/project/belajar%20rust/rustbasic/src/resources/js/) dipisahkan menjadi dua bagian utama:
 
-<ul>
-{% for item in items %}
-    <li>{{ item }}</li>
-{% endfor %}
-</ul>
-```
+1.  **Halaman Utama SPA (`Pages/`)**: Berkas komponen halaman utama yang dirujuk langsung oleh rute controller backend (seperti `Welcome.jsx`, `About.jsx`). Berkas disimpan di [`src/resources/js/Pages/`](file:///Users/herisvanhendra/Desktop/Desktop%20new/project/belajar%20rust/rustbasic/src/resources/js/Pages/).
+2.  **Subkomponen Reusable (`Components/`)**: Bagian antarmuka modular yang dipanggil berulang kali di dalam halaman Page (seperti `Navbar.jsx`, `Footer.jsx`, `ButtonPremium.jsx`). Berkas disimpan di [`src/resources/js/Components/`](file:///Users/herisvanhendra/Desktop/Desktop%20new/project/belajar%20rust/rustbasic/src/resources/js/Components/).
 
-### 3. Layouts & Inheritance
-Gunakan ekstensi untuk mewarisi tata letak utama (`app.rb.html`):
-```html
-{% extends "layouts/app.rb.html" %}
+---
 
-{% block title %}Halaman Dashboard{% endblock %}
+## ⚡ 2. Komposisi Navigasi & Link Bebas Reload
 
-{% block content %}
-    <div>Konten Halaman</div>
-{% endblock %}
+Semua tautan navigasi internal antar halaman SPA **WAJIB menggunakan komponen `<Link>`** yang disediakan oleh `@inertiajs/react`. 
+DILARANG menggunakan tag anchor `<a>` biasa karena akan memaksa browser memuat ulang halaman secara keseluruhan (round-trip), yang menghilangkan pengalaman instan SPA dan merusak state React.
+
+```jsx
+import { Link } from '@inertiajs/react';
+import Navbar from '../Components/Navbar';
+
+export default function Welcome({ title }) {
+  return (
+    <div>
+      <Navbar />
+      <main className="p-8">
+        <h1 className="text-3xl font-bold">{title}</h1>
+        {/* Navigasi Instan SPA */}
+        <Link href="/about" className="mt-4 inline-block text-indigo-400 hover:underline">
+          Pelajari Tentang Kami →
+        </Link>
+      </main>
+    </div>
+  );
+}
 ```
 
 ---
 
-## 🧩 Sistem Desain (Pure CSS & HTML)
-Daripada menggunakan sistem komponen kustom (seperti `<Buttons.Button />`), framework ini mendorong penggunaan kelas utilitas CSS murni (seperti Tailwind/Bootstrap) langsung pada elemen HTML.
+## 💎 3. Desain Sistem & Penataan Gaya (Tailwind CSS)
 
-### 1. Buttons
-```html
-<button class="btn btn-primary">Simpan</button>
-<a href="/login" class="btn btn-outline">Batal</a>
-```
+RustBasic SPA didesain untuk tampil ultra-premium dengan memanfaatkan utilitas **Tailwind CSS**. Dibandingkan menulis file CSS mentah manual yang panjang, gunakan utility class Tailwind untuk menerapkan estetika modern:
 
-### 2. Forms
-```html
-<label class="form-label">Email</label>
-<input type="email" name="email" class="form-control" placeholder="nama@email.com">
-```
+*   **Glassmorphism**: Kombinasi transparansi background, efek blur, dan border tipis:
+    `bg-slate-900/60 backdrop-blur-md border border-slate-800/80`
+*   **Warna Premium**: Gunakan palet gelap bergradasi elegan:
+    `bg-gradient-to-tr from-slate-950 via-slate-900 to-indigo-950`
+*   **Shadow Glowing**: Efek pendaran cahaya orbs pada tombol premium:
+    `shadow-[0_0_20px_rgba(99,102,241,0.2)]`
 
-### 3. Alerts
-```html
-<div class="alert alert-success">Berhasil disimpan!</div>
+---
+
+## 🗂️ 4. Pengiriman Formulir Dinamis (`useForm`)
+
+Untuk memproses input data dan mengirimkan form ke backend Axum secara aman, reaktif, dan instan, manfaatkan hook pembantu **`useForm`** dari Inertia:
+
+```jsx
+import { useForm } from '@inertiajs/react';
+
+export default function EditProfile({ user }) {
+  const { data, setData, put, processing, errors } = useForm({
+    name: user.name,
+    email: user.email,
+  });
+
+  const onSubmit = (e) => {
+    e.preventDefault();
+    put('/profile/update'); // Mengirim data via HTTP PUT ke backend Axum
+  };
+
+  return (
+    <form onSubmit={onSubmit} className="p-6 bg-slate-900 rounded-xl border border-slate-800 max-w-sm">
+      <input 
+        type="text" 
+        value={data.name} 
+        onChange={e => setData('name', e.target.value)} 
+        className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-white mb-2"
+      />
+      {errors.name && <div className="text-red-500 text-xs mb-2">{errors.name}</div>}
+
+      <button type="submit" disabled={processing} className="w-full py-2 bg-indigo-600 rounded text-white font-semibold">
+        {processing ? 'Menyimpan...' : 'Simpan Perubahan'}
+      </button>
+    </form>
+  );
+}
 ```
 
 ---
 
-## 📅 Filter Waktu & Tanggal (Carbon-like)
-Anda tetap dapat menggunakan filter Minijinja bawaan RustBasic:
-1. **`diff_for_humans`**: `{{ user.created_at | diff_for_humans }}` -> *"2 hours ago"*
-2. **`format_date`**: `{{ now() | format_date("%d %B %Y") }}` -> *"02 May 2026"*
-3. **`now()`**: Mendapatkan waktu saat ini.
+## 📦 5. Single-Binary Asset Embedding (`rust-embed`)
 
----
+RustBasic menggunakan teknologi **Dual-Mode Serving** untuk memuat aset statis React hasil kompilasi (`public/build`) dan berkas root HTML template (`app.rb.html`) secara cerdas:
 
-## 🛡️ Keamanan & Privasi Source Code
-Secara default, RustBasic melakukan **Minifikasi Otomatis** pada output HTML. Saat pengguna melakukan "View Source" di browser:
-- Semua spasi berlebih dan baris baru dihapus.
-- Semua komentar HTML (`<!-- ... -->`) dibuang.
-- Kode akan tampak sebagai satu baris rapat yang sulit dibaca (Obfuscation ringan).
-
----
-
-## 📦 Template Embedding (rust-embed)
-Secara default, RustBasic menggunakan sistem **Hybrid Loading** untuk efisiensi maksimal:
-
-1.  **Mode Debug (Development)**: Template dibaca langsung dari folder `src/resources/views/`. Ini memungkinkan fitur **Live Reload** bekerja tanpa perlu kompilasi ulang setiap kali ada perubahan file `.rb.html` (aktif jika menjalankan `rustbasic serve`).
-2.  **Mode Release (Production)**: Seluruh file template di-embed ke dalam file binary menggunakan `rust-embed`. Hal ini membuat aplikasi Anda menjadi satu file executable tunggal yang portabel, lebih cepat, dan tidak lagi membutuhkan folder `src/resources/views/` di server produksi.
-
----
-
-## 🔄 Hot Reload & Pengembangan
-Gunakan perintah berikut untuk pengembangan yang super cepat dengan auto-refresh browser:
-```bash
-rustbasic serve
-```
-Setiap kali file `.rb.html` di `src/resources/views/` disimpan, browser akan otomatis memuat ulang halaman.
+1.  **Mode Debug (`APP_DEBUG=true`)**: 
+    File HTML root dan berkas CSS/JS dibaca secara langsung dari direktori fisik di komputer lokal Anda. Vite HMR Dev Server (`http://localhost:5173`) menyuplai perubahan kode React Anda secara instan ke layar browser saat Anda menekan tombol simpan (Save) tanpa perlu me-reload halaman browser atau me-rebuild biner Rust.
+2.  **Mode Production (`APP_DEBUG=false`)**: 
+    Seluruh file HTML template (`src/resources/views/`) dan seluruh berkas hasil bundel Vite React (`public/build/`) disematkan (**di-embed**) ke dalam satu file biner executable Rust saat Anda menjalankan perintah `cargo build --release`. 
+    *   Begitu dideploy ke server VPS, berkas-berkas tersebut dilayani langsung dari **RAM memori biner ter-embed**, menghasilkan kecepatan respon secepat kilat!
+    *   **Anda bebas menghapus folder `public/` dan `src/` di disk produksi server!**

@@ -36,9 +36,6 @@ pub async fn csrf_middleware(
             .get("X-CSRF-TOKEN")
             .and_then(|h| h.to_str().ok());
         
-        // Note: Untuk form body, biasanya kita butuh extractor. 
-        // Untuk saat ini kita wajibkan via Header X-CSRF-TOKEN (HTMX style).
-        
         if let Some(h_token) = header_token {
             if h_token != token {
                 return Err(StatusCode::from_u16(419).unwrap());
