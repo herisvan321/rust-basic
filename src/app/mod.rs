@@ -11,3 +11,4 @@ pub mod inertia;
 // Re-export view helpers dari config untuk backward compatibility
 pub use rustbasic_core::view::{render, view};
 pub use inertia::inertia;
+
