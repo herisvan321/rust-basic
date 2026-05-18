@@ -43,21 +43,30 @@ pub fn inertia(req: &Request, component: &str, props: Value) -> Response {
 
 /// Helper untuk mendapatkan HTML tag asset Vite (JS/CSS) secara dinamis
 pub fn get_vite_assets() -> String {
-    let debug = rustbasic_core::Config::load().app_debug;
+    let cfg = rustbasic_core::Config::load();
+    let debug = cfg.app_debug;
 
     if debug {
-        // Mode Development: Hubungkan ke Vite Dev Server (localhost:5173)
-        r#"
+        let port = cfg.vite_port;
+        let host = &cfg.app_host;
+        let display_host = if host == "0.0.0.0" || host.is_empty() { "localhost" } else { host };
+
+        // Mode Development: Hubungkan ke Vite Dev Server kustom host dan port
+        format!(
+            r#"
         <!-- Vite Dev Server Integration -->
          <script type="module">
-          import RefreshRuntime from 'http://localhost:5173/@react-refresh';
+          import RefreshRuntime from 'http://{host}:{port}/@react-refresh';
           RefreshRuntime.injectIntoGlobalHook(window);
-          window.$RefreshReg$ = () => {};
+          window.$RefreshReg$ = () => {{}};
           window.$RefreshSig$ = () => (type) => type;
           window.__vite_plugin_react_preamble_installed__ = true;
         </script>
-        <script type="module" src="http://localhost:5173/src/resources/js/main.jsx"></script>
-        "#.to_string()
+        <script type="module" src="http://{host}:{port}/src/resources/js/main.jsx"></script>
+        "#,
+            host = display_host,
+            port = port
+        )
     } else {
         // Mode Production: Baca manifest.json dari build hasil compile Vite
         let mut manifest_content = String::new();
