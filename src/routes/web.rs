@@ -7,17 +7,5 @@ pub fn router() -> Router<AppState> {
         .route("/", get(welcome_controller::index))
         .route("/about", get(welcome_controller::about))
         .route("/dev", get(welcome_controller::dev_info))
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
         .route("/inline", get(|| async { "Ini rute dalam satu baris!" }))
 }

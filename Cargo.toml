@@ -45,3 +45,7 @@ lto = true
 codegen-units = 1
 panic = "abort"
 
+[patch.crates-io]
+rustbasic-core = { path = "../rustbasic-core" }
+rustbasic-cli = { path = "../rustbasic-cli" }
+
