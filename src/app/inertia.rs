@@ -12,6 +12,32 @@ pub fn inertia(req: &Request, component: &str, props: Value) -> Response {
     // Versi asset (bisa dikonfigurasi untuk deteksi kadaluwarsa aset)
     let version = ""; 
 
+    let errors: std::collections::HashMap<String, String> = req.session.get("errors").unwrap_or_default();
+    req.session.remove("errors");
+
+    let success: Option<String> = req.session.get("success");
+    req.session.remove("success");
+
+    let error: Option<String> = req.session.get("error");
+    req.session.remove("error");
+
+    let warning: Option<String> = req.session.get("warning");
+    req.session.remove("warning");
+
+    let info: Option<String> = req.session.get("info");
+    req.session.remove("info");
+
+    let mut props = props;
+    if let Value::Object(ref mut map) = props {
+        map.insert("errors".to_string(), json!(errors));
+        map.insert("flash".to_string(), json!({
+            "success": success,
+            "error": error,
+            "warning": warning,
+            "info": info
+        }));
+    }
+
     let page_object = json!({
         "component": component,
         "props": props,

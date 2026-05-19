@@ -9,5 +9,15 @@ pub fn router() -> Router<AppState> {
         .route("/dev", get(welcome_controller::dev_info))
         
         
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
         .route("/inline", get(|| async { "Ini rute dalam satu baris!" }))
 }
