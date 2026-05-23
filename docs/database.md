@@ -60,16 +60,23 @@ rustbasic migrate:back
 rustbasic migrate:rollback
 ```
 
-## Contoh File Migrasi (Rust)
+## Contoh File Migrasi (Rust - Blueprint Schema)
 ```rust
+use rustbasic_core::Schema;
+
 async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
-    manager.create_table(
-        Table::create()
-            .table(Users::Table)
-            .col(ColumnDef::new(Users::Id).integer().not_null().auto_increment().primary_key())
-            .col(ColumnDef::new(Users::Name).string().not_null())
-            .to_owned()
-    ).await
+    Schema::create(manager, "users", |table| {
+        table.id();
+        table.string("name").not_null();
+        table.string("email").not_null().unique().index();
+        table.date_time("email_verified_at").nullable();
+        table.string("password").not_null();
+        table.timestamps();
+    }).await
+}
+
+async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
+    Schema::drop(manager, "users").await
 }
 ```
 

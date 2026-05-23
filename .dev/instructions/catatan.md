@@ -1,6 +1,6 @@
-# 📘 Catatan Dokumentasi RustBasic (HTMX Edition)
+# 📘 Catatan Dokumentasi RustBasic (React SPA Edition)
 
-Dokumentasi ini berisi panduan struktur folder, fitur, dan cara penggunaan framework **RustBasic** (Axum bergaya Monolith dengan filosofi HTMX & Pure CSS).
+Dokumentasi ini berisi panduan struktur folder, fitur, dan cara penggunaan framework **RustBasic** (Axum bergaya Monolith dengan integrasi React.js & Inertia.js SPA).
 
 ---
 
@@ -10,16 +10,16 @@ Aplikasi telah dipisahkan menjadi modul-modul kecil untuk skalabilitas tinggi:
 
 ```text
 rustbasic/
-├── database/             # Lokasi database SQLite & SQL migrasi
-├── public/               # File statis (CSS, Gambar)
+├── database/             # Lokasi database SQLite, seeder, & migrasi
+├── public/               # File statis dan assets hasil build Vite
 ├── src/resources/
-│   └── views/            # Template HTML (Minijinja - .rb.html)
-│       └── layouts/      # Layout Utama
+│   ├── js/               # Frontend React SPA (Pages, Components)
+│   └── views/            # Template HTML Root (app.rb.html)
 ├── src/
 │   ├── main.rs           # Entry point (Strict Config & Mandatory .env)
-│   ├── app/              # Folder Inti Aplikasi (Controllers, Middleware)
+│   ├── app/              # Folder Inti Aplikasi (Controllers, Models, Middleware)
 │   ├── config/           # Pusat Konfigurasi (Server, Session, Logging)
-│   └── routes/           # Pengaturan rute
+│   └── routes/           # Pengaturan rute (web.rs)
 ├── storage/              # Penyimpanan File & Log
 └── .env                  # Environment Variables (Wajib Ada)
 ```
@@ -35,56 +35,63 @@ Aplikasi menerapkan standar keamanan produksi:
 - **Dual Logging**: 
     - Terminal: Output berwarna untuk visibilitas instan.
     - File: Log bersih (tanpa kode warna ANSI) di `storage/logs/` untuk audit.
-- **Cache:Clear**: Perintah `cargo rustbasic cache:clear` sekarang memotong (truncate) file log tanpa menghapusnya, menjaga kompatibilitas dengan server yang sedang berjalan.
-- **Flexible Assets & Binary Embedding**: Library HTMX dan File CSS inti dapat ditanam ke dalam file eksekusi (binary) aplikasi untuk performa maksimal. Namun, framework kini juga mendukung penggunaan **CDN eksternal** secara fleksibel, memudahkan integrasi library pihak ketiga tanpa harus meng-host file tersebut secara lokal.
-- **Browser Live Reload**: Menggunakan `tower-livereload` yang hanya aktif jika `APP_DEBUG=true`. Fitur ini memungkinkan browser melakukan refresh otomatis setiap kali server melakukan restart atau ada perubahan pada file template/aset (aktif saat `cargo rustbasic serve`).
-- **Source Minification**: Output HTML secara default diminifikasi oleh server (spasi/komentar dihapus) untuk melindungi struktur source code.
-- **Hybrid Embedding (rust-embed)**: Seluruh folder template (`src/resources/views`) kini di-embed ke dalam binary saat kompilasi rilis. Saat pengembangan (debug), aplikasi tetap membaca dari disk untuk mendukung *Live Reload*.
-- **Modern Premium UI**: Framework kini mewajibkan standar desain tinggi (Split-Screen, Glassmorphism) untuk semua modul inti seperti Autentikasi dan Dashboard.
-
-- **Hybrid API & Web Routing**: Pemisahan rute antara `web.rs` (Stateful/Session) dan `api.rs` (Stateless/CORS). Rute API secara otomatis melewati proteksi CSRF agar bisa diakses oleh client eksternal.
+- **Cache:Clear**: Perintah `rustbasic cache:clear` sekarang memotong (truncate) file log tanpa menghapusnya, menjaga kompatibilitas dengan server yang sedang berjalan.
+- **Asset serving & Binary Embedding**: Seluruh file template HTML (`.rb.html`) dan React compiled assets terkompilasi (`public/build/`) disematkan langsung ke dalam satu file biner Rust saat rilis produksi.
+- **Browser Live Reload**: Menggunakan `tower-livereload` yang hanya aktif jika `APP_DEBUG=true` untuk sinkronisasi otomatis.
+- **Modern Premium UI**: Estetika modern (Glassmorphism, Tema Gelap/Terang, Bento Grid) dengan reaktivitas SPA dari React.
+- **Hybrid API & Web Routing**: Pemisahan rute antara `web.rs` (Stateful/Session/Inertia) dan `api.rs` (Stateless/CORS).
 
 ---
 
-## 🎨 3. Frontend & UI (HTMX & Pure CSS Philosophy)
+## 🎨 3. Frontend & UI (React & Inertia.js SPA)
 
-RustBasic meninggalkan library JavaScript berat (seperti Alpine.js) dan beralih ke **Murni HTMX + CSS**:
+RustBasic mengintegrasikan React.js + Inertia.js untuk pengalaman SPA monolith yang mulus:
 
-- **HTML Murni & Jinja**: Menggunakan ekstensi `.rb.html`. Tidak menggunakan sistem komponen reaktif yang ajaib, murni HTML dengan kelas utilitas.
-- **Floating Alerts**: Notifikasi tidak lagi mendorong konten, melainkan melayang di pojok kanan atas dengan animasi halus.
-- **SPA Experience**: Navigasi instan menggunakan `hx-boost` dan `hx-indicator` untuk feedback visual.
-- **CORS Support**: API sekarang mendukung CORS secara bawaan (konfigurasi di `src/app/http/middleware/cors.rs`), memungkinkan integrasi dengan frontend modern (React/Next.js/Vue).
+- **React Page Components**: Dibuat di `src/resources/js/Pages/` menggunakan `.jsx` dan Tailwind CSS.
+- **Inertia Link**: Navigasi bebas refresh halaman penuh menggunakan `<Link href="...">` dari `@inertiajs/react`.
+- **Form State Handling**: Menggunakan hook reaktif `useForm` dari Inertia untuk handling form submission, validasi error, dan state loading.
+- **Floating Toasts**: Notifikasi melayang dengan transisi visual yang responsif.
 
 ---
 
-## 🗄️ 4. Database & Time Management
+## 🗄️ 4. Database & Migration Engine (Blueprint Schema)
 
 - **Multi-Database**: Mendukung SQLite dan MySQL via Sea-ORM.
-- **RustBasicSessionStore**: Menyimpan IP Address untuk setiap sesi guna keamanan ekstra.
-- **Timezone Aware**: Semua fungsi waktu merujuk pada `APP_TIMEZONE` di `.env`.
-- **Intelligent Migrations**: Perintah `make:migration:add` secara otomatis mendeteksi pola penambahan kolom dan menghasilkan template `ALTER TABLE`.
+- **Blueprint Schema & Blueprint**: Mendukung penulisan migrasi yang super simpel dan elegan:
+  ```rust
+  Schema::create(manager, "users", |table| {
+      table.id();
+      table.string("name").not_null();
+      table.string("email").not_null().unique().index();
+      table.date_time("email_verified_at").nullable();
+      table.string("password").not_null();
+      table.timestamps();
+  }).await
+  ```
+- **Lengkap dengan Fitur Relasi & Tipe Data**: Mendukung `uuid()`, `primary_key()`, `foreign()` (cascade, restrict, dll), `index()`, `json()`, `json_binary()`, `float()`, `double()`, dll.
+- **Database Seeding**: Mengisi database secara modular dengan `rustbasic db:seed` dan mendaftarkan seeder di `src/app/seeder.rs`.
 
 ---
 
 ## 🚀 5. Perintah Pengembangan (CLI Standalone)
 
-RustBasic kini menggunakan binary mandiri `rustbasic`. Anda tidak perlu lagi menggunakan `cargo rustbasic`.
+RustBasic menggunakan binary mandiri `rustbasic`.
 
 ```bash
 rustbasic new nama_app        # Membuat project baru dari template resmi
-rustbasic serve               # Menjalankan server dengan Hot-Reload
+rustbasic serve               # Menjalankan server backend Axum dengan Hot-Reload
+npm run dev                   # Menjalankan Vite dev server untuk React HMR
 rustbasic key:generate        # Membuat APP_KEY baru di file .env
 
 ## Scaffolding (Generator Kode)
 rustbasic make:controller <Name>      # Membuat Controller baru
 rustbasic make:model <Name> -m        # Membuat Model & Migration
-rustbasic make:migration <Name>       # Membuat file migrasi (Create Table)
-rustbasic make:migration:add <Col> <Tab> # Membuat migrasi tambah kolom (Alter Table)
+rustbasic make:migration <Name>       # Membuat file migrasi baru
 rustbasic make:seeder <Name>          # Membuat Seeder baru
 rustbasic make:middleware <Name>      # Membuat Middleware baru
-rustbasic make:auth                   # Scaffold sistem Login/Register/Dashboard
+rustbasic make:auth                   # Scaffold sistem Login/Register/Dashboard (Breeze)
 
-## Database & Migrasi (Delegasi ke Project Lokal)
+## Database & Migrasi
 rustbasic migrate                     # Jalankan migrasi yang belum dieksekusi
 rustbasic migrate:refresh             # Reset semua dan jalankan ulang
 rustbasic migrate:rollback            # Rollback langkah terakhir
@@ -93,9 +100,4 @@ rustbasic db:seed                     # Jalankan seeder database
 
 ---
 
-## 🏛️ 6. Arsitektur Delegasi
-Perintah database (`migrate`, `seed`) sekarang dijalankan melalui project lokal itu sendiri. CLI Global hanya bertindak sebagai "jembatan" yang memanggil `cargo run -- <command>`. Hal ini memastikan versi skema database selalu sinkron dengan kode project yang sedang Anda kembangkan.
-
----
-
-_Dokumentasi ini diperbarui pada Mei 2026 mencerminkan Standalone CLI Architecture, Intelligent Migrations, dan API CORS support._
+_Dokumentasi ini diperbarui pada Mei 2026 mencerminkan React SPA Edition, Standalone CLI, dan Blueprint Migration Schema._

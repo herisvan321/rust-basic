@@ -1,29 +1,21 @@
-# 🦾 AI Action Center: RustBasic Framework
-
-prompt
-pastikan perpindah antar halaman tanpa reload/refresh menggunakan htmx, saya ingin berpindah antar halaman tanpa ada reload/refresh, 
-
----
+# 🦾 AI Action Center: RustBasic Framework (React SPA Edition)
 
 ## 📂 Struktur Folder (Modular & Clean)
 
 Aplikasi telah dipisahkan menjadi modul-modul kecil untuk skalabilitas tinggi:
-csrf protection pada htmx dengan menggunakan cargo rustbasic, untuk input type=csrf wajib diubah menjadi token htmx
 
 ```text
 rustbasic/
-├── database/             # Lokasi database SQLite & SQL migrasi
-├── public/               # File statis (CSS, Gambar)
+├── database/             # Lokasi database SQLite, seeder, & migrasi
+├── public/               # File statis dan assets hasil build Vite
 ├── src/resources/
-│   └── css/              # CSS files
-│   └── js/               # JS files
-│   └── views/            # Template .rb.html (HTML + Minijinja)
-│       └── layouts/      # Layout utama (app.rb.html)
+│   ├── js/               # Frontend React SPA (Pages, Components)
+│   └── views/            # Template HTML Root (app.rb.html)
 ├── src/
 │   ├── main.rs           # Entry point (Strict Config & Mandatory .env)
 │   ├── app/              # Folder Inti Aplikasi (Controllers, Models, Middleware)
-│   ├── config/           # Pusat Konfigurasi (Server, Session, View Engine)
-│   └── routes/           # Pengaturan rute
+│   ├── config/           # Pusat Konfigurasi (Server, Session, Logging)
+│   └── routes/           # Pengaturan rute (web.rs)
 ├── storage/              # Penyimpanan File & Log
 ├── docs/                 # Dokumentasi Lengkap
 └── .env                  # Environment Variables (Wajib Ada)
@@ -31,13 +23,13 @@ rustbasic/
 
 ---
 
-## 🛡️ Standar Penulisan Template (WAJIB)
+## 🛡️ Standar Penulisan React SPA (WAJIB)
 AI harus selalu menggunakan standar ini saat memodifikasi tampilan:
-1. **Ekstensi**: Selalu gunakan `.rb.html`.
-2. **Sintaks**: Gunakan tag HTML standar dan tag Minijinja (`{{ variable }}`, `{% block content %}`). Sistem RSX telah **dihapus**.
-3. **Modern UI**: Wajib menggunakan estetika modern (Split-Screen, Glassmorphism, CSS Mesh Gradients) seperti pada modul Auth.
-4. **Hybrid Embedding**: Memahami bahwa template di-embed ke binary saat *Release* (via `rust-embed`) tapi tetap bisa di-edit secara live saat *Debug*.
-5. **Source Protection**: Output HTML otomatis diminifikasi oleh server.
+1. **Frontend (React SPA)**: WAJIB menggunakan komponen React fungsional (`.jsx`) di bawah `src/resources/js/Pages/` dan disajikan via `inertia(req, component, props)`. DILARANG menggunakan rendering template HTML murni banyak-halaman (MPA).
+2. **Interaktivitas**: WAJIB menggunakan React Hooks (`useState`, `useEffect`) dan Inertia hooks (`useForm`, `usePage`). DILARANG keras menambahkan script JQuery, HTMX, atau pustaka manipulasi DOM luar secara acak.
+3. **Styling**: Wajib menggunakan utility class Tailwind CSS dengan estetika modern premium (Glassmorphism, Bento card, glowing orbs, dark mode default).
+4. **Hybrid Embedding**: Memahami bahwa seluruh HTML templates dan React compiled assets terkompilasi (`public/build`) disematkan (di-embed) langsung ke dalam satu file biner Rust saat rilis produksi.
+5. **Rute Internal**: Navigasi antar halaman internal WAJIB menggunakan `<Link>` dari `@inertiajs/react` agar SPA tidak mengalami reload halaman secara penuh.
 
 ---
 
@@ -46,27 +38,21 @@ AI harus selalu menggunakan standar ini saat memodifikasi tampilan:
 Panduan penggunaan alat baris perintah (**CLI**) lengkap untuk framework RustBasic.
 
 ## 🚀 Cara Menjalankan
-Gunakan perintah `cargo rustbasic` diikuti dengan sub-perintah yang diinginkan:
+Gunakan perintah `rustbasic` diikuti dengan sub-perintah yang diinginkan:
 
 ```bash
-cargo rustbasic <perintah> [argumen]
-```
-
-Atau gunakan alias langsung jika sudah dikonfigurasi:
-```bash
-rb <perintah> [argumen]
+rustbasic <perintah> [argumen]
 ```
 
 ---
 
 ## ⚡ Pengembangan (Shortcuts)
 
-### `cargo rustbasic serve`
-Menjalankan server dalam mode pengembangan:
-- **Template Rendering**: Mengolah `.rb.html` dengan Minijinja.
-- **Auto-Watch**: Memantau perubahan pada `src/`, `src/resources/` (template), dan file `.env`.
-- **Live Reload**: Otomatis merestart server dan me-refresh browser.
-- **Contoh**: `cargo rustbasic serve`
+### `rustbasic serve`
+Menjalankan server backend Axum dalam mode pengembangan (Hot-Reload).
+
+### `npm run dev`
+Menjalankan Vite dev server untuk instant Hot Module Replacement (HMR) saat development lokal.
 
 ---
 
@@ -76,37 +62,34 @@ Menjalankan server dalam mode pengembangan:
 Membuat file Entity Sea-ORM baru di folder `src/app/models/`.
 - **Argumen**: `<NamaModel>`
 - **Opsi**: `-m` (Otomatis buat file migrasi terkait)
-- **Contoh**: `cargo rustbasic make:model Product -m`
+- **Contoh**: `rustbasic make:model Product -m`
 
 ### `make:migration`
-Membuat file migrasi Rust (Sea-ORM) baru dengan timestamp otomatis di `database/migrations/`.
+Membuat file migrasi Rust baru dengan timestamp otomatis di `database/migrations/` menggunakan helper `Schema` & `Blueprint`.
 - **Argumen**: `<NamaMigration>`
-- **Contoh**: `cargo rustbasic make:migration add_price_to_products`
+- **Contoh**: `rustbasic make:migration create_products`
 
 ### `make:controller`
-Membuat Controller Axum baru di `src/app/http/controllers/` dan otomatis mendaftarkannya di `mod.rs`.
+Membuat Controller Axum baru di `src/app/http/controllers/`.
 - **Argumen**: `<NamaController>`
-- **Contoh**: `cargo rustbasic make:controller Product`
+- **Contoh**: `rustbasic make:controller ProductController`
 
 ### `make:middleware`
-Membuat Middleware Axum baru di `src/app/http/middleware/` dan otomatis mendaftarkannya di `mod.rs`.
+Membuat Middleware Axum baru di `src/app/http/middleware/`.
 - **Argumen**: `<NamaMiddleware>`
-- **Contoh**: `cargo rustbasic make:middleware CheckRole`
+- **Contoh**: `rustbasic make:middleware CheckRole`
 
 ---
 
 ## 🔐 2. Authentication Scaffolding
 
-### `auth` / `make:auth`
-Membangun sistem autentikasi lengkap secara otomatis.
-- **Fitur**: Login, Register, Forgot Password, Reset, dan Dashboard premium.
-- **UI**: Desain Modern Split-Screen dengan Floating Toast Notifications.
-- **Logic**: Mengintegrasikan Sea-ORM, Bcrypt, dan validasi secara otomatis.
-- **Contoh**: `cargo rustbasic auth`
+### `make:auth`
+Memasang sistem autentikasi lengkap (Breeze) secara otomatis berbasis React & Inertia SPA.
+- **Contoh**: `rustbasic make:auth`
 
-### `auth back` / `auth:back`
+### `auth:back`
 Menghapus seluruh sistem autentikasi dan mengembalikan project ke kondisi bersih.
-- **Contoh**: `cargo rustbasic auth back`
+- **Contoh**: `rustbasic auth:back`
 
 ---
 
@@ -114,23 +97,23 @@ Menghapus seluruh sistem autentikasi dan mengembalikan project ke kondisi bersih
 
 ### `migrate`
 Menjalankan seluruh file migrasi yang ada ke database (SQLite/MySQL).
-- **Contoh**: `cargo rustbasic migrate`
+- **Contoh**: `rustbasic migrate`
 
 ### `migrate:refresh`
 Melakukan rollback seluruh migrasi dan menjalankannya ulang dari awal. Sangat berguna saat fase development untuk mereset struktur tabel.
-- **Contoh**: `cargo rustbasic migrate:refresh`
+- **Contoh**: `rustbasic migrate:refresh`
 
 ### `migrate:back` / `migrate:rollback`
-Membatalkan migrasi terakhir (rollback 1 step).
-- **Contoh**: `cargo rustbasic migrate:back`
+Pembatalan migrasi terakhir (rollback 1 step).
+- **Contoh**: `rustbasic migrate:back`
 
 ### `cache:clear`
-Membersihkan sistem secara menyeluruh (log dan data sesi).
-- **Contoh**: `cargo rustbasic cache:clear`
+Membersihkan log dan data sesi.
+- **Contoh**: `rustbasic cache:clear`
     
 ### `key:generate`
-Membuat kunci aplikasi baru (`APP_KEY`) yang aman.
-- **Contoh**: `cargo rustbasic key:generate`
+Membuat kunci aplikasi baru (`APP_KEY`) yang aman di file `.env`.
+- **Contoh**: `rustbasic key:generate`
 
 ---
 
@@ -140,19 +123,8 @@ Membuat kunci aplikasi baru (`APP_KEY`) yang aman.
 Menampilkan tabel daftar rute yang terdaftar di aplikasi (Method, Path, dan Handler).
 
 ### `check:security`
-Melakukan audit keamanan aplikasi (CSRF, Bcrypt, XSS protection).
-
-### `check:update`
-Mengecek pembaruan dependencies di crates.io.
+Melakukan audit keamanan aplikasi.
 
 ---
 
-## 🚀 5. Build Manager
-
-### `build`
-Menu interaktif untuk kompilasi aplikasi ke berbagai sistem operasi (Cross-build).
-- **Contoh**: `cargo rustbasic build`
-
----
-
-_Dokumentasi ini adalah instruksi operasional untuk AI agar menjaga integritas RustBasic Framework._
+_Dokumentasi ini adalah instruksi operasional untuk AI agar menjaga integritas RustBasic Framework SPA Edition._
