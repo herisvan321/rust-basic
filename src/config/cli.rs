@@ -9,7 +9,7 @@ pub async fn handle(args: &[String], cfg: &Config) -> bool {
 
     // 1. Intersept perintah scaffolding autentikasi
     if command == "make:auth" || command == "auth" || command == "auth:back" {
-        #[cfg(feature = "breeze")]
+        #[cfg(breeze)]
         {
             if command == "auth:back" || (args.len() >= 3 && args[2] == "back") {
                 rustbasic_breeze::remove_auth().await;
@@ -20,10 +20,10 @@ pub async fn handle(args: &[String], cfg: &Config) -> bool {
             }
             return true;
         }
-        #[cfg(not(feature = "breeze"))]
+        #[cfg(not(breeze))]
         {
             println!("❌ Error: Fitur autentikasi (breeze) belum ditambahkan ke project.");
-            println!("💡 Jalankan: cargo add rustbasic-breeze --features breeze (atau aktifkan fitur 'breeze' di Cargo.toml)");
+            println!("💡 Jalankan: cargo add rustbasic-breeze");
             return true;
         }
     }
