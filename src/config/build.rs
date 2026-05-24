@@ -56,8 +56,13 @@ fn main() {
     }
 
     // Automatically register and enable cfg for each detected package
-    for suffix in detected_packages {
+    for suffix in &detected_packages {
         println!("cargo:rustc-check-cfg=cfg({})", suffix);
         println!("cargo:rustc-cfg={}", suffix);
+    }
+
+    // Always declare known optional package cfg names to avoid compiler warnings
+    if !detected_packages.contains("breeze") {
+        println!("cargo:rustc-check-cfg=cfg(breeze)");
     }
 }

@@ -7,27 +7,6 @@ pub async fn handle(args: &[String], cfg: &Config) -> bool {
 
     let command = args[1].as_str();
 
-    // 1. Intersept perintah scaffolding autentikasi
-    if command == "make:auth" || command == "auth" || command == "auth:back" {
-        #[cfg(breeze)]
-        {
-            if command == "auth:back" || (args.len() >= 3 && args[2] == "back") {
-                rustbasic_breeze::remove_auth().await;
-                println!("\n✅ Scaffolding autentikasi berhasil dihapus.");
-            } else {
-                rustbasic_breeze::make_auth().await;
-                println!("\n✅ Scaffolding autentikasi berhasil dibuat.");
-            }
-            return true;
-        }
-        #[cfg(not(breeze))]
-        {
-            println!("❌ Error: Fitur autentikasi (breeze) belum ditambahkan ke project.");
-            println!("💡 Jalankan: cargo add rustbasic-breeze");
-            return true;
-        }
-    }
-
     // Daftar perintah yang ditangani oleh CLI lokal project
     let is_migration_cmd = command.starts_with("migrate") || command == "db:seed";
     let is_storage_cmd = command == "storage:link";

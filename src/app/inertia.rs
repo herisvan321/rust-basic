@@ -52,6 +52,7 @@ pub fn inertia(req: &Request, component: &str, props: Value) -> Response {
             .status(StatusCode::OK)
             .header(header::CONTENT_TYPE, "application/json")
             .header("X-Inertia", "true")
+            .header(header::VARY, "X-Inertia")
             .body(rustbasic_core::axum::body::Body::from(body))
             .unwrap()
             .into_response()
@@ -63,7 +64,12 @@ pub fn inertia(req: &Request, component: &str, props: Value) -> Response {
             vite_assets => vite_assets,
         };
         
-        crate::app::view(req, "app.rb.html", ctx)
+        let mut response = crate::app::view(req, "app.rb.html", ctx).into_response();
+        response.headers_mut().insert(
+            header::VARY,
+            rustbasic_core::axum::http::HeaderValue::from_static("X-Inertia"),
+        );
+        response
     }
 }
 

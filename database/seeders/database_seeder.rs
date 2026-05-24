@@ -1,21 +1,17 @@
-use rustbasic_core::sea_orm::{DatabaseConnection, Set, ActiveModelTrait, EntityTrait, ColumnTrait, QueryFilter};
-use rustbasic_core::seeder::SeederTrait;
-use crate::app::models::users;
+use rustbasic_core::seeder;
+use rustbasic_core::sea_orm::{EntityTrait, ColumnTrait, QueryFilter};
+use crate::app::models::User;
 use rustbasic_core::bcrypt::{hash, DEFAULT_COST};
 use rustbasic_core::colored::Colorize;
+use rustbasic_core::serde_json;
 
-use rustbasic_core::async_trait;
-
-pub struct DatabaseSeeder;
-
-#[async_trait]
-impl SeederTrait for DatabaseSeeder {
-    async fn run(&self, db: &DatabaseConnection) -> Result<(), rustbasic_core::sea_orm::DbErr> {
+seeder! {
+    run(db) {
         println!("   {} Sedang memproses DatabaseSeeder...", "⏳".blue());
         
         // 1. Cek apakah user admin sudah ada
-        let admin_exists = users::Entity::find()
-            .filter(users::Column::Email.eq("admin@rustbasic.com"))
+        let admin_exists = User::find()
+            .filter(crate::app::models::users::Column::Email.eq("admin@rustbasic.com"))
             .one(db)
             .await?
             .is_some();
@@ -23,14 +19,12 @@ impl SeederTrait for DatabaseSeeder {
         if !admin_exists {
             let hashed_password = hash("password123", DEFAULT_COST).unwrap();
             
-            let admin = users::ActiveModel {
-                name: Set("Administrator".to_owned()),
-                email: Set("admin@rustbasic.com".to_owned()),
-                password: Set(hashed_password),
-                ..Default::default()
-            };
+            User::create(db, serde_json::json!({
+                "name": "Administrator",
+                "email": "admin@rustbasic.com",
+                "password": hashed_password,
+            })).await?;
 
-            admin.insert(db).await?;
             println!("   {} User admin default berhasil dibuat (admin@rustbasic.com / password123)", "✅".green());
         } else {
             println!("   {} User admin sudah ada, melewati...", "⏩".yellow());
