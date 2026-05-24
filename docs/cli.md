@@ -21,7 +21,7 @@ rustbasic make:controller BlogController
 
 ## ⚡ Pengembangan (Shortcuts)
 
-### `rustbasic serve` atau `rustbasic serve`
+### `rustbasic serve`
 Menjalankan server dalam mode pengembangan dengan fitur:
 - **Auto-Watch**: Memantau perubahan pada kode Rust, template, dan konfigurasi.
 - **Live Reload**: Otomatis me-refresh browser saat Anda menyimpan perubahan.
@@ -40,18 +40,15 @@ Membuat Entity Sea-ORM baru di `src/app/models/`.
 
 ### `make:middleware`
 Membuat Middleware Axum baru di `src/app/http/middleware/`.
+- Perintah: `rustbasic make:middleware NamaMiddleware`
+
+### `make:seeder`
+Membuat file seeder baru di `database/seeders/`.
+- Perintah: `rustbasic make:seeder NamaSeeder`
 
 ---
 
-## 🔐 2. Authentication Scaffolding
-
-### `make:auth`
-Memasang sistem autentikasi lengkap dengan standar visual premium.
-- Perintah: `rustbasic make:auth`
-
----
-
-## 🗄️ 3. Database & Cache
+## 🗄️ 2. Database & Cache
 
 ### `migrate`
 Menjalankan semua migrasi database yang belum dieksekusi.
@@ -66,19 +63,38 @@ Membatalkan (rollback) satu langkah migrasi terakhir.
 - Perintah: `rustbasic migrate:back`
 
 ### `db:seed`
-Menjalankan seluruh database seeder yang terdaftar di `src/app/seeder.rs`.
+Menjalankan seluruh database seeder yang terdaftar di `database/seeders/mod.rs`.
 - Perintah: `rustbasic db:seed`
-
-### `make:seeder`
-Membuat file seeder baru di `database/seeders/`.
 
 ---
 
-## 🔍 4. Monitoring
+## 🔐 3. Authentication Scaffolding (Breeze)
+Pemasangan sistem autentikasi lengkap kini terintegrasi secara otomatis. Anda hanya perlu menambahkan dependensi `rustbasic-breeze` di `Cargo.toml`. Silakan baca [Panduan Autentikasi](auth_cli.md) untuk detail selengkapnya.
+
+---
+
+## 🔍 4. Monitoring & Utilitas
 
 ### `route:list`
 Menampilkan tabel daftar rute yang aktif di aplikasi Anda.
 - Perintah: `rustbasic route:list`
 
+### `key:generate`
+Membuat application key (`APP_KEY`) baru di berkas `.env`.
+- Perintah: `rustbasic key:generate`
+
+### `cache:clear`
+Membersihkan logs dan database session cache.
+- Perintah: `rustbasic cache:clear`
+
+### `storage:link`
+Menghubungkan folder storage ke folder public agar berkas dapat diakses publik.
+- Perintah: `rustbasic storage:link`
+
 ### `check:security`
-Menjalankan audit pengaturan keamanan sistem.
+Menjalankan audit pengaturan keamanan dependency proyek.
+- Perintah: `rustbasic check:security`
+
+### `check:update`
+Memeriksa pembaruan dependency framework di crates.io.
+- Perintah: `rustbasic check:update`

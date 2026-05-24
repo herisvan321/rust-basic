@@ -1,60 +1,57 @@
-# 🔐 RustBasic Authentication CLI
+# 🔐 RustBasic Authentication Scaffolding (Breeze)
 
-Dokumentasi fitur *scaffolding* autentikasi otomatis pada framework RustBasic.
+Dokumentasi fitur *scaffolding* autentikasi otomatis pada framework RustBasic menggunakan paket **Breeze**.
 
 ---
 
-## 🚀 Perintah Utama
+## 🚀 Pemasangan Otomatis (Automatic Installation)
 
-### 1. Memasang Autentikasi (`auth`)
-Membangun sistem login, registrasi, forgot password, reset password, dan dashboard secara otomatis dengan desain premium.
+Autentikasi di RustBasic tidak lagi dipicu secara manual via perintah CLI khusus, melainkan dipasang secara otomatis saat aplikasi dijalankan ketika paket **`rustbasic-breeze`** ditambahkan ke dependensi proyek Anda.
 
-```bash
-rustbasic auth
-```
+### Langkah-langkah Pemasangan:
 
-**Fitur Unggulan:**
-- **Modern Split-Screen UI**: Desain antarmuka kelas atas dengan estetika *Glassmorphism* dan *Mesh Gradient*.
-- **React & Inertia SPA**: Membangun Single Page Application menggunakan React.js dan Inertia.js (tanpa reload halaman).
-- **Inertia.js useForm**: Penanganan state form reaktif, transisi halus, dan penanganan error instan.
-- **Floating Toasts**: Sistem pesan sukses/error melayang dengan animasi CSS otomatis (tanpa JS tambahan).
-- **Secure by Default**: Terproteksi oleh `csrf_middleware` dan validasi *server-side* yang kuat.
+1. **Tambahkan Dependensi**
+   Buka file `Cargo.toml` proyek Anda, lalu tambahkan `rustbasic-breeze` ke dalam bagian `[dependencies]`:
+   ```toml
+   [dependencies]
+   rustbasic-core = "0.1"
+   rustbasic-breeze = "0.0"
+   ```
+
+2. **Jalankan Proyek**
+   Jalankan server aplikasi Anda menggunakan Cargo atau CLI:
+   ```bash
+   rustbasic serve
+   # atau
+   cargo run
+   ```
+
+3. **Inisialisasi Otomatis**
+   Sistem startup RustBasic akan mendeteksi kehadiran paket Breeze dan secara otomatis membangun seluruh sistem autentikasi (Login, Registrasi, Forgot Password, Reset Password, Dashboard, Middleware, Model, Rute, dan Migrasi Database).
 
 ---
 
 ## 📂 Struktur File Tergenerasi
 
-Setelah menjalankan `auth`, file-file berikut akan dibuat:
+Setelah proses inisialisasi sukses, berkas-berkas berikut akan dibuat secara otomatis di proyek Anda:
 
 | Path | Keterangan |
 | :--- | :--- |
-| `src/resources/js/Pages/Auth/Login.jsx` | Halaman login React dengan desain split-screen modern. |
-| `src/resources/js/Pages/Auth/Register.jsx` | Halaman registrasi React dengan state reaktif `useForm`. |
-| `src/resources/js/Pages/Auth/Forgot.jsx` | Alur React untuk pemulihan password. |
-| `src/resources/js/Pages/Auth/Reset.jsx` | Alur React untuk reset password. |
-| `src/resources/js/Pages/Dashboard.jsx` | Dashboard administrator premium berbasis React SPA. |
-| `src/app/http/controllers/auth/auth_controller.rs` | Logika backend autentikasi modern berbasis JSON & Inertia. |
-| `src/resources/views/emails/reset.rb.html` | Template email reset password Minijinja. |
+| `src/app/models/password_resets.rs` | Model database untuk token reset password menggunakan macro `model!`. |
+| `src/app/http/controllers/auth/auth_controller.rs` | Kontroller backend untuk logika autentikasi (Inertia & JSON API). |
+| `src/app/http/controllers/dashboard_controller.rs` | Kontroller backend untuk halaman dashboard premium. |
+| `src/app/http/middleware/auth.rs` | Middleware pelindung rute autentikasi. |
+| `src/routes/auth.rs` | Registrasi rute web khusus autentikasi. |
+| `database/migrations/m2026xxxxxx_create_password_resets_table.rs` | Migrasi tabel token reset password database. |
+| `src/resources/js/Pages/Auth/` | Folder berisi halaman React SPA (Login, Register, ForgotPassword, ResetPassword). |
+| `src/resources/js/Pages/Dashboard.jsx` | Tampilan dashboard React SPA dengan gaya premium. |
 
 ---
 
-### 2. Menghapus Autentikasi (`auth:back`)
-Jika Anda ingin membersihkan alur auth dan memulai dari awal:
+## 🔒 Fitur Keamanan & UX Unggulan
 
-```bash
-rustbasic auth back
-```
-Atau:
-```bash
-rustbasic auth:back
-```
-
-**Proses Pembersihan:**
-- Menghapus seluruh file rute, controller, middleware, model, dan view yang terkait dengan autentikasi.
-- Mengembalikan konfigurasi `mod.rs` ke keadaan semula.
-- **Pembersihan Database**: Secara otomatis menghapus catatan migrasi dari tabel `seaql_migrations` sehingga tidak terjadi konflik saat Anda memasang ulang autentikasi nanti.
-
----
-
-## 🛠️ Kustomisasi
-Anda dapat memodifikasi logika di `src/app/http/controllers/auth/auth_controller.rs` dan memperbarui tampilan langsung di file `.rb.html` terkait. Setiap perubahan pada template akan memicu auto-refresh di browser jika `rustbasic serve` sedang berjalan.
+* **split-screen UI Premium**: Menggunakan estetika modern dengan efek *Glassmorphism* dan *Mesh Gradient*.
+* **React & Inertia SPA**: Transisi halaman instan tanpa *full page reload*.
+* **Inertia useForm**: Validasi input instan dan penanganan error langsung dari backend.
+* **Mass-assignment Safe**: Pendaftaran akun dan manajemen token menggunakan `User::create` dan `PasswordReset::create` yang divalidasi secara kuat.
+* **CSRF & Session Protection**: Dilindungi sepenuhnya oleh token CSRF dan database session driver bawaan.

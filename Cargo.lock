@@ -2508,32 +2508,15 @@ name = "rustbasic"
 version = "0.1.9"
 dependencies = [
  "rust-embed",
- "rustbasic-breeze",
  "rustbasic-core",
  "sea-orm",
- "sea-orm-migration",
  "serde",
- "tokio",
- "validator",
-]
-
-[[package]]
-name = "rustbasic-breeze"
-version = "0.0.7"
-dependencies = [
- "async-trait",
- "chrono",
- "colored",
- "regex",
- "sea-orm",
- "serde",
- "serde_json",
  "tokio",
 ]
 
 [[package]]
 name = "rustbasic-core"
-version = "0.1.16"
+version = "0.1.17"
 dependencies = [
  "async-trait",
  "axum",
