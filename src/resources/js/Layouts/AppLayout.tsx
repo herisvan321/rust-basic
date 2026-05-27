@@ -345,9 +345,7 @@ function AppLayoutInner({ children }: AppLayoutProps) {
             >
               GitHub
             </a>
-            <span style={{ color: 'rgba(232,82,14,0.15)' }}>|</span>
-            <span style={{ fontSize: '0.8rem', color: isDark ? '#555' : '#888' }}>v0.1.9</span>
-          </div>
+            </div>
         </div>
       </footer>
 
