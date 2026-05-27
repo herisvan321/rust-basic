@@ -1,73 +1,73 @@
-# 🏛️ RustBasic Architecture (SPA Edition)
+# 🏛️ Panduan Arsitektur Monolith SPA
 
-Dokumen ini membedah arsitektur dasar dari framework **RustBasic Modern SPA** dan bagaimana komponen-komponennya berinteraksi secara mulus antara backend Rust (Axum) dan frontend JavaScript (React.js + Inertia.js).
-
----
-
-## 1. Delegasi CLI & Starter Kit
-RustBasic memisahkan tanggung jawab antara alat global dan kode lokal proyek untuk menjaga efisiensi:
-*   **Global CLI (`rustbasic-cli`)**: Dikelola secara global (terinstal via `cargo install`). CLI global bertugas memicu pembuatan proyek baru (`new`), perakitan modul baru, dan pendelegasian perintah lokal.
-*   **Local CLI (`src/main.rs` & `rustbasic-core`)**: Perintah CLI lokal seperti migrasi database (`migrate`), refresh skema (`migrate:refresh`), dan seeder data (`db:seed`) dijalankan langsung oleh kode proyek lokal melalui pendelegasian wrapper cargo.
+## 📝 Kata Pengantar
+Selamat datang di panduan **Arsitektur Monolith SPA RustBasic**. Dokumentasi ini dirancang khusus untuk memandu pengembang memahami bagaimana server Rust (backend) dapat terintegrasi secara mulus dengan React.js (frontend) melalui jembatan protokol Inertia.js. Melalui panduan ini, Anda akan mempelajari siklus hidup request, proses hidrasi awal, dan teknik pengiriman data global secara instan.
 
 ---
 
-## 2. Arsitektur Monolith SPA Terpadu
+## 🛠️ Script Contoh
 
-Berbeda dengan arsitektur web tradisional yang memisahkan frontend (port 3000) dan backend API (port 8000), RustBasic menyatukan keduanya menjadi **satu kesatuan monolith utuh (Single Port & Single Binary Deployment)**:
-
-```mermaid
-graph TD
-    Browser[Browser Client]
-    Vite[Vite Dev Server HMR - Port 5173]
-    Axum[Axum Server Backend - Port 4000]
-    Inertia[Jembatan Inertia.js Protocol]
-    RAM[Biner Executable RAM]
-
-    Browser -- 1. Request Halaman Awal --> Axum
-    Axum -- 2. Sajikan app.rb.html & Hidrasi Awal --> Browser
-    Browser -- 3. Navigasi SPA Link --> Inertia
-    Inertia -- 4. Request AJAX X-Inertia --> Axum
-    Axum -- 5. Kembalikan Data JSON Mentah --> Inertia
-    Inertia -- 6. Tukar Komponen & Props React --> Browser
-
-    style Browser fill:#1e293b,stroke:#3b82f6,stroke-width:2px,color:#fff
-    style Vite fill:#4c1d95,stroke:#8b5cf6,stroke-width:1px,color:#fff
-    style Axum fill:#1c1917,stroke:#f97316,stroke-width:2px,color:#fff
-    style Inertia fill:#022c22,stroke:#10b981,stroke-width:1px,color:#fff
-```
-
-1.  **Hydration Awal**: Saat pengguna pertama kali membuka situs web, Axum merender template root [`app.rb.html`](file:///Users/herisvanhendra/Desktop/Desktop%20new/project/belajar%20rust/rustbasic/src/resources/views/app.rb.html) dengan objek JSON halaman awal yang disimpan pada atribut `'data-page'`. React SPA kemudian bangkit dan menghidrasi DOM browser secara instan.
-2.  **Navigasi SPA Tanpa Reload**: Ketika pengguna menavigasi rute (misal mengklik `<Link href="/about">`), Inertia memotong request standar dan mengirim request AJAX khusus. Backend Axum secara cerdas **hanya mengembalikan data JSON mentah** berisi properti (*props*) terbaru. Halaman React langsung dirender ulang secara instan tanpa ada round-trip reload browser!
-
----
-
-## 3. Web Routes vs API Routes
-Pemisahan rute tetap dipertahankan untuk mengoptimalkan keamanan:
-*   **Web Routes ([`src/routes/web.rs`](file:///Users/herisvanhendra/Desktop/Desktop%20new/project/belajar%20rust/rustbasic/src/routes/web.rs))**: Menyajikan halaman SPA Inertia. Dilengkapi dengan proteksi keamanan **CSRF** otomatis, session terenkripsi di HTTP-only cookie, dan CSP Headers yang aman.
-*   **API Routes (`src/routes/api.rs`)**: Menyajikan data JSON murni untuk aplikasi pihak ketiga (pihak eksternal). Dilengkapi dengan CORS middleware dan bypass proteksi CSRF.
-
----
-
-## 4. Inertia Shared Page Props (Penyuntik Data Global)
-Di arsitektur Jinja lama, data global disuntikkan ke template engine. Pada edisi SPA, RustBasic menyuntikkan data global ini secara otomatis ke dalam **Shared Page Props** di setiap respons Inertia:
-
-Setiap kali controller Axum mengembalikan respons `inertia()`, data berikut **otomatis ikut terkirim di dalam payload**:
-*   `auth.user`: Objek data pengguna yang sedang login (ID, username, email, roles).
-*   `errors`: Objek daftar pesan kesalahan validasi dari input formulir.
-*   `flash.success` / `flash.error`: Pesan flash notifikasi satu-kali yang dikirim dari server.
-
-Data global ini dapat diakses secara instan di komponen React mana pun dengan menggunakan hook bawaan:
+### A. Mengakses Shared Page Props di React (`src/resources/js/Components/Navbar.jsx`)
 ```jsx
+import React from 'react';
 import { usePage } from '@inertiajs/react';
 
-const { auth, flash, errors } = usePage().props;
+export default function Navbar() {
+  //usePage().props otomatis berisi data auth user dari server Rust
+  const { auth, flash } = usePage().props;
+
+  return (
+    <nav className="p-4 bg-slate-900 text-white flex justify-between">
+      <span>My SPA Project</span>
+      {auth.user ? (
+        <span>User: {auth.user.name}</span>
+      ) : (
+        <a href="/login" className="text-indigo-400">Masuk Akun</a>
+      )}
+    </nav>
+  );
+}
+```
+
+### B. Mengirim Flash Message dari Controller Rust
+```rust
+use rustbasic_core::{Request, IntoResponse, Redirect};
+
+pub async fn login_user(req: Request) -> impl IntoResponse {
+    // Menyimpan flash message sukses ke dalam sesi
+    req.session.set("success", "Anda berhasil masuk sistem!");
+    Redirect::to("/dashboard")
+}
 ```
 
 ---
 
-## 5. Security & Middleware Stack
-Setiap request yang masuk melalui web router diproses secara runut oleh middleware:
-1.  **Request Logging**: Melacak status respon dan durasi request.
-2.  **Session & CSRF**: Menangani dekripsi cookie sesi dan verifikasi keabsahan token request.
-3.  **Inertia Context Builder**: Membaca sesi, memetakan flash message, dan menyusun Shared Props global.
-4.  **Application Logic (Controller)**: Menjalankan logika bisnis Anda dan merender komponen React SPA yang sesuai.
+## 🔄 Perbandingan Pemakaian (Traditional MVC vs Monolith SPA)
+
+Berikut adalah perbandingan pemakaian arsitektur antarmuka aplikasi:
+
+| Aspek Arsitektur | Traditional MVC (Template Server) | Monolith SPA (React-Inertia) |
+| :--- | :--- | :--- |
+| **Bahasa Tampilan** | Menulis markup Jinja/HTML di sisi backend Rust. | Menulis komponen modern React (.jsx) di frontend. |
+| **Siklus Navigasi** | Browser memuat ulang seluruh halaman saat klik link. | Halaman dimuat instan tanpa reload (AJAX swap). |
+| **Metode Pengiriman Data** | Data digabungkan ke template sebelum HTML dikirim. | Data dikirim berupa props JSON mentah secara berkala. |
+| **Reusable Component** | Tergantung pada potongan berkas HTML template. | Komponen React modular, dinamis, dan terisolasi. |
+
+---
+
+## 📊 Tabel Ringkasan Siklus Hidup Request SPA
+
+Berikut adalah urutan proses saat pengguna berinteraksi dengan aplikasi Monolith SPA RustBasic:
+
+| Tahap Siklus | Aksi Pengguna / Browser | Respon Server RustBasic |
+| :--- | :--- | :--- |
+| **1. Kunjungan Awal** | Mengetik URL di address bar (atau tekan F5). | Merender HTML root kontainer `app.rb.html` beserta data awal. |
+| **2. React Hydration** | React memuat data di atribut `'data-page'`. | Selesai bertugas, browser dihidupkan menjadi aplikasi dinamis. |
+| **3. Navigasi Tautan** | Pengguna mengklik `<Link href="/about">`. | Memotong rute request, mengirim AJAX dengan header Inertia. |
+| **4. JSON Delivery** | Inertia menangkap respon JSON terbaru. | Server hanya mengembalikan JSON props tanpa kerangka HTML. |
+| **5. Page Render** | React langsung menukar komponen di layar. | Siap menerima interaksi navigasi berikutnya. |
+
+---
+
+## 🏁 Penutup
+Arsitektur Monolith SPA memberikan efisiensi luar biasa dalam proses *development* karena menghilangkan kebutuhan REST API yang kompleks, sambil memberikan pengalaman visual tingkat tinggi bagi pengguna akhir aplikasi Anda.

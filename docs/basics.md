@@ -1,90 +1,49 @@
-# Dasar-Dasar RustBasic SPA
+# 🚀 Panduan Dasar-Dasar RustBasic SPA
 
-Dokumen ini menjelaskan tiga pilar utama saat membangun aplikasi web dengan **RustBasic Modern SPA**: **Routing**, **Controllers**, dan **Views (React Pages)**.
+## 📝 Kata Pengantar
+Selamat datang di panduan dasar **RustBasic SPA (Single Page Application)**. Dokumentasi ini dibuat untuk memandu Anda memahami tiga pilar utama pembangunan aplikasi web dengan RustBasic: **Routing**, **Controllers**, dan **Views (React)**. Panduan ini dirancang dari tingkat pemula agar siapa pun dapat memahaminya, hingga tingkat lanjutan untuk arsitek sistem yang menginginkan pemahaman mendalam tentang siklus request-response.
 
 ---
 
-## 🛣️ 1. Routing (Perutean)
+## 🛠️ Script Contoh
 
-Seluruh rute web untuk halaman SPA didaftarkan di dalam berkas [`src/routes/web.rs`](file:///Users/herisvanhendra/Desktop/Desktop%20new/project/belajar rust/rustbasic/src/routes/web.rs). Framework ini menggunakan **Axum** sebagai mesin perutean utama yang sangat cepat.
-
-### Mendefinisikan Rute Web SPA
-Gunakan Axum Router standar untuk mendaftarkan URL dan memetakan fungsi kontroler yang sesuai:
-
+### A. Definisikan Routing (`src/routes/web.rs`)
 ```rust
-use axum::{routing::get, Router};
+use rustbasic_core::{Router, get, AppState};
 use crate::app::http::controllers::welcome_controller;
-use rustbasic_core::server::AppState;
 
 pub fn router() -> Router<AppState> {
     Router::new()
-        // Mengarahkan halaman beranda ke fungsi 'index' di welcome_controller
+        // Memetakan rute beranda ke controller
         .route("/", get(welcome_controller::index))
 }
 ```
 
----
-
-## ⚙️ 2. Controllers (Kontroler)
-
-Controller bertindak sebagai pengolah data bisnis, otentikasi, validasi, dan penyuplai data ke frontend. Controller disimpan di direktori [`src/app/http/controllers/`](file:///Users/herisvanhendra/Desktop/Desktop%20new/project/belajar%20rust/rustbasic/src/app/http/controllers/).
-
-### Membuat Controller Baru
-Anda dapat menggunakan CLI RustBasic untuk mempercepat pembuatan berkas kontroler:
-```bash
-rustbasic make:controller WelcomeController
-```
-
-### Menyajikan Halaman SPA dengan `inertia`
-Bukan lagi memanggil render HTML MiniJinja lama, controller SPA mengembalikan pembantu **`inertia`** yang menerima parameter rujukan request, nama komponen halaman React, dan payload JSON:
-
+### B. Definisikan Controller (`src/app/http/controllers/welcome_controller.rs`)
 ```rust
-use crate::app::inertia::inertia;
-use rustbasic_core::requests::Request;
-use axum::response::Response;
-use rustbasic_core::serde_json::json;
+use crate::app::inertia;
+use rustbasic_core::{Request, IntoResponse, serde_json::json};
 
-pub async fn index(req: Request) -> Response {
-    // 1. "Welcome" merujuk pada berkas src/resources/js/Pages/Welcome.jsx
-    // 2. Objek json! berisi properti (props) yang otomatis diterima oleh React
-    inertia(req, "Welcome", json!({ 
-        "title": "Halaman Utama",
-        "description": "Selamat datang di starter kit super cepat RustBasic SPA!"
+pub async fn index(req: Request) -> impl IntoResponse {
+    // Mengembalikan response Inertia ke halaman Welcome.jsx
+    inertia(&req, "Welcome", json!({
+        "title": "Selamat Datang di RustBasic SPA!",
+        "version": "2026.1"
     }))
 }
 ```
 
----
-
-## 🎨 3. Views (React Pages)
-
-Di dalam RustBasic SPA, berkas tampilan tidak lagi ditulis menggunakan HTML/Minijinja tradisional di server, melainkan ditulis sebagai **Komponen React fungsional (`.jsx`)** di sisi klien browser.
-
-### Folder Halaman React
-Seluruh file halaman utama React SPA Anda wajib diletakkan di dalam folder [`src/resources/js/Pages/`](file:///Users/herisvanhendra/Desktop/Desktop%20new/project/belajar%20rust/rustbasic/src/resources/js/Pages/).
-
-Setiap file di dalam folder tersebut otomatis dipetakan sebagai nama komponen yang bisa dipanggil oleh controller backend Anda (seperti `inertia(req, "Welcome", ...)`).
-
-### Contoh Komponen React SPA (`Pages/Welcome.jsx`):
+### C. Definisikan View (`src/resources/js/Pages/Welcome.jsx`)
 ```jsx
-import { Link } from '@inertiajs/react';
 import React from 'react';
+import { Link } from '@inertiajs/react';
 
-export default function Welcome({ title, description }) {
+export default function Welcome({ title, version }) {
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-center items-center p-6">
-      <div className="max-w-md text-center p-8 bg-slate-900 border border-slate-800 rounded-2xl glassmorphism">
-        <h1 className="text-3xl font-extrabold text-white mb-4">{title}</h1>
-        <p className="text-slate-400 text-sm mb-6">{description}</p>
-        
-        {/* Link SPA Bebas Reload */}
-        <Link 
-          href="/about" 
-          className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-lg font-semibold transition"
-        >
-          Pelajari Lebih Lanjut
-        </Link>
-      </div>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-950 text-white">
+      <h1 className="text-4xl font-extrabold mb-2">{title}</h1>
+      <p className="text-slate-400 mb-6">Versi Aplikasi: {version}</p>
+      <Link href="/about" className="px-4 py-2 bg-indigo-600 rounded-lg">Tentang Kami</Link>
     </div>
   );
 }
@@ -92,9 +51,31 @@ export default function Welcome({ title, description }) {
 
 ---
 
-## 📦 4. Asset Management (Vite & Manifest)
+## 🔄 Perbandingan Pemakaian (MPA vs SPA)
 
-Aset statis dikelola dan dikompilasi secara optimal menggunakan **Vite**.
-*   **Aset Bundling**: Ketika Anda menjalankan `npm run build`, Vite akan mengompilasi berkas React, JS, CSS, dan gambar ke dalam folder `public/build/` dengan *content hashing* untuk keamanan cache-busting.
-*   **Manifest Lookup**: Backend Axum secara cerdas membaca berkas manifest hasil kompilasi tersebut untuk memuat file Javascript dan CSS dengan nama file ter-hash yang tepat ke dalam HTML root container.
-*   **Zero-Dependency Embed**: Seluruh berkas di `public/build/` secara otomatis ditanamkan langsung (di-embed) ke RAM biner saat rilis produksi.
+Berikut adalah tabel perbandingan pemakaian antara arsitektur Multi-Page Application (MPA) tradisional berbasis server template dan arsitektur Single Page Application (SPA) berbasis React-Inertia di RustBasic:
+
+| Fitur / Karakteristik | Multi-Page Application (MPA) | Single-Page Application (SPA) |
+| :--- | :--- | :--- |
+| **Siklus Navigasi** | Memuat ulang seluruh halaman (full reload), layar berkedip putih. | Navigasi instan tanpa reload, hanya bertukar data via AJAX. |
+| **Integrasi State** | State hilang setiap kali berpindah halaman. | State global tetap terjaga menggunakan React Context. |
+| **Routing** | Ditangani penuh di sisi server (misal: Minijinja template). | Ditangani server & dihidrasi instan di sisi client React. |
+| **Kecepatan Respon** | Lambat karena harus merender seluruh kerangka HTML di server. | Sangat cepat karena server hanya mengirim data JSON mentah. |
+
+---
+
+## 📊 Tabel Ringkasan Komponen Dasar
+
+Berikut adalah ringkasan berkas utama yang terlibat dalam arsitektur dasar RustBasic SPA:
+
+| Nama Komponen | Lokasi Berkas | Deskripsi Fungsi |
+| :--- | :--- | :--- |
+| **Web Router** | `src/routes/web.rs` | Tempat mendaftarkan URL aplikasi dan memetakannya ke fungsi controller yang sesuai. |
+| **Controller** | `src/app/http/controllers/` | Mengolah data request, berinteraksi dengan database, dan menyuplai data ke React. |
+| **React Pages** | `src/resources/js/Pages/` | Berkas visual antarmuka pengguna (.jsx) yang dirender di browser klien. |
+| **Root Template** | `src/resources/views/app.rb.html` | File HTML utama yang bertindak sebagai kontainer awal SPA. |
+
+---
+
+## 🏁 Penutup
+Dengan memahami alur kerja dasar antara perutean (`Router`), pengolahan data (`Controller`), dan presentasi visual (`View` React), Anda kini siap untuk membangun modul aplikasi yang kompleks dan responsif secara mandiri.

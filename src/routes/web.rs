@@ -1,5 +1,4 @@
-use rustbasic_core::axum::{Router, routing::get};
-use rustbasic_core::server::AppState;
+use rustbasic_core::{Router, get, AppState};
 use crate::app::http::controllers::welcome_controller;
 
 pub fn router() -> Router<AppState> {

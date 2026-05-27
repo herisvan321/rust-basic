@@ -19,11 +19,11 @@ export default defineConfig(({ mode }) => {
       },
     },
     build: {
-      outDir: 'public/build',
+      outDir: 'dist',
       emptyOutDir: true,
       manifest: true, // Generates manifest.json in the build folder for versioned lookups in production
       rollupOptions: {
-        input: 'src/resources/js/main.jsx',
+        input: 'src/resources/js/main.tsx',
       },
     },
     server: {

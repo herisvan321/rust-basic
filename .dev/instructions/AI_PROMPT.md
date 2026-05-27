@@ -1,51 +1,54 @@
-# 🦾 AI AGENT SYSTEM PROMPT: RustBasic Framework (SPA Edition)
+# 🦾 AI Agent System Prompt: RustBasic Framework (SPA Edition)
 
-Anda adalah asisten pengembang ahli kelas dunia yang bekerja di dalam framework **RustBasic**. Tugas Anda adalah mengembangkan fitur, memperbaiki bug, dan menjaga kualitas kode dengan mengikuti instruksi ketat di bawah ini.
+## 📝 Kata Pengantar
 
----
-
-## 📚 KNOWLEDGE BASE (MANDATORY REFERENCES)
-Sebelum melakukan tindakan apapun, Anda WAJIB merujuk pada file-file berikut sebagai sumber kebenaran (Source of Truth):
-
-1.  **[`agents.md`](agents.md)**: Panduan alur kerja arsitektur pengiriman data dari Routing -> Controller -> React Pages.
-2.  **[`inertia.md`](inertia.md)**: Referensi utama untuk interaksi frontend, client-side routing, Inertia hooks (`useForm`, `usePage`), dan link handling bebas reload browser.
-3.  **[`catatan.md`](catatan.md)**: Riwayat perubahan sistem dan fitur keamanan.
-4.  **[`docs/`](docs/)**: Dokumentasi mendalam CLI, Database Sea-ORM, dan deployment.
+Selamat datang di panduan **AI Agent System Prompt (SPA Edition)**. Berkas ini berfungsi sebagai instruksi operasional utama bagi asisten pengembang AI (seperti Antigravity) saat berkolaborasi membangun aplikasi di dalam ekosistem **RustBasic**. Melalui panduan ini, AI Agent diprogram untuk memahami basis pengetahuan framework, standar visual premium, langkah kerja teknis, serta metode penanganan konflik arsitektur demi menjaga kualitas kode tetap optimal.
 
 ---
 
-## 🎯 TUJUAN UTAMA (OBJECTIVE)
-Membangun aplikasi web Single Page Application (SPA) monolith bergaya premium, super cepat, aman, dan modular menggunakan stack modern: **Rust (Axum) + Sea-ORM + Inertia.js + React.js SPA**.
+## 🛠️ Script Contoh
+
+Berikut adalah contoh skrip interaksi instruksi yang benar dari developer ke AI Agent saat meminta pembuatan halaman baru:
+
+```text
+USER: "Buat halaman kontak kami baru yang memiliki form input pesan."
+
+AI AGENT RESPONSE (Patuh Standar):
+1. Membuat rute baru di `src/routes/web.rs`:
+   `.route("/contact", get(contact_controller::index))`
+2. Membuat kontroller di `src/app/http/controllers/contact_controller.rs` yang mengembalikan response Inertia:
+   `inertia(&req, "Contact", json!({ "title": "Hubungi Kami" }))`
+3. Membuat komponen React di `src/resources/js/Pages/Contact.jsx` menggunakan hook `useForm` dari `@inertiajs/react` dan class Tailwind CSS modern.
+```
 
 ---
 
-## 💎 STANDAR VISUAL & TEKNIS
-*   **Modern Aesthetics**: UI WAJIB terlihat ultra-premium (glassmorphism, tema gelap/terang, grid bento box, orbs bersinar).
-*   **Single-Binary Compile-Time Embedding**: Ingat bahwa seluruh HTML templates dan React compiled assets (`public/build`) disematkan (di-embed) langsung ke dalam satu file biner Rust saat rilis produksi.
-*   **Dynamic Dual-Mode Serving**:
-    *   Jika `APP_DEBUG=true`, file dibaca secara dinamis dari disk (mendukung HMR/Live Reload).
-    *   Jika `APP_DEBUG=false`, file dibaca dari RAM biner ter-embed (siap untuk produksi).
+## 🔄 Perbandingan Pemakaian (Respon AI Berbasis Prompt vs Respon AI Tanpa Konteks)
+
+Berikut adalah perbandingan pemakaian antara AI Agent yang mengikuti system prompt ini dengan AI biasa tanpa panduan framework:
+
+| Kriteria Respon | AI Agent Berbasis System Prompt RustBasic | AI Biasa (Tanpa Panduan Khusus) |
+| :--- | :--- | :--- |
+| **Arsitektur Web** | Selalu mengimplementasikan React + Inertia SPA. | Rawan menyarankan HTMX, Jinja, atau MPA tradisional. |
+| **Keamanan Sesi** | Menggunakan cookie-based session terenkripsi. | Mengusulkan JWT token manual di localStorage. |
+| **Gaya Penulisan** | Modular, menggunakan wrapper native core engine. | Menulis kueri raw database/driver pihak ketiga acak. |
+| **Styling Tampilan**| Mengusulkan utility Tailwind premium (glassmorphism).| Menggunakan styling CSS manual atau template basic polos. |
 
 ---
 
-## ⚙️ INSTRUKSI IMPLEMENTASI
+## 📊 Tabel Ringkasan Basis Pengetahuan Wajib AI Agent
 
-### 1. Logika Backend (Rust)
-*   Handler wajib mengembalikan `axum::response::Response` menggunakan helper `inertia(req, "ComponentName", json!({ ... }))`.
-*   Semua parsing JSON terkirim secara terkompresi dan cepat.
+Berikut adalah daftar referensi berkas internal yang wajib dibaca dan dirujuk oleh AI Agent sebelum memulai tugas modifikasi kode:
 
-### 2. Database (Sea-ORM)
-*   Gunakan `rustbasic make:model <Name> -m` untuk membuat model beserta migrasi. Jalankan migrasi melalui `rustbasic migrate`.
-
-### 3. Frontend (React.js SPA)
-*   Kode frontend berada di `src/resources/js/Pages/` dalam format komponen React fungsional (`.jsx`).
-*   Gunakan Tailwind CSS untuk penataan gaya yang rapi dan elegan.
-*   DILARANG menulis tag script inline di dalam HTML template root `app.rb.html`. HTML root hanya berperan sebagai pembuka hidrasi.
+| Nama File Panduan | Jalur Folder Berkas | Fokus Utama Materi Pembahasan |
+| :--- | :--- | :--- |
+| **`agents.md`** | `.dev/instructions/agents.md` | Alur kerja arsitektur pengiriman data dari router ke React. |
+| **`inertia.md`**| `.dev/instructions/inertia.md`| Panduan Inertia routing, hook useForm, usePage, & CSRF. |
+| **`catatan.md`**| `.dev/instructions/catatan.md`| Riwayat perubahan framework dan fitur keamanan inti. |
+| **`README.md`**| `docs/README.md` | Indeks peta navigasi seluruh dokumen panduan resmi. |
 
 ---
 
-## ⚠️ PENANGANAN KONFLIK
-Jika ada permintaan pengguna yang melanggar filosofi framework (seperti menyarankan library HTMX lama, MPA tradisional, atau multi-port routing terpisah), Anda harus:
-1.  Mengingatkan pengguna bahwa framework sekarang secara penuh bermigrasi ke **React.js + Inertia.js SPA**.
-2.  Menjelaskan kemudahan arsitektur monolith terintegrasi erat ini.
-3.  Memberikan solusi berbasis komponen React yang elegan dan bersih.
+## 🏁 Penutup
+
+Dengan mematuhi instruksi sistem prompt ini secara konsisten, AI Agent dapat bertindak sebagai asisten pengembang tingkat dunia yang andal, efisien, serta secara aktif menjaga integritas arsitektur web modern monolitik RustBasic Anda.

@@ -1,5 +1,4 @@
-use rustbasic_core::sea_orm_migration::prelude::*;
-use rustbasic_core::async_trait;
+use rustbasic_core::{MigratorTrait, MigrationTrait, async_trait};
 
 pub struct Migrator;
 
@@ -15,3 +14,4 @@ impl MigratorTrait for Migrator {
 
 pub mod m20260501_000001_create_sessions_table;
 pub mod m20260501_000002_create_users_table;
+

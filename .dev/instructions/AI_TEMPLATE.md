@@ -1,101 +1,127 @@
 # 🎨 RustBasic AI Template Workflow (React SPA Edition)
 
-Dokumen ini mendefinisikan alur kerja standar bagi AI Agent saat melakukan porting atau implementasi halaman/komponen UI ke dalam framework **RustBasic** menggunakan stack **React.js + Inertia.js**.
+## 📝 Kata Pengantar
+
+Selamat datang di panduan **AI Template Workflow (React SPA Edition)**. Dokumen ini mendefinisikan alur kerja standar bagi AI Agent dan pengembang saat melakukan konversi atau ekspor aset visual dari berkas HTML statis (seperti `template.html`) ke dalam proyek berbasis **React.js + Inertia.js** pada framework **RustBasic**. Panduan ini memandu Anda memecah kerangka template statis ke dalam berkas-berkas halaman inti React, berkas CSS proyek, komponen modular, serta pendaftaran rute backend secara terstruktur dan terstandarisasi.
 
 ---
 
-## 📥 1. INPUT (Analisis & Persiapan)
-Sebelum melakukan modifikasi file, AI harus mengumpulkan data berikut:
-*   **Nama Halaman**: Tentukan nama komponen React yang akan dibuat (contoh: `About.jsx`, `Welcome.jsx`, `Dashboard/Profile.jsx`).
-*   **Analisis Desain UI**: Tinjau desain/komponen visual asli untuk disesuaikan dengan estetika premium RustBasic (glassmorphism, tema gelap, bento box, orbs).
-*   **Identifikasi State & Interaktivitas**: Identifikasi bagian UI mana saja yang memerlukan perubahan dinamis (seperti counter, modal, input form) untuk diimplementasikan menggunakan React hooks.
+## 📁 Nama Project & Aturan Ekspor Struktur Project
+
+Sebelum melakukan ekspor dari `template.html`, Anda wajib menentukan **Nama Project** dan **Nama Template** yang akan diekspor (misal: `nama-template`). Nama template ini akan digunakan untuk menghasilkan berkas controller, halaman React, serta file stylesheet yang mewakili file inti tersebut di dalam struktur proyek.
+
+Berikut adalah peta struktur direktori proyek `<nama-project>` yang dihasilkan berdasarkan penamaan template `<nama-template>` yang diekspor:
+
+```text
+<nama-project>/
+├── Cargo.toml                  # Nama project mewakili nama crate inti
+├── package.json                # Konfigurasi dependensi npm frontend
+├── vite.config.js              # Konfigurasi bundler Vite untuk SPA
+├── src/
+│   ├── main.rs                 # Berkas utama inisialisasi server RustBasic
+│   ├── app/
+│   │   ├── http/
+│   │   │   └── controllers/    # Berkas kontroller (misal: <nama_template>_controller.rs)
+│   │   └── inertia.rs          # Helper rendering jembatan Inertia
+│   └── routes/
+│       └── web.rs              # Pendaftaran rute web & import controller <nama_template>
+├── src/resources/
+│   ├── js/
+│   │   ├── Pages/              # Berkas halaman React utama (misal: <NamaTemplate>.jsx)
+│   │   ├── Components/         # Komponen modular pembantu visual terkait (misal: <NamaTemplate>Navbar.jsx)
+│   │   └── main.jsx            # Entry point rendering frontend React
+│   └── css/
+│       └── <nama-template>.css # Berkas stylesheet CSS khusus untuk template tersebut
+└── public/
+    └── assets/                 # Folder penyimpanan gambar & file statis
+```
 
 ---
 
-## ⚙️ 2. PROSES (Teknis Pemisahan & Kompilasi React)
+## 🛠️ Script Contoh
 
-### A. Konversi Gaya (Tailwind CSS)
-*   **Adaptasi Tailwind**: Gunakan class utility **Tailwind CSS** untuk penataan gaya yang seragam, premium, responsif, dan mudah dipelihara.
-*   **Hindari Pure CSS Manual**: Di era React SPA, kurangi penulisan file CSS mentah manual. Maksimalkan utility class Tailwind untuk visual glassmorphism, gradasi warna modern, dan bayangan orbs.
+### A. Contoh Ekstraksi CSS dari `template.html` ke Proyek (`src/resources/css/app.css`)
+```css
+/* Ekspor class styling khusus dari template.html ke folder css proyek */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-### B. Pembuatan Halaman React (Pages)
-*   Buat berkas halaman baru di dalam folder [`src/resources/js/Pages/`](file:///Users/herisvanhendra/Desktop/Desktop%20new/project/belajar%20rust/rustbasic/src/resources/js/Pages/).
-*   Komponen wajib diekspor secara *default* (`export default`).
-*   Seluruh navigasi antar halaman internal **WAJIB** menggunakan `<Link>` dari `@inertiajs/react` agar SPA tidak mengalami reload halaman secara penuh:
-
-```jsx
-import { Link } from '@inertiajs/react';
-
-export default function About({ author, version }) {
-  return (
-    <div className="p-8 bg-slate-950 min-h-screen text-slate-100">
-      <h1 className="text-3xl font-bold">Tentang Aplikasi</h1>
-      <p className="mt-4">Pembuat: {author}</p>
-      <p>Versi: {version}</p>
-      <Link href="/" className="mt-6 inline-block text-indigo-400 hover:underline">
-        ← Kembali ke Beranda
-      </Link>
-    </div>
-  );
+.glassmorphism {
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 ```
 
-### C. Ekstraksi Komponen Modular (Components)
-*   Jika ada bagian UI yang digunakan berulang-kali (seperti Navbar, Footer, Button Premium), pisahkan ke dalam folder [`src/resources/js/Components/`](file:///Users/herisvanhendra/Desktop/Desktop%20new/project/belajar%20rust/rustbasic/src/resources/js/Components/).
-*   Panggil komponen tersebut di dalam halaman Page Anda:
-
+### B. Contoh Pembuatan Berkas Halaman Utama React SPA (`src/resources/js/Pages/Welcome.jsx`)
 ```jsx
+import React from 'react';
+import { Link } from '@inertiajs/react';
 import Navbar from '../Components/Navbar';
 
-export default function Dashboard() {
+export default function Welcome({ title, appVersion }) {
   return (
-    <div>
-      <Navbar user="Admin" />
-      <main className="p-6">Konten Utama...</main>
+    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans">
+      <Navbar />
+      <main className="max-w-4xl mx-auto mt-12 p-8 glassmorphism rounded-2xl">
+        <h1 className="text-4xl font-extrabold tracking-tight mb-4">{title}</h1>
+        <p className="text-slate-400 mb-6">Aplikasi berjalan pada versi: {appVersion}</p>
+        <Link href="/dashboard" className="px-6 py-3 bg-indigo-600 rounded-xl hover:bg-indigo-500 font-semibold transition-colors duration-200">
+          Masuk ke Dashboard
+        </Link>
+      </main>
     </div>
   );
 }
 ```
 
-### D. Routing & Controller (Axum)
-*   Daftarkan rute Anda di [`src/routes/web.rs`](file:///Users/herisvanhendra/Desktop/Desktop%20new/project/belajar%20rust/rustbasic/src/routes/web.rs).
-*   Buat controller Axum yang memanggil helper `inertia` untuk memicu render komponen React SPA di browser:
-
+### C. Mendaftarkan Rute & Controller Baru (`src/routes/web.rs`)
 ```rust
-pub async fn about(req: Request) -> Response {
-    inertia(req, "About", json!({
-        "author": "Heris",
-        "version": "1.0.0"
-    }))
+use rustbasic_core::{Router, get, AppState, Request, Response, IntoResponse};
+use rustbasic_core::serde_json::json;
+use crate::app::inertia::inertia;
+
+pub fn router() -> Router<AppState> {
+    Router::new()
+        .route("/", get(|req: Request| async move {
+            inertia(&req, "Welcome", json!({
+                "title": "Welcome to RustBasic SPA",
+                "appVersion": "2026.1"
+            }))
+        }))
 }
 ```
 
 ---
 
-## 📤 3. OUTPUT (Struktur File Akhir)
-```text
-src/resources/js/
-├── Pages/
-│   ├── Welcome.jsx
-│   └── About.jsx
-├── Components/
-│   ├── Navbar.jsx
-│   └── Footer.jsx
-└── main.jsx
-```
+## 🔄 Perbandingan Pemakaian (Direct HTML Rendering vs React-Inertia SPA Component)
+
+Berikut adalah perbandingan pemakaian antara menggunakan visual HTML statis langsung dan mengekspornya ke komponen SPA React-Inertia:
+
+| Karakteristik | Direct HTML Rendering (`template.html`) | React-Inertia SPA Component (`Welcome.jsx`) |
+| :--- | :--- | :--- |
+| **Kecepatan Navigasi** | Memicu refresh halaman penuh yang lambat. | Navigasi instan bebas reload (AJAX swap). |
+| **Modul & Reusability** | Sulit memisahkan komponen berulang (Navbar, Footer).| Sangat mudah memisahkannya ke komponen re-usable. |
+| **Manajemen State** | Menggunakan variabel DOM global/JQuery yang rawan konflik.| Terkelola rapi menggunakan state internal React. |
+| **Konektivitas Backend**| Harus menulis API request manual (Fetch/Axios). | Otomatis tersambung via *Props* controller backend. |
 
 ---
 
-## ⚠️ 4. LIMIT & RESTRICTIONS (Batasan)
-*   **Ekstensi React**: Seluruh berkas halaman React menggunakan ekstensi `.jsx`.
-*   **Link Bebas Reload**: DILARANG menggunakan tag anchor murni `<a>` untuk navigasi internal halaman SPA. Selalu gunakan komponen `<Link>` dari `@inertiajs/react`.
-*   **Compile First**: Ingat untuk selalu menjalankan kompilasi frontend (`npm run build`) sebelum mengompilasi biner Rust akhir di server produksi agar perubahan visual Anda tertanam ke dalam memori RAM biner.
+## 📊 Tabel Ringkasan Aturan Ekspor Berkas dari `template.html`
+
+Saat memindahkan desain dari berkas HTML mentah (`template.html`), gunakan tabel rujukan pemetaan nama berkas dan folder berikut untuk mewakili komponen proyek Anda:
+
+| Elemen Asal (`template.html`) | Berkas Hasil Ekspor | Direktori Tujuan Ekspor | Deskripsi Fungsi |
+| :--- | :--- | :--- | :--- |
+| **Body Utama & Layout** | `Welcome.jsx` | `src/resources/js/Pages/` | Menjadi berkas halaman inti visual SPA. |
+| **CSS internal / external** | `app.css` | `src/resources/css/` | Berisi styling global & utility Tailwind. |
+| **Navbar & Sidebar** | `Navbar.jsx` | `src/resources/js/Components/`| Komponen modular navigasi terpisah. |
+| **Image & static assets** | `logo.png` | `public/assets/` | File statis yang diakses langsung dari web server. |
 
 ---
 
-## 🛠️ 5. ACTION (Verifikasi Jalannya Kode)
-| Perintah | Kegunaan |
-| :--- | :--- |
-| `npm run dev` | Menjalankan Vite dev server untuk fitur instant Hot Module Replacement (HMR) saat development lokal. |
-| `rustbasic serve` | Menjalankan backend server Axum. |
-| `npm run build` | Melakukan kompilasi optimal frontend React ke folder `public/build/` sebelum rilis produksi. |
+## 🏁 Penutup
+
+Dengan mengikuti alur konversi terstandar ini, pemindahan visual dari berkas HTML statis seperti `template.html` ke dalam arsitektur React-Inertia SPA dapat dilakukan dengan rapi, efisien, dan tetap menjaga keterbacaan kode sistem Anda secara optimal.

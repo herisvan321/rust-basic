@@ -1,103 +1,71 @@
 # 📘 Catatan Dokumentasi RustBasic (React SPA Edition)
 
-Dokumentasi ini berisi panduan struktur folder, fitur, dan cara penggunaan framework **RustBasic** (Axum bergaya Monolith dengan integrasi React.js & Inertia.js SPA).
+## 📝 Kata Pengantar
+
+Selamat datang di **Catatan Dokumentasi RustBasic (React SPA Edition)**. Berkas catatan ini merangkum riwayat pembaruan, detail fungsionalitas pengerasan keamanan backend (hardening), modularitas direktori, integrasi skema database blueprint, serta pintasan pengembangan di dalam ekosistem **RustBasic**. Melalui catatan ini, pengembang dapat menelusuri bagaimana setiap bagian dari sistem monolith ini bekerja sama menciptakan aplikasi web SPA yang cepat, stabil, dan aman.
 
 ---
 
-## 📂 1. Struktur Folder (Modular & Clean)
+## 🛠️ Script Contoh
 
-Aplikasi telah dipisahkan menjadi modul-modul kecil untuk skalabilitas tinggi:
+Berikut adalah contoh skrip blueprint schema migrasi tabel database relasional bergaya fluent:
 
-```text
-rustbasic/
-├── database/             # Lokasi database SQLite, seeder, & migrasi
-├── public/               # File statis dan assets hasil build Vite
-├── src/resources/
-│   ├── js/               # Frontend React SPA (Pages, Components)
-│   └── views/            # Template HTML Root (app.rb.html)
-├── src/
-│   ├── main.rs           # Entry point (Strict Config & Mandatory .env)
-│   ├── app/              # Folder Inti Aplikasi (Controllers, Models, Middleware)
-│   ├── config/           # Pusat Konfigurasi (Server, Session, Logging)
-│   └── routes/           # Pengaturan rute (web.rs)
-├── storage/              # Penyimpanan File & Log
-└── .env                  # Environment Variables (Wajib Ada)
+```rust
+use rustbasic_core::{Schema, SchemaManager, MigrationTrait, DbErr};
+use rustbasic_core::async_trait;
+
+pub struct Migration;
+
+#[async_trait]
+impl MigrationTrait for Migration {
+    fn name(&self) -> &str { "m2026_create_users" }
+
+    async fn up<'a>(&self, manager: &'a SchemaManager<'a>) -> Result<(), DbErr> {
+        // Mendefinisikan tabel baru menggunakan helper Schema bergaya fluent
+        Schema::create(manager, "users", |table| {
+            table.id();
+            table.string("name").not_null();
+            table.string("email").not_null().unique().index();
+            table.string("password").not_null();
+            table.timestamps();
+        }).await
+    }
+
+    async fn down<'a>(&self, manager: &'a SchemaManager<'a>) -> Result<(), DbErr> {
+        Schema::drop(manager, "users").await
+    }
+}
 ```
 
 ---
 
-## ⚙️ 2. Konfigurasi & Keamanan (Hardened)
+## 🔄 Perbandingan Pemakaian (Penyimpanan Sesi Cookie vs Penyimpanan Sesi Database)
 
-Aplikasi menerapkan standar keamanan produksi:
+Berikut adalah perbandingan pemakaian metode penyimpanan data sesi (session management) pada backend RustBasic:
 
-- **Mandatory .env**: Aplikasi akan `panic!` jika file `.env` tidak ditemukan untuk mencegah salah konfigurasi.
-- **Session-IP Binding**: Setiap sesi dikunci ke alamat IP pembuatnya. Jika IP berubah secara drastis saat sesi aktif, sistem akan menolak akses untuk mencegah pembajakan sesi.
-- **Dual Logging**: 
-    - Terminal: Output berwarna untuk visibilitas instan.
-    - File: Log bersih (tanpa kode warna ANSI) di `storage/logs/` untuk audit.
-- **Cache:Clear**: Perintah `rustbasic cache:clear` sekarang memotong (truncate) file log tanpa menghapusnya, menjaga kompatibilitas dengan server yang sedang berjalan.
-- **Asset serving & Binary Embedding**: Seluruh file template HTML (`.rb.html`) dan React compiled assets terkompilasi (`public/build/`) disematkan langsung ke dalam satu file biner Rust saat rilis produksi.
-- **Browser Live Reload**: Menggunakan `tower-livereload` yang hanya aktif jika `APP_DEBUG=true` untuk sinkronisasi otomatis.
-- **Modern Premium UI**: Estetika modern (Glassmorphism, Tema Gelap/Terang, Bento Grid) dengan reaktivitas SPA dari React.
-- **Hybrid API & Web Routing**: Pemisahan rute antara `web.rs` (Stateful/Session/Inertia) dan `api.rs` (Stateless/CORS).
+| Karakteristik Sesi | Cookie Session Store (Stateless) | Database Session Store (Stateful) |
+| :--- | :--- | :--- |
+| **Lokasi Penyimpanan** | Data tersimpan sepenuhnya di cookie browser user. | Hanya Session ID di cookie, data asli tersimpan di DB. |
+| **Kapasitas Penyimpanan**| Sangat terbatas (maksimal ~4KB). | Sangat besar (tidak terbatas, bergantung disk database). |
+| **Proteksi Manipulasi**  | Harus dienkripsi kuat di tingkat client. | Lebih aman karena client tidak bisa memodifikasi isi data. |
+| **Pembatalan Sesi (Revoke)**| Sulit dibatalkan sebelum cookie kadaluarsa. | Sangat mudah dibatalkan langsung dengan menghapus baris DB. |
 
 ---
 
-## 🎨 3. Frontend & UI (React & Inertia.js SPA)
+## 📊 Tabel Ringkasan Fitur Pengerasan Keamanan Sistem (Hardened Security)
 
-RustBasic mengintegrasikan React.js + Inertia.js untuk pengalaman SPA monolith yang mulus:
+Berikut adalah ringkasan mekanisme pertahanan dan audit keamanan yang diimplementasikan di tingkat core RustBasic:
 
-- **React Page Components**: Dibuat di `src/resources/js/Pages/` menggunakan `.jsx` dan Tailwind CSS.
-- **Inertia Link**: Navigasi bebas refresh halaman penuh menggunakan `<Link href="...">` dari `@inertiajs/react`.
-- **Form State Handling**: Menggunakan hook reaktif `useForm` dari Inertia untuk handling form submission, validasi error, dan state loading.
-- **Floating Toasts**: Notifikasi melayang dengan transisi visual yang responsif.
-
----
-
-## 🗄️ 4. Database & Migration Engine (Blueprint Schema)
-
-- **Multi-Database**: Mendukung SQLite dan MySQL via Sea-ORM.
-- **Blueprint Schema & Blueprint**: Mendukung penulisan migrasi yang super simpel dan elegan:
-  ```rust
-  Schema::create(manager, "users", |table| {
-      table.id();
-      table.string("name").not_null();
-      table.string("email").not_null().unique().index();
-      table.date_time("email_verified_at").nullable();
-      table.string("password").not_null();
-      table.timestamps();
-  }).await
-  ```
-- **Lengkap dengan Fitur Relasi & Tipe Data**: Mendukung `uuid()`, `primary_key()`, `foreign()` (cascade, restrict, dll), `index()`, `json()`, `json_binary()`, `float()`, `double()`, dll.
-- **Database Seeding**: Mengisi database secara modular dengan `rustbasic db:seed` dan mendaftarkan seeder di `src/app/seeder.rs`.
+| Fitur Hardening | Cara Kerja Fitur Keamanan | Manfaat Bagi Aplikasi |
+| :--- | :--- | :--- |
+| **Mandatory .env** | Aplikasi memicu `panic!` jika berkas konfigurasi tidak ada. | Mencegah salah konfigurasi port & database di produksi. |
+| **Session-IP Binding** | ID Sesi dikunci erat ke alamat IP browser pengguna. | Menghentikan aksi pembajakan sesi (Session Hijacking). |
+| **Dual Logging** | Log konsol berwarna, log file `storage/logs/` tanpa warna. | Membantu peninjauan error visual & audit log terstruktur. |
+| **CSRF Verifier** | Melakukan verifikasi token otomatis pada request POST/PUT/DELETE. | Melindungi aplikasi dari ancaman eksploitasi lintas situs. |
+| **Live Reload Watcher** | Mengaktifkan `tower-livereload` hanya pada mode debug. | Membantu pengembangan lokal tanpa membebani server rilis. |
 
 ---
 
-## 🚀 5. Perintah Pengembangan (CLI Standalone)
+## 🏁 Penutup
 
-RustBasic menggunakan binary mandiri `rustbasic`.
-
-```bash
-rustbasic new nama_app        # Membuat project baru dari template resmi
-rustbasic serve               # Menjalankan server backend Axum dengan Hot-Reload
-npm run dev                   # Menjalankan Vite dev server untuk React HMR
-rustbasic key:generate        # Membuat APP_KEY baru di file .env
-
-## Scaffolding (Generator Kode)
-rustbasic make:controller <Name>      # Membuat Controller baru
-rustbasic make:model <Name> -m        # Membuat Model & Migration
-rustbasic make:migration <Name>       # Membuat file migrasi baru
-rustbasic make:seeder <Name>          # Membuat Seeder baru
-rustbasic make:middleware <Name>      # Membuat Middleware baru
-rustbasic make:auth                   # Scaffold sistem Login/Register/Dashboard (Breeze)
-
-## Database & Migrasi
-rustbasic migrate                     # Jalankan migrasi yang belum dieksekusi
-rustbasic migrate:refresh             # Reset semua dan jalankan ulang
-rustbasic migrate:rollback            # Rollback langkah terakhir
-rustbasic db:seed                     # Jalankan seeder database
-```
-
----
-
-_Dokumentasi ini diperbarui pada Mei 2026 mencerminkan React SPA Edition, Standalone CLI, dan Blueprint Migration Schema._
+Catatan dokumentasi ini diperbarui pada Mei 2026 untuk mencerminkan implementasi React SPA Edition, Standalone CLI biner global, serta Blueprint Migration Schema. Dengan memahami catatan sistem ini, pengembang dapat menjaga efisiensi dan keamanan aplikasi web yang dibangun di atas framework RustBasic.

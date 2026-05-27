@@ -18,31 +18,23 @@ async fn main() {
         }
     }
 
-    // 2.1 Cek Command CLI (migrate, seed, storage:link, make:auth)
+
+
+    // 2.1 Cek Command CLI (migrate, seed, storage:link)
     let args: Vec<String> = std::env::args().collect();
     if rustbasic::config::cli::handle(&args, &cfg).await {
         return;
     }
 
-    // 3. Setup Database & Sea-ORM
+    // 3. Setup Database
     let db = rustbasic_core::database::connect(&cfg).await;
-    // Migrasi TIDAK dijalankan otomatis saat serve.
-    // Gunakan 'rustbasic migrate' untuk menjalankan migrasi secara manual.
-    
+
     // 4. Inisialisasi Session Store
     rustbasic_core::session::init_sessions(&cfg).await;
     let session_store = rustbasic_core::session::setup_session(&cfg).await;
 
     // 5. Bangun Router Aplikasi
-    let api_router = rustbasic::routes::api::router()
-        .layer(rustbasic::app::http::middleware::cors::cors_middleware());
-
-    let web_router = rustbasic::routes::web::router()
-        .layer(rustbasic_core::axum::middleware::from_fn(rustbasic::app::http::middleware::csrf::csrf_middleware));
-
-    let app_router: rustbasic_core::axum::Router<rustbasic_core::server::AppState> = rustbasic_core::axum::Router::new()
-        .nest("/api", api_router)
-        .merge(web_router);
+    let app_router = rustbasic::routes::build_router();
 
     // Inject embedded files
     rustbasic_core::view::set_embedded_templates(rustbasic::config::app::EmbeddedTemplates::get);

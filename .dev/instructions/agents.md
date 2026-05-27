@@ -1,76 +1,50 @@
 # 🤖 RustBasic AI Agents Handbook (SPA Edition)
 
-Dokumen ini mendefinisikan standar kerja operasional bagi AI Agent (seperti Antigravity, Cursor, dll.) saat mengembangkan fitur atau memodifikasi kode di dalam framework **RustBasic**.
+## 📝 Kata Pengantar
+
+Selamat datang di **RustBasic AI Agents Handbook (SPA Edition)**. Dokumen ini bertindak sebagai panduan standar kerja operasional tertinggi bagi asisten AI (seperti Antigravity, Cursor, dll.) serta pengembang saat mengembangkan fitur, merekayasa struktur, atau memodifikasi kode di dalam proyek framework **RustBasic**. Panduan ini memastikan kepatuhan penuh pada filosofi Single Page Application (SPA) monolith, visual premium, dan embedding aset satu biner.
 
 ---
 
-## 🏗️ 0. GOLDEN RULES (Prinsip Utama)
-1.  **React.js + Inertia.js SPA Monolith**: SEMUA halaman web disajikan sebagai Single Page Application (SPA). Backend Axum dan frontend React berkomunikasi erat menggunakan **Inertia.js** tanpa memisahkan repository atau port!
-2.  **No HTMX / No Legacy Jinja**: Kami tidak menggunakan HTMX atau rendering multi-page tradisional. File HTML `.rb.html` hanya digunakan sekali sebagai *root layout container* ([`app.rb.html`](file:///Users/herisvanhendra/Desktop/Desktop%20new/project/belajar%20rust/rustbasic/src/resources/views/app.rb.html)). Seluruh halaman dinamis dibuat sebagai komponen React (`.jsx`) di bawah folder [`src/resources/js/Pages/`](file:///Users/herisvanhendra/Desktop/Desktop%20new/project/belajar%20rust/rustbasic/src/resources/js/Pages).
-3.  **Single-Binary Compile-Time Embedding**: 
-    *   Seluruh berkas template HTML dan aset React hasil kompilasi (`public/build/`) dimasukkan langsung (di-embed) ke dalam satu file biner executable Rust saat release kompilasi menggunakan `rust-embed`.
-    *   Jika `APP_DEBUG=true`, sistem akan membaca dari disk secara dinamis untuk mendukung Live Reload/HMR. Jika `APP_DEBUG=false`, sistem akan membaca 100% dari RAM biner ter-embed.
-4.  **Premium Aesthetics**: Desain visual wajib terlihat ultra-premium, modern, tema gelap/terang adaptif, menggunakan grid bento box, orbs bersinar, efek glassmorphism, dan transisi navigasi mikro yang fluid.
+## 🛠️ Script Contoh
 
----
+### A. Contoh Penulisan Rute Web (`src/routes/web.rs`)
+```rust
+use rustbasic_core::{Router, get, AppState};
+use crate::app::http::controllers::welcome_controller;
 
-## 🛠️ 1. PERINTAH EKSEKUSI (CLI)
+pub fn router() -> Router<AppState> {
+    Router::new()
+        // Memetakan rute beranda ke method index controller
+        .route("/", get(welcome_controller::index))
+}
+```
 
-AI Agent wajib menggunakan CLI RustBasic dan NPM untuk siklus pengembangan:
-
-| Tugas | Perintah |
-| :--- | :--- |
-| **Jalankan Backend (Lokal)** | `rustbasic serve` |
-| **Jalankan Frontend (HMR)** | `npm run dev` |
-| **Kompilasi Frontend (Build)** | `npm run build` |
-| **Buat Controller Baru** | `rustbasic make:controller <Name>` |
-| **Buat Model & Migrasi** | `rustbasic make:model <Name> -m` |
-| **Jalankan Migrasi Database** | `rustbasic migrate` |
-
----
-
-## ⚙️ 2. PROCESS (Langkah Kerja Teknis)
-
-### A. Routing & Controller (Rust)
-1.  Daftarkan rute Anda di [`src/routes/web.rs`](file:///Users/herisvanhendra/Desktop/Desktop%20new/project/belajar%20rust/rustbasic/src/routes/web.rs).
-2.  Buat controller di [`src/app/http/controllers/`](file:///Users/herisvanhendra/Desktop/Desktop%20new/project/belajar%20rust/rustbasic/src/app/http/controllers/). Gunakan pola return `inertia` untuk menyuplai komponen React dan data JSON:
-
+### B. Contoh Penulisan Controller RustBasic (`src/app/http/controllers/welcome_controller.rs`)
 ```rust
 use crate::app::inertia::inertia;
-use rustbasic_core::requests::Request;
-use axum::response::Response;
-use rustbasic_core::serde_json::json;
+use rustbasic_core::{Request, Response, IntoResponse, serde_json::json};
 
-pub async fn index(req: Request) -> Response {
-    inertia(req, "Welcome", json!({
+pub async fn index(req: Request) -> impl IntoResponse {
+    // Mengembalikan response Inertia menuju halaman Welcome di frontend React
+    inertia(&req, "Welcome", json!({
         "welcomeMessage": "Halo dari Backend RustBasic!",
-        "stats": { "users": 120, "active": 85 }
+        "stats": { "users": 150, "active": 90 }
     }))
 }
 ```
 
-### B. Frontend Views (React Halaman & Komponen)
-1.  Buat berkas komponen halaman React baru di dalam [`src/resources/js/Pages/<Name>.jsx`](file:///Users/herisvanhendra/Desktop/Desktop%20new/project/belajar%20rust/rustbasic/src/resources/js/Pages/).
-2.  Menerima properti (*props*) dari backend Axum secara otomatis sebagai argumen fungsi:
-
+### C. Contoh Penulisan Halaman React SPA (`src/resources/js/Pages/Welcome.jsx`)
 ```jsx
+import React from 'react';
 import { Link } from '@inertiajs/react';
-import React, { useState } from 'react';
 
 export default function Welcome({ welcomeMessage, stats }) {
-  const [count, setCount] = useState(0);
-
   return (
-    <div className="min-h-screen bg-slate-950 text-white flex flex-col justify-center items-center">
-      <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500">
-        {welcomeMessage}
-      </h1>
-      <div className="mt-8 p-6 bg-slate-900 border border-slate-800 rounded-2xl glassmorphism">
-        <p>Pengguna Terdaftar: {stats.users}</p>
-        <button onClick={() => setCount(count + 1)} className="mt-4 px-4 py-2 bg-indigo-600 rounded-lg">
-          Tambah Angka: {count}
-        </button>
-      </div>
+    <div className="min-h-screen bg-slate-950 text-white flex flex-col justify-center items-center font-sans">
+      <h1 className="text-4xl font-extrabold tracking-tight mb-4">{welcomeMessage}</h1>
+      <p className="text-slate-400">Pengguna Aktif: {stats.active}</p>
+      {/* WAJIB menggunakan <Link> untuk navigasi internal SPA tanpa refresh */}
       <Link href="/about" className="mt-6 text-indigo-400 hover:underline">
         Tentang Aplikasi →
       </Link>
@@ -81,18 +55,35 @@ export default function Welcome({ welcomeMessage, stats }) {
 
 ---
 
-## 📂 3. FOLDER MAPPING
+## 🔄 Perbandingan Pemakaian (Multi-Page Application vs Single Page Application)
 
-| Area | Path Folder |
-| :--- | :--- |
-| **Logika Controller** | `src/app/http/controllers/` |
-| **Model Database** | `src/app/models/` |
-| **Rute & URL** | `src/routes/` |
-| **React Halaman SPA** | `src/resources/js/Pages/` |
-| **React Komponen Modular**| `src/resources/js/Components/` |
-| **Root HTML Container** | `src/resources/views/app.rb.html` |
-| **Migrasi Database** | `database/migrations/` |
+Berikut adalah perbandingan pemakaian antara arsitektur web tradisional (MPA) dan arsitektur modern SPA monolith di RustBasic:
+
+| Karakteristik Arsitektur | Multi-Page Application (MPA) | Single Page Application (SPA) |
+| :--- | :--- | :--- |
+| **Pemuatan Halaman** | Memuat ulang seluruh halaman (full refresh). | Hanya menukar komponen secara dinamis (bebas refresh). |
+| **Bahasa Templating** | Menulis markup server template (Jinja/HTML). | Menulis komponen modern React (.jsx) di frontend. |
+| **Pertukaran Data** | Mengirimkan kode HTML utuh dari server. | Hanya bertukar payload JSON mentah dari controller. |
+| **Keterjagaan State** | State visual browser hilang setiap navigasi. | State global React tetap terjaga di seluruh halaman. |
 
 ---
 
-_Dokumentasi ini adalah instruksi operasional tertinggi bagi AI Agent untuk menjaga integritas arsitektur Modern SPA RustBasic._
+## 📊 Tabel Ringkasan Pemetaan Folder Utama Proyek
+
+Berikut adalah tabel pemetaan folder wajib yang harus dipatuhi oleh AI Agent saat melakukan operasi file:
+
+| Nama Komponen Proyek | Lokasi Penyimpanan Direktori | Deskripsi Fungsi Direktori |
+| :--- | :--- | :--- |
+| **Controller Logika** | `src/app/http/controllers/` | Tempat menyimpan berkas logika pengolahan request RustBasic. |
+| **Model Database** | `src/app/models/` | Definisi model entity database menggunakan Sea-ORM. |
+| **Rute & URL** | `src/routes/` | Berkas pendaftaran URL web (`web.rs`) & API (`api.rs`). |
+| **React Halaman SPA** | `src/resources/js/Pages/` | Komponen halaman React (.jsx) yang dipetakan oleh controller. |
+| **React Komponen Modular**| `src/resources/js/Components/` | Modular kecil reusable UI seperti Navbar, Sidebar, & Card. |
+| **HTML Root Container** | `src/resources/views/app.rb.html` | Satu-satunya file HTML root sebagai tempat hidrasi awal React. |
+| **Database Migrations** | `database/migrations/` | Berkas skema tabel database relasional. |
+
+---
+
+## 🏁 Penutup
+
+Handbook panduan ini dirancang untuk menjaga keselarasan pemahaman arsitektur, kepatuhan teknis, dan standar visual premium yang ditawarkan oleh framework RustBasic. AI Agent wajib menjadikan dokumen ini sebagai instruksi operasional tertinggi saat berkolaborasi membangun sistem aplikasi Anda.

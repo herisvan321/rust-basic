@@ -1,100 +1,56 @@
-# 🛠️ RustBasic CLI Documentation
+# 🛠️ Panduan Perintah CLI RustBasic
 
-Panduan penggunaan alat baris perintah (**CLI**) khusus untuk framework RustBasic.
+## 📝 Kata Pengantar
+Selamat datang di panduan resmi **RustBasic CLI**. Dokumentasi ini dirancang khusus untuk memandu Anda menguasai baris perintah (Command Line) bawaan framework. Dengan menguasai perkakas CLI ini, Anda dapat mengotomatisasi pembuatan struktur folder, file kode boilerplate (generator), pengelolaan migrasi database, hingga audit performa dan keamanan secara instan di terminal Anda.
 
-## 🚀 Perintah Utama (Shortcuts)
-Framework ini menyediakan beberapa cara singkat untuk menjalankan perintah:
+---
 
-### `rustbasic new`
-Membuat project RustBasic baru dari template resmi.
+## 🛠️ Script Contoh
+
+### A. Membuat Proyek Baru
 ```bash
-rustbasic new myapp
+rustbasic new my-new-app
 ```
 
-### `rustbasic <perintah>`
-Gunakan perintah `rustbasic` di root proyek untuk tugas sehari-hari:
+### B. Membuat Controller Baru di Terminal
 ```bash
-rustbasic make:controller BlogController
+rustbasic make:controller ArticleController
+```
+
+### C. Menampilkan Daftar Rute yang Aktif
+```bash
+rustbasic route:list
 ```
 
 ---
 
-## ⚡ Pengembangan (Shortcuts)
+## 🔄 Perbandingan Pemakaian Perintah Lokal vs Perintah Global
 
-### `rustbasic serve`
-Menjalankan server dalam mode pengembangan dengan fitur:
-- **Auto-Watch**: Memantau perubahan pada kode Rust, template, dan konfigurasi.
-- **Live Reload**: Otomatis me-refresh browser saat Anda menyimpan perubahan.
+Berikut adalah perbandingan pemakaian arsitektur delegasi perintah CLI pada RustBasic:
 
----
-
-## 📂 1. Generator Komponen
-
-### `make:controller`
-Membuat Controller baru di `src/app/http/controllers/`.
-- Perintah: `rustbasic make:controller NamaController`
-
-### `make:model`
-Membuat Entity Sea-ORM baru di `src/app/models/`.
-- Perintah: `rustbasic make:model Nama -m`
-
-### `make:middleware`
-Membuat Middleware Axum baru di `src/app/http/middleware/`.
-- Perintah: `rustbasic make:middleware NamaMiddleware`
-
-### `make:seeder`
-Membuat file seeder baru di `database/seeders/`.
-- Perintah: `rustbasic make:seeder NamaSeeder`
+| Kriteria Perbandingan | Perintah CLI Global (`rustbasic-cli`) | Perintah CLI Lokal (`rustbasic <cmd>`) |
+| :--- | :--- | :--- |
+| **Metode Instalasi** | Terinstal secara global di OS (`cargo install`). | Dijalankan langsung di folder root proyek lokal Anda. |
+| **Tugas Utama** | Membuat kerangka folder proyek baru (`new`). | Menjalankan migrasi, membuat model, controller, & seeder. |
+| **Sinkronisasi Versi** | Independen dari versi library proyek. | Otomatis selaras dengan versi dependensi lokal proyek Anda. |
+| **Sumber Eksekusi** | File biner global system. | Didelegasikan ke file biner proyek (`src/config/cli.rs`). |
 
 ---
 
-## 🗄️ 2. Database & Cache
+## 📊 Tabel Ringkasan Pintasan CLI Lengkap
 
-### `migrate`
-Menjalankan semua migrasi database yang belum dieksekusi.
-- Perintah: `rustbasic migrate`
+Berikut adalah daftar perintah baris teks yang sering digunakan dalam proses pengembangan:
 
-### `migrate:refresh`
-Melakukan rollback pada seluruh migrasi dan menjalankannya kembali dari awal. Berguna untuk mereset struktur database.
-- Perintah: `rustbasic migrate:refresh`
-
-### `migrate:back` (atau `migrate:rollback`)
-Membatalkan (rollback) satu langkah migrasi terakhir.
-- Perintah: `rustbasic migrate:back`
-
-### `db:seed`
-Menjalankan seluruh database seeder yang terdaftar di `database/seeders/mod.rs`.
-- Perintah: `rustbasic db:seed`
+| Perintah CLI | Deskripsi Singkat Perintah | Output / Hasil Eksekusi |
+| :--- | :--- | :--- |
+| **`make:controller`** | Membuat berkas kontroler baru. | Berkas baru di `src/app/http/controllers/`. |
+| **`make:model -m`** | Membuat model beserta migrasinya. | Berkas model di `src/app/models/` & berkas migrasi baru. |
+| **`make:middleware`**| Membuat berkas middleware baru. | Berkas baru di `src/app/http/middleware/`. |
+| **`key:generate`** | Membuat kunci enkripsi APP_KEY baru. | Kunci base64 baru tersimpan otomatis di berkas `.env`. |
+| **`storage:link`** | Menghubungkan folder privat ke publik. | Folder `public/storage` terhubung ke `storage/app/public`. |
+| **`route:list`** | Menampilkan daftar rute dan middleware.| Tabel rute tercetak rapi di terminal Anda. |
 
 ---
 
-## 🔐 3. Authentication Scaffolding (Breeze)
-Pemasangan sistem autentikasi lengkap kini terintegrasi secara otomatis. Anda hanya perlu menambahkan dependensi `rustbasic-breeze` di `Cargo.toml`. Silakan baca [Panduan Autentikasi](auth_cli.md) untuk detail selengkapnya.
-
----
-
-## 🔍 4. Monitoring & Utilitas
-
-### `route:list`
-Menampilkan tabel daftar rute yang aktif di aplikasi Anda.
-- Perintah: `rustbasic route:list`
-
-### `key:generate`
-Membuat application key (`APP_KEY`) baru di berkas `.env`.
-- Perintah: `rustbasic key:generate`
-
-### `cache:clear`
-Membersihkan logs dan database session cache.
-- Perintah: `rustbasic cache:clear`
-
-### `storage:link`
-Menghubungkan folder storage ke folder public agar berkas dapat diakses publik.
-- Perintah: `rustbasic storage:link`
-
-### `check:security`
-Menjalankan audit pengaturan keamanan dependency proyek.
-- Perintah: `rustbasic check:security`
-
-### `check:update`
-Memeriksa pembaruan dependency framework di crates.io.
-- Perintah: `rustbasic check:update`
+## 🏁 Penutup
+Perkakas CLI pada RustBasic dirancang untuk menghilangkan kejenuhan menulis kode boilerplate secara manual. Dengan memanfaatkan pintasan generator ini, Anda dapat fokus sepenuhnya pada pembangunan logika bisnis utama aplikasi.

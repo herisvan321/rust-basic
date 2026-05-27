@@ -1,12 +1,12 @@
 [package]
 name = "rustbasic"
-version = "0.1.9"
+version = "0.1.10"
 edition = "2024"
 build = "src/config/build.rs"
 description = "The official starter template and CLI tool for the RustBasic Framework."
 license = "MIT"
 repository = "https://github.com/herisvan321/rustbasic"
-keywords = ["web", "framework", "starter", "axum", "orm"]
+keywords = ["web", "framework", "starter", "sqlx"]
 categories = ["web-programming::http-server", "development-tools::scaffolding"]
 default-run = "rustbasic"
 
@@ -17,12 +17,10 @@ path = "src/main.rs"
 [dependencies]
 # Core Framework (Local Path)
 rustbasic-core = "0.1"
-
-# Macro dependencies
-sea-orm = { version = "1.1", features = ["macros", "with-chrono"] }
-serde = { version = "1.0", features = ["derive"] }
-rust-embed = "8.1"
-tokio = { version = "1.52", features = ["full"] }
+# Shared dependencies with exact same versions as core to prevent redownload
+serde = { version = "1.0.228", features = ["derive"] }
+rust-embed = "8.11.0"
+tokio = { version = "1.52.1", features = ["full"] }
 
 # Profile Optimizations
 [profile.dev]

@@ -1,6 +1,6 @@
 use rustbasic_core::requests::Request;
-use rustbasic_core::axum::response::{IntoResponse, Response};
-use rustbasic_core::axum::http::{header, StatusCode};
+use rustbasic_core::{IntoResponse, Response};
+use rustbasic_core::http::{header, StatusCode, HeaderValue};
 use rustbasic_core::serde_json::{json, Value};
 use std::fs;
 
@@ -48,12 +48,12 @@ pub fn inertia(req: &Request, component: &str, props: Value) -> Response {
     if is_inertia {
         // Return JSON response untuk navigasi SPA Inertia
         let body = rustbasic_core::serde_json::to_string(&page_object).unwrap_or_default();
-        Response::builder()
+        rustbasic_core::http::Response::builder()
             .status(StatusCode::OK)
             .header(header::CONTENT_TYPE, "application/json")
             .header("X-Inertia", "true")
             .header(header::VARY, "X-Inertia")
-            .body(rustbasic_core::axum::body::Body::from(body))
+            .body(body.into_bytes())
             .unwrap()
             .into_response()
     } else {
@@ -67,7 +67,7 @@ pub fn inertia(req: &Request, component: &str, props: Value) -> Response {
         let mut response = crate::app::view(req, "app.rb.html", ctx).into_response();
         response.headers_mut().insert(
             header::VARY,
-            rustbasic_core::axum::http::HeaderValue::from_static("X-Inertia"),
+            HeaderValue::from_static("X-Inertia"),
         );
         response
     }
@@ -94,7 +94,7 @@ pub fn get_vite_assets() -> String {
           window.$RefreshSig$ = () => (type) => type;
           window.__vite_plugin_react_preamble_installed__ = true;
         </script>
-        <script type="module" src="http://{host}:{port}/src/resources/js/main.jsx"></script>
+        <script type="module" src="http://{host}:{port}/src/resources/js/main.tsx"></script>
         "#,
             host = display_host,
             port = port
@@ -102,32 +102,42 @@ pub fn get_vite_assets() -> String {
     } else {
         // Mode Production: Baca manifest.json dari build hasil compile Vite
         let mut manifest_content = String::new();
-        let paths = ["public/build/.vite/manifest.json", "public/build/manifest.json"];
+        let paths = ["dist/.vite/manifest.json", "dist/manifest.json"];
         for path in &paths {
             if let Ok(content) = fs::read_to_string(path) {
                 manifest_content = content;
                 break;
             }
         }
-        if !manifest_content.is_empty() {
-            if let Ok(manifest) = rustbasic_core::serde_json::from_str::<Value>(&manifest_content) {
-                if let Some(entry) = manifest.get("src/resources/js/main.jsx") {
-                    let file = entry.get("file").and_then(|f| f.as_str()).unwrap_or("assets/main.js");
-                    let mut assets_html = format!(r#"<script type="module" src="/build/{}"></script>"#, file);
-                    
-                    if let Some(css_arr) = entry.get("css").and_then(|c| c.as_array()) {
-                        for css in css_arr {
-                            if let Some(css_str) = css.as_str() {
-                                assets_html = format!(r#"<link rel="stylesheet" href="/build/{}" />"#, css_str) + &assets_html;
-                            }
+        
+        // Fallback ke EmbeddedPublic jika file di disk tidak ditemukan (misal: production standalone binary)
+        if manifest_content.is_empty() {
+            if let Some(file) = crate::config::app::EmbeddedPublic::get(".vite/manifest.json")
+                && let Ok(content) = String::from_utf8(file.data.to_vec()) {
+                manifest_content = content;
+            } else if let Some(file) = crate::config::app::EmbeddedPublic::get("manifest.json")
+                && let Ok(content) = String::from_utf8(file.data.to_vec()) {
+                manifest_content = content;
+            }
+        }
+
+        if !manifest_content.is_empty()
+            && let Ok(manifest) = rustbasic_core::serde_json::from_str::<Value>(&manifest_content)
+            && let Some(entry) = manifest.get("src/resources/js/main.tsx") {
+                let file = entry.get("file").and_then(|f| f.as_str()).unwrap_or("assets/main.js");
+                let mut assets_html = format!(r#"<script type="module" src="/{}"></script>"#, file);
+                
+                if let Some(css_arr) = entry.get("css").and_then(|c| c.as_array()) {
+                    for css in css_arr {
+                        if let Some(css_str) = css.as_str() {
+                            assets_html = format!(r#"<link rel="stylesheet" href="/{}" />"#, css_str) + &assets_html;
                         }
                     }
-                    return assets_html;
                 }
-            }
+                return assets_html;
         }
         
         // Fallback jika manifest.json tidak ditemukan
-        r#"<script type="module" src="/build/assets/main.js"></script>"#.to_string()
+        r#"<script type="module" src="/assets/main.js"></script>"#.to_string()
     }
 }

@@ -1,5 +1,4 @@
-use rustbasic_core::axum::{Router, routing::get, response::Json};
-use rustbasic_core::server::AppState;
+use rustbasic_core::{Router, get, Json, AppState};
 use rustbasic_core::serde_json::{json, Value};
 
 pub fn router() -> Router<AppState> {
@@ -19,6 +18,6 @@ async fn version_info() -> Json<Value> {
     Json(json!({
         "framework": "RustBasic",
         "version": "0.1.7",
-        "engine": "Axum"
+        "engine": "Custom"
     }))
 }

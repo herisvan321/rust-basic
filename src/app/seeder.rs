@@ -1,9 +1,9 @@
-use rustbasic_core::sea_orm::DatabaseConnection;
+use rustbasic_core::sqlx::AnyPool;
 use rustbasic_core::colored::*;
 use crate::seeders;
 use rustbasic_core::seeder::SeederTrait;
 
-pub async fn run(db: &DatabaseConnection) {
+pub async fn run(db: &AnyPool) {
     println!("\n{}", "🌱 Menjalankan Seeder Database...".blue().bold());
     
     // REGISTRASI SEEDER DI SINI

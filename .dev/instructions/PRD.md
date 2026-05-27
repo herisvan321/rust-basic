@@ -1,58 +1,66 @@
 # 📄 Product Requirements Document (PRD) Prompt (React SPA Edition)
 
-Gunakan template ini untuk mendefinisikan fitur atau aplikasi baru yang akan dibangun di atas framework **RustBasic** versi **Modern SPA (React + Inertia)**. Masukkan detail aplikasi Anda di bawah setiap section.
+## 📝 Kata Pengantar
+
+Selamat datang di template **Product Requirements Document (PRD) Prompt (React SPA Edition)**. Dokumen ini digunakan sebagai cetak biru (blueprint) awal bagi pengembang dan AI Agent untuk merencanakan pembangunan fitur atau aplikasi baru di atas framework **RustBasic**. Melalui penulisan PRD yang terstruktur, seluruh cakupan fitur, desain database, visual UI, alur navigasi, dan batasan teknis dapat diselaraskan sejak awal sebelum penulisan kode dimulai.
 
 ---
 
-## 🚀 1. Ringkasan Proyek (Project Overview)
-*Deskripsikan secara singkat aplikasi apa yang ingin dibuat.*
-*   **Nama Aplikasi**: 
-*   **Tujuan Utama**: 
-*   **Target Pengguna**: 
+## 🛠️ Script Contoh
+
+Berikut adalah contoh draf pengisian PRD singkat untuk fitur **Sistem Manajemen Kontak (Contact Management)**:
+
+```markdown
+### 🚀 1. Ringkasan Proyek
+*   **Nama Aplikasi**: ContactBook SPA
+*   **Tujuan Utama**: Mempermudah pengguna menyimpan dan melihat daftar kontak secara cepat.
+
+### 🛠️ 2. Fitur Utama
+*   [x] CRUD data kontak (Nama, Telepon, Email).
+*   [x] Pencarian kontak real-time di frontend.
+
+### 📊 3. Struktur Data (Sea-ORM)
+*   **Tabel**: `contacts`
+    *   Fields: `id (int)`, `name (varchar)`, `phone (varchar)`, `email (varchar)`.
+
+### 🎨 4. Antarmuka Pengguna (UI/UX)
+*   Menggunakan layout Bento Grid, tema default dark mode, dan form submission instan via `useForm` Inertia helper.
+
+### 🛣️ 5. Alur Pengguna & Routing
+*   `GET /contacts` -> Merender halaman `Contacts/Index.jsx`
+*   `POST /contacts` -> Menyimpan data kontak baru di backend
+```
 
 ---
 
-## 🛠️ 2. Fitur Utama (Core Features)
-*Daftar fungsionalitas yang harus ada.*
-*   [ ] **Fitur A**: Deskripsi alur kerja komponen.
-*   [ ] **Fitur B**: Deskripsi alur kerja komponen.
-*   [ ] **Auth System**: Sistem login dan registrasi berbasis React component dengan *state verification* backend Axum.
+## 🔄 Perbandingan Pemakaian (Pengembangan Berbasis PRD vs Pengembangan Ad-Hoc)
+
+Berikut adalah perbandingan pemakaian metode perencanaan dalam pengembangan fitur web SPA:
+
+| Aspek Pengembangan | Pengembangan Berbasis PRD Terstruktur | Pengembangan Ad-Hoc (Tanpa Rencana) |
+| :--- | :--- | :--- |
+| **Kejelasan Struktur Data**| Skema database terdefinisi matang di awal. | Struktur tabel sering diubah di tengah jalan. |
+| **Konsistensi Alur URL** | Peta rute web terdokumentasi dengan jelas. | Rawan terjadi tumpang tindih atau konflik rute URL. |
+| **Kesesuaian Desain UI**  | Desain Tailwind dan transisi SPA terencana rapi. | Tampilan tidak konsisten antar halaman. |
+| **Efisiensi Debugging** | Bug mudah dilacak sesuai batasan teknis PRD. | Membuang waktu mencari letak error karena alur acak. |
 
 ---
 
-## 📊 3. Struktur Data (Data Model)
-*Definisikan entitas yang dibutuhkan untuk database (Sea-ORM).*
-*   **Nama Tabel**: `users`
-    *   Fields: `id`, `username`, `email`, `password`, `created_at`.
-*   **Nama Tabel**: `...`
-    *   Fields: `...`
+## 📊 Tabel Ringkasan Komponen Wajib Dokumen PRD
+
+Berikut adalah ringkasan parameter utama yang wajib diisi dalam setiap dokumen PRD:
+
+| Parameter PRD | Fungsi Isian | Contoh Kebutuhan Data |
+| :--- | :--- | :--- |
+| **Ringkasan Proyek** | Mendefinisikan visi dan target aplikasi. | Nama aplikasi, tujuan utama, & segmen user. |
+| **Fitur Utama** | Menyusun daftar checklist fitur prioritas. | Sistem autentikasi, dashboard panel, CRUD produk. |
+| **Struktur Data** | Merancang skema tabel database (Sea-ORM). | Nama kolom, tipe data, relasi foreign key. |
+| **Antarmuka (UI/UX)** | Menetapkan tema dan interaktivitas SPA. | Dark mode, form helper `useForm`, layout bento. |
+| **Alur Pengguna** | Memetakan URL rute web dan responsnya. | `GET /profile`, `POST /profile/update`. |
+| **Batasan Teknis** | Menegaskan batasan teknologi yang wajib dipakai. | Komponen React `.jsx`, Tailwind styling, single biner build. |
 
 ---
 
-## 🎨 4. Antarmuka Pengguna (UI/UX Requirements)
-*Sesuai dengan Standar RustBasic: Modern, Premium, HSL Tailwind CSS, Bento Box, Glassmorphism.*
-*   **Tema Warna**: Dark Mode default / Adaptif Light-Dark dengan HSL warna premium.
-*   **Layout**: Bento grid layout, rounded card, glowing orbs, sidebar/header menu interaktif React.
-*   **Interaktivitas SPA (Inertia)**:
-    *   [ ] Transisi halaman instan menggunakan Inertia `<Link>` (bebas reload browser).
-    *   [ ] Form submission instan tanpa reload menggunakan Inertia Form Helper (`useForm`).
-    *   [ ] Indikator progress bar otomatis dari Inertia saat memuat halaman baru.
-    *   [ ] Modal dinamis dan pop-up reaktif murni menggunakan React State.
+## 🏁 Penutup
 
----
-
-## 🛣️ 5. Alur Pengguna & Routing (User Flow)
-*Daftar endpoint rute web Inertia.*
-*   `GET /`: Merender halaman `Welcome.jsx` (Landing Page).
-*   `GET /dashboard`: Merender halaman `Dashboard.jsx` setelah login berhasil.
-*   `POST /login`: Proses validasi login di backend yang mengembalikan redirect Inertia.
-
----
-
-## ⚠️ 6. Batasan Teknis (Technical Constraints)
-*Wajib diikuti oleh AI Agent:*
-1.  **Frontend (React SPA)**: WAJIB menggunakan komponen React fungsional (`.jsx`) di bawah `src/resources/js/Pages/` dan disajikan via `inertia(req, component, props)`. DILARANG menggunakan rendering template HTML murni banyak-halaman (MPA).
-2.  **Interaktivitas**: WAJIB menggunakan React Hooks (`useState`, `useEffect`) dan Inertia hooks (`useForm`, `usePage`). DILARANG keras menambahkan script JQuery, HTMX, atau pustaka manipulasi DOM luar secara acak.
-3.  **Styling**: WAJIB menggunakan utility class **Tailwind CSS**. 
-4.  **Database**: WAJIB menggunakan Sea-ORM via perintah CLI `rustbasic migrate`.
-5.  **Deployment**: Seluruh aset wajib terkompilasi (`npm run build`) dan tertanam (ter-embed) ke dalam satu file biner executable Rust saat rilis produksi.
+Menggunakan dokumen PRD sebagai acuan kerja membantu menjaga integritas arsitektur aplikasi web SPA Anda, menyelaraskan persepsi antar anggota tim, serta memastikan kualitas akhir produk yang dibuat dengan framework RustBasic tetap premium dan berkinerja tinggi.
